@@ -58,3 +58,17 @@ features = [
 
 [build-dependencies.slint-build]
 git = "https://github.com/slint-ui/slint.git"
+
+[package.metadata.deb]
+license-file = ["../LICENSE", "4"]
+extended-description = """\
+The dbus server for asusctl and rog-control-center applications."""
+depends = "$auto"
+section = "utility"
+priority = "optional"
+assets = [
+  ["target/release/rog-control-center", "usr/bin/", "755"],
+  ["../rog_gui-fakeinstall/usr/share/applications/*", "usr/share/share/applications/", "644"],
+  ["../rog_gui-fakeinstall/usr/share/icons/hicolor/512x512/apps/*", "usr/share/icons/hicolor/512x512/apps", "644"],
+  ["../rog_gui-fakeinstall/usr/share/icons/hicolor/scalable/status/*", "usr/share/icons/hicolor/scalable/status", "644"],
+]
