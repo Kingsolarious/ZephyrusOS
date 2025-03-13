@@ -100,6 +100,7 @@ install-data-asusd_user:
 install-data: install-data-asusd install-data-rog_gui
 
 install: install-program install-data
+	$(INSTALL_DATA) "./LICENSE" "$(DESTDIR)$(datarootdir)/asusctl/LICENSE"
 
 uninstall:
 	rm -f "$(DESTDIR)$(bindir)/$(BIN_ROG)"
