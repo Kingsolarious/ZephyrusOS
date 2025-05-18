@@ -107,6 +107,15 @@
         advanced_type: None,
         power_zones: [Keyboard],
     ),
+    ( 
+        device_name: "FX706HEB",
+        product_id: "",
+        layout_name: "fx505d",
+        basic_modes: [Static, Breathe, RainbowCycle],
+        basic_zones: [],
+        advanced_type: None,
+        power_zones: [Keyboard],
+    ),
     (
         device_name: "G512L",
         product_id: "",
