@@ -108,7 +108,7 @@
         power_zones: [Keyboard],
     ),
     ( 
-        device_name: "FX706HEB",
+        device_name: "FX706H",
         product_id: "",
         layout_name: "fx505d",
         basic_modes: [Static, Breathe, RainbowCycle],
