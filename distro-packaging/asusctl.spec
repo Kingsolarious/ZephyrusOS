@@ -31,6 +31,7 @@ Version: %{version}
 Release: %{pkg_release}
 Summary: Control fan speeds, LEDs, graphics modes, and charge levels for ASUS notebooks
 License: MPLv2
+Requires: power-profiles-daemon
 
 Group:   System Environment/Kernel
 
