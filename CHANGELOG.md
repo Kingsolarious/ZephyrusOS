@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [v6.1.13]
+
+### Changed
+- Fix a problem in reloading the service (@evertvorster)
+- Add Azerbaijani language (@rashadgasimli)
+- Add Ubuntu installation instructions
+
 ## [v6.1.12]
 
 ### Changed
