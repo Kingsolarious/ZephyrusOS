@@ -110,32 +110,48 @@ impl AsusArmouryAttribute {
 impl crate::Reloadable for AsusArmouryAttribute {
     async fn reload(&mut self) -> Result<(), RogError> {
         info!("Reloading {}", self.attr.name());
-        let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
-        let power_plugged = self
-            .power
-            .get_online()
-            .map_err(|e| {
-                error!("Could not get power status: {e:?}");
-                e
-            })
-            .unwrap_or_default();
-        let config = if power_plugged == 1 {
-            &self.config.lock().await.ac_profile_tunings
-        } else {
-            &self.config.lock().await.dc_profile_tunings
-        };
-        if let Some(tuning) = config.get(&profile) {
-            if tuning.enabled {
-                if let Some(tune) = tuning.group.get(&self.name()) {
-                    self.attr
-                        .set_current_value(&AttrValue::Integer(*tune))
-                        .map_err(|e| {
-                            error!("Could not set {} value: {e:?}", self.attr.name());
-                            self.attr.base_path_exists();
-                            e
-                        })?;
-                    info!("Set {} to {:?}", self.attr.name(), tune);
+        let name: FirmwareAttribute = self.attr.name().into();
+        
+        if name.is_ppt() {
+            let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
+            let power_plugged = self
+                .power
+                .get_online()
+                .map_err(|e| {
+                    error!("Could not get power status: {e:?}");
+                    e
+                })
+                .unwrap_or_default();
+            let config = if power_plugged == 1 {
+                &self.config.lock().await.ac_profile_tunings
+            } else {
+                &self.config.lock().await.dc_profile_tunings
+            };
+            if let Some(tuning) = config.get(&profile) {
+                if tuning.enabled {
+                    if let Some(tune) = tuning.group.get(&self.name()) {
+                        self.attr
+                            .set_current_value(&AttrValue::Integer(*tune))
+                            .map_err(|e| {
+                                error!("Could not set {} value: {e:?}", self.attr.name());
+                                self.attr.base_path_exists();
+                                e
+                            })?;
+                        info!("Set {} to {:?}", self.attr.name(), tune);
+                    }
                 }
+            }
+        } else {
+            // Handle non-PPT attributes (boolean and other settings)
+            if let Some(saved_value) = self.config.lock().await.armoury_settings.get(&name) {
+                self.attr
+                    .set_current_value(&AttrValue::Integer(*saved_value))
+                    .map_err(|e| {
+                        error!("Could not set {} value: {e:?}", self.attr.name());
+                        self.attr.base_path_exists();
+                        e
+                    })?;
+                info!("Restored armoury setting {} to {:?}", self.attr.name(), saved_value);
             }
         }
 
@@ -419,6 +435,20 @@ pub async fn set_config_or_default(
                     );
                     // config.write();
                 }
+            }
+        } else {
+            // Handle non-PPT attributes (boolean and other settings)
+            if let Some(saved_value) = config.armoury_settings.get(&name) {
+                attr.set_current_value(&AttrValue::Integer(*saved_value))
+                    .map_err(|e| {
+                        error!("Failed to set {}: {e}", <&str>::from(name));
+                    })
+                    .ok();
+                info!(
+                    "Restored armoury setting for {} = {:?}",
+                    <&str>::from(name),
+                    saved_value
+                );
             }
         }
     }
