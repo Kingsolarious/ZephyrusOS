@@ -9,6 +9,7 @@ vendor_*
 .vscode
 .~lock.*
 *.ods#
+*.patch
 
 # gnome extension
 node-modules
