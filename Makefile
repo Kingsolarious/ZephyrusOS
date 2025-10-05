@@ -48,24 +48,26 @@ clean:
 distclean:
 	rm -rf .cargo vendor vendor.tar.xz
 
-install-program:
-	$(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_ROG)" "$(DESTDIR)$(bindir)/$(BIN_ROG)"
-
-	$(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_C)" "$(DESTDIR)$(bindir)/$(BIN_C)"
+install-asusd: target/$(TARGET)/$(BIN_D)
 	$(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_D)" "$(DESTDIR)$(bindir)/$(BIN_D)"
+
+install-asusctl: target/$(TARGET)/$(BIN_C)
+	$(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_C)" "$(DESTDIR)$(bindir)/$(BIN_C)"
+
+install-asusd_user: target/$(TARGET)/$(BIN_U)
 	$(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_U)" "$(DESTDIR)$(bindir)/$(BIN_U)"
 
-install-data:
+install-rog_gui: target/$(TARGET)/$(BIN_ROG)
+	$(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_ROG)" "$(DESTDIR)$(bindir)/$(BIN_ROG)"
+
+.PHONY: install-asusd install-asusctl install-asusd_user install-rog_gui
+
+install-program: install-asusd install-asusctl install-asusd_user install-rog_gui
+
+install-data-rog_gui:
 	$(INSTALL_DATA) "./rog-control-center/data/$(BIN_ROG).desktop" "$(DESTDIR)$(datarootdir)/applications/$(BIN_ROG).desktop"
 	$(INSTALL_DATA) "./rog-control-center/data/$(BIN_ROG).png" "$(DESTDIR)$(datarootdir)/icons/hicolor/512x512/apps/$(BIN_ROG).png"
 	cd rog-aura/data/layouts && find . -type f -name "*.ron" -exec $(INSTALL_DATA) "{}" "$(DESTDIR)$(datarootdir)/rog-gui/layouts/{}" \;
-
-	$(INSTALL_DATA) "./data/$(BIN_D).rules" "$(DESTDIR)$(libdir)/udev/rules.d/99-$(BIN_D).rules"
-	$(INSTALL_DATA) "./rog-aura/data/$(LEDCFG)" "$(DESTDIR)$(datarootdir)/asusd/$(LEDCFG)"
-	$(INSTALL_DATA) "./data/$(BIN_D).conf" "$(DESTDIR)$(datarootdir)/dbus-1/system.d/$(BIN_D).conf"
-
-	$(INSTALL_DATA) "./data/$(BIN_D).service" "$(DESTDIR)$(libdir)/systemd/system/$(BIN_D).service"
-	$(INSTALL_DATA) "./data/$(BIN_U).service" "$(DESTDIR)$(libdir)/systemd/user/$(BIN_U).service"
 
 	$(INSTALL_DATA) "./data/icons/asus_notif_yellow.png" "$(DESTDIR)$(datarootdir)/icons/hicolor/512x512/apps/asus_notif_yellow.png"
 	$(INSTALL_DATA) "./data/icons/asus_notif_green.png" "$(DESTDIR)$(datarootdir)/icons/hicolor/512x512/apps/asus_notif_green.png"
@@ -81,9 +83,24 @@ install-data:
 	$(INSTALL_DATA) "./data/icons/scalable/gpu-vfio.svg" "$(DESTDIR)$(datarootdir)/icons/hicolor/scalable/status/gpu-vfio.svg"
 	$(INSTALL_DATA) "./data/icons/scalable/notification-reboot.svg" "$(DESTDIR)$(datarootdir)/icons/hicolor/scalable/status/notification-reboot.svg"
 
+install-data-asusd:
+	$(INSTALL_DATA) "./data/$(BIN_D).rules" "$(DESTDIR)$(libdir)/udev/rules.d/99-$(BIN_D).rules"
+	$(INSTALL_DATA) "./rog-aura/data/$(LEDCFG)" "$(DESTDIR)$(datarootdir)/asusd/$(LEDCFG)"
+	$(INSTALL_DATA) "./data/$(BIN_D).conf" "$(DESTDIR)$(datarootdir)/dbus-1/system.d/$(BIN_D).conf"
+
+	$(INSTALL_DATA) "./data/$(BIN_D).service" "$(DESTDIR)$(libdir)/systemd/system/$(BIN_D).service"
+
 	cd rog-anime/data && find "./anime" -type f -exec $(INSTALL_DATA) "{}" "$(DESTDIR)$(datarootdir)/asusd/{}" \;
 
+install-data-asusd_user:
+	$(INSTALL_DATA) "./data/$(BIN_U).service" "$(DESTDIR)$(libdir)/systemd/user/$(BIN_U).service"
+
+.PHONY: install-data-asusd install-data-asusd_user
+
+install-data: install-data-asusd install-data-rog_gui
+
 install: install-program install-data
+	$(INSTALL_DATA) "./LICENSE" "$(DESTDIR)$(datarootdir)/asusctl/LICENSE"
 
 uninstall:
 	rm -f "$(DESTDIR)$(bindir)/$(BIN_ROG)"

@@ -32,3 +32,16 @@ config-traits = { path = "../config-traits" }
 
 zbus.workspace = true
 env_logger.workspace = true
+
+[package.metadata.deb]
+license-file = ["../LICENSE", "4"]
+extended-description = """\
+An user utility for Linux to control fancy things on various ASUS laptops
+like keyboard effects or anime matrix animation cycles."""
+depends = "$auto"
+section = "utility"
+priority = "optional"
+assets = [
+  ["target/release/asusd-user", "usr/bin/", "755"],
+  ["../asusd_user-fakeinstall/usr/lib/systemd/user/*", "usr/lib/systemd/user/", "644"],
+]
