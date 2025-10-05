@@ -17,6 +17,8 @@ BIN_D := asusd
 BIN_U := asusd-user
 LEDCFG := aura_support.ron
 
+DESTDIR_REALPATH = $(shell realpath $(DESTDIR))
+
 SRC := Cargo.toml Cargo.lock Makefile $(shell find -type f -wholename '**/src/*.rs')
 
 STRIP_BINARIES ?= 0
@@ -67,7 +69,7 @@ install-program: install-asusd install-asusctl install-asusd_user install-rog_gu
 install-data-rog_gui:
 	$(INSTALL_DATA) "./rog-control-center/data/$(BIN_ROG).desktop" "$(DESTDIR)$(datarootdir)/applications/$(BIN_ROG).desktop"
 	$(INSTALL_DATA) "./rog-control-center/data/$(BIN_ROG).png" "$(DESTDIR)$(datarootdir)/icons/hicolor/512x512/apps/$(BIN_ROG).png"
-	cd rog-aura/data/layouts && find . -type f -name "*.ron" -exec $(INSTALL_DATA) "{}" "$(DESTDIR)$(datarootdir)/rog-gui/layouts/{}" \;
+	cd rog-aura/data/layouts && find . -type f -name "*.ron" -exec $(INSTALL_DATA) "{}" "$(DESTDIR_REALPATH)$(datarootdir)/rog-gui/layouts/{}" \;
 
 	$(INSTALL_DATA) "./data/icons/asus_notif_yellow.png" "$(DESTDIR)$(datarootdir)/icons/hicolor/512x512/apps/asus_notif_yellow.png"
 	$(INSTALL_DATA) "./data/icons/asus_notif_green.png" "$(DESTDIR)$(datarootdir)/icons/hicolor/512x512/apps/asus_notif_green.png"
@@ -90,7 +92,7 @@ install-data-asusd:
 
 	$(INSTALL_DATA) "./data/$(BIN_D).service" "$(DESTDIR)$(libdir)/systemd/system/$(BIN_D).service"
 
-	cd rog-anime/data && find "./anime" -type f -exec $(INSTALL_DATA) "{}" "$(DESTDIR)$(datarootdir)/asusd/{}" \;
+	cd rog-anime/data && find "./anime" -type f -exec $(INSTALL_DATA) "{}" "$(DESTDIR_REALPATH)$(datarootdir)/asusd/{}" \;
 
 install-data-asusd_user:
 	$(INSTALL_DATA) "./data/$(BIN_U).service" "$(DESTDIR)$(libdir)/systemd/user/$(BIN_U).service"
