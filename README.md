@@ -110,7 +110,12 @@ officially unsuported,but you can still try and test it by yourself(some feature
 
 **Ubuntu, Popos (unsuported):**
 
-instructions removed as outdated
+```sh
+sudo apt install make cargo gcc pkg-config openssl libasound2-dev cmake build-essential python3 libfreetype6-dev libexpat1-dev libxcb-composite0-dev libssl-dev libx11-dev libfontconfig1-dev curl libclang-dev libudev-dev checkinstall libseat-dev libinput-dev libxkbcommon-dev libgbm-dev
+
+make
+sudo make install
+```
 
 ## Installing
 
