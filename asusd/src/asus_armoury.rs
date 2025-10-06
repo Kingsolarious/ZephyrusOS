@@ -51,6 +51,10 @@ impl AsusArmouryAttribute {
         }
     }
 
+    pub fn attribute_name(&self) -> String {
+        String::from(self.attr.name())
+    }
+
     pub async fn move_to_zbus(self, connection: &Connection) -> Result<(), RogError> {
         let path = dbus_path_for_attr(self.attr.name());
         connection
@@ -402,7 +406,9 @@ pub async fn start_attributes_zbus(
             continue;
         }
 
-        let path = dbus_path_for_attr(attr.attr.name());
+        let attr_name = attr.attribute_name();
+
+        let path = dbus_path_for_attr(attr_name.as_str());
         match zbus::object_server::SignalEmitter::new(conn, path) {
             Ok(sig) => {
                 if let Err(e) = attr.watch_and_notify(sig).await {
@@ -419,8 +425,7 @@ pub async fn start_attributes_zbus(
 
         if let Err(e) = attr.move_to_zbus(conn).await {
             error!(
-                "Failed to register attribute '{}' on zbus: {e:?}",
-                attr.attr.name()
+                "Failed to register attribute '{attr_name}' on zbus: {e:?}"
             );
         }
     }
