@@ -82,7 +82,7 @@ impl AsusArmouryAttribute {
                         let sig = signal_ctxt.clone();
                         tokio::spawn(async move {
                             let mut buffer = [0; 32];
-                            if let Ok(mut stream) = watch.into_event_stream(&mut buffer) {
+                            if let Ok(stream) = watch.into_event_stream(&mut buffer) {
                                 stream
                                     .for_each(|_| async {
                                         debug!("{} changed", name);
