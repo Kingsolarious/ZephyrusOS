@@ -78,14 +78,19 @@ impl AsusArmouryAttribute {
                         let sig = signal_ctxt.clone();
                         tokio::spawn(async move {
                             let mut buffer = [0; 32];
-                            watch
-                                .into_event_stream(&mut buffer)
-                                .unwrap()
-                                .for_each(|_| async {
-                                    debug!("{} changed", name);
-                                    ctrl.$fn_prop_changed(&sig).await.ok();
-                                })
-                                .await;
+                            if let Ok(mut stream) = watch.into_event_stream(&mut buffer) {
+                                stream
+                                    .for_each(|_| async {
+                                        debug!("{} changed", name);
+                                        ctrl.$fn_prop_changed(&sig).await.ok();
+                                    })
+                                    .await;
+                            } else {
+                                info!(
+                                    "inotify event stream failed for {} ({}). You can ignore this if unsupported",
+                                    name, $attr_str
+                                );
+                            }
                         });
                     }
                     Err(e) => info!(
@@ -387,13 +392,37 @@ pub async fn start_attributes_zbus(
             power.clone(),
             config.clone(),
         );
-        attr.reload().await?;
+
+        if let Err(e) = attr.reload().await {
+            error!(
+                "Skipping attribute '{}' due to reload error: {e:?}",
+                attr.attr.name()
+            );
+            // continue with others
+            continue;
+        }
 
         let path = dbus_path_for_attr(attr.attr.name());
-        let sig = zbus::object_server::SignalEmitter::new(conn, path)?;
-        attr.watch_and_notify(sig).await?;
+        match zbus::object_server::SignalEmitter::new(conn, path) {
+            Ok(sig) => {
+                if let Err(e) = attr.watch_and_notify(sig).await {
+                    error!(
+                        "Failed to start watcher for '{}': {e:?}",
+                        attr.attr.name()
+                    );
+                }
+            }
+            Err(e) => {
+                error!("Failed to create SignalEmitter for '{}': {e:?}", attr.attr.name());
+            }
+        }
 
-        attr.move_to_zbus(conn).await?;
+        if let Err(e) = attr.move_to_zbus(conn).await {
+            error!(
+                "Failed to register attribute '{}' on zbus: {e:?}",
+                attr.attr.name()
+            );
+        }
     }
     Ok(())
 }

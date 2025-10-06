@@ -62,7 +62,9 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
 
     // Start zbus server
     let mut server = Connection::system().await?;
-    server.object_server().at("/", ObjectManager).await.unwrap();
+    if let Err(e) = server.object_server().at("/", ObjectManager).await {
+        error!("Failed to register ObjectManager at root '/': {e:?}");
+    }
 
     let config = Config::new().load();
     let cfg_path = config.file_path();
@@ -72,14 +74,17 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
     let platform = RogPlatform::new()?; // TODO: maybe needs async mutex?
     let power = AsusPower::new()?; // TODO: maybe needs async mutex?
     let attributes = FirmwareAttributes::new();
-    start_attributes_zbus(
+    if let Err(e) = start_attributes_zbus(
         &server,
         platform.clone(),
         power.clone(),
         attributes.clone(),
         config.clone(),
     )
-    .await?;
+    .await
+    {
+        error!("Failed to initialize firmware attributes over zbus: {e:?}");
+    }
 
     match CtrlFanCurveZbus::new() {
         Ok(ctrl) => {
