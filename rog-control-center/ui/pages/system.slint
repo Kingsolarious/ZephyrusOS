@@ -140,7 +140,8 @@ export component PageSystem inherits Rectangle {
     property <bool> show_fade_cover: false;
     property <bool> show_throttle_advanced: false;
     clip: true;
-    padding: 8px;
+    //padding only has effect on layout elements
+    //padding: 8px;
     ScrollView {
         VerticalLayout {
             padding: 10px;

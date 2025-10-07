@@ -12,7 +12,7 @@ use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 use super::show_toast;
 use crate::config::Config;
 use crate::zbus_proxies::find_iface_async;
-use crate::{set_ui_callbacks, set_ui_props_async, AttrMinMax, MainWindow, SystemPageData};
+use crate::{set_ui_callbacks, AttrMinMax, MainWindow, SystemPageData};
 
 const MINMAX: AttrMinMax = AttrMinMax {
     min: 0,
@@ -572,120 +572,123 @@ pub fn setup_system_page_callbacks(ui: &MainWindow, _states: Arc<Mutex<Config>>)
 
         for attr in armoury_attrs {
             if let Ok(value) = attr.current_value().await {
-                let name = attr.name().await.unwrap();
-                debug!("Setting up {} = {value}", <&str>::from(name));
-                let platform = platform.clone();
-                handle
-                    .upgrade_in_event_loop(move |handle| match name {
-                        FirmwareAttribute::ApuMem => {}
-                        FirmwareAttribute::CoresPerformance => {}
-                        FirmwareAttribute::CoresEfficiency => {}
-                        FirmwareAttribute::PptEnabled => {
-                            init_property!(ppt_enabled, handle, value, bool);
-                            setup_callback!(ppt_enabled, handle, attr, bool);
-                            let handle_copy = handle.as_weak();
-                            let proxy_copy = attr.clone();
-                            tokio::spawn(async move {
-                                let mut x = proxy_copy.receive_current_value_changed().await;
-                                use futures_util::StreamExt;
-                                while let Some(e) = x.next().await {
-                                    if let Ok(out) = e.get().await {
-                                        handle_copy
-                                            .upgrade_in_event_loop(move |handle| {
-                                                handle
-                                                    .global::<SystemPageData>()
-                                                    .set_enable_ppt_group(out == 1);
-                                                handle
-                                                    .global::<SystemPageData>()
-                                                    .set_ppt_enabled(out == 1);
-                                            })
-                                            .ok();
+                if let Ok(name) = attr.name().await {
+                    debug!("Setting up {} = {value}", <&str>::from(name));
+                    let platform = platform.clone();
+                    handle
+                        .upgrade_in_event_loop(move |handle| match name {
+                            FirmwareAttribute::ApuMem => {}
+                            FirmwareAttribute::CoresPerformance => {}
+                            FirmwareAttribute::CoresEfficiency => {}
+                            FirmwareAttribute::PptEnabled => {
+                                init_property!(ppt_enabled, handle, value, bool);
+                                setup_callback!(ppt_enabled, handle, attr, bool);
+                                let handle_copy = handle.as_weak();
+                                let proxy_copy = attr.clone();
+                                tokio::spawn(async move {
+                                    let mut x = proxy_copy.receive_current_value_changed().await;
+                                    use futures_util::StreamExt;
+                                    while let Some(e) = x.next().await {
+                                        if let Ok(out) = e.get().await {
+                                            handle_copy
+                                                .upgrade_in_event_loop(move |handle| {
+                                                    handle
+                                                        .global::<SystemPageData>()
+                                                        .set_enable_ppt_group(out == 1);
+                                                    handle
+                                                        .global::<SystemPageData>()
+                                                        .set_ppt_enabled(out == 1);
+                                                })
+                                                .ok();
+                                        }
                                     }
-                                }
-                            });
-                            handle
-                                .global::<SystemPageData>()
-                                .set_ppt_enabled_available(true);
-                            handle
-                                .global::<SystemPageData>()
-                                .set_enable_ppt_group(value == 1);
-                        }
-                        FirmwareAttribute::PptPl1Spl => {
-                            init_minmax_property!(ppt_pl1_spl, handle, attr);
-                            setup_callback!(ppt_pl1_spl, handle, attr, i32);
-                            setup_callback_restore_default!(ppt_pl1_spl, handle, attr);
-                            setup_minmax_external!(ppt_pl1_spl, handle, attr, platform);
-                        }
-                        FirmwareAttribute::PptPl2Sppt => {
-                            init_minmax_property!(ppt_pl2_sppt, handle, attr);
-                            setup_callback!(ppt_pl2_sppt, handle, attr, i32);
-                            setup_callback_restore_default!(ppt_pl2_sppt, handle, attr);
-                            setup_minmax_external!(ppt_pl2_sppt, handle, attr, platform);
-                        }
-                        FirmwareAttribute::PptPl3Fppt => {
-                            init_minmax_property!(ppt_pl3_fppt, handle, attr);
-                            setup_callback!(ppt_pl3_fppt, handle, attr, i32);
-                            setup_callback_restore_default!(ppt_pl3_fppt, handle, attr);
-                            setup_minmax_external!(ppt_pl3_fppt, handle, attr, platform);
-                        }
-                        FirmwareAttribute::PptFppt => {
-                            init_minmax_property!(ppt_fppt, handle, attr);
-                            setup_callback!(ppt_fppt, handle, attr, i32);
-                            setup_callback_restore_default!(ppt_fppt, handle, attr);
-                            setup_minmax_external!(ppt_fppt, handle, attr, platform);
-                        }
-                        FirmwareAttribute::PptApuSppt => {
-                            init_minmax_property!(ppt_apu_sppt, handle, attr);
-                            setup_callback!(ppt_apu_sppt, handle, attr, i32);
-                            setup_callback_restore_default!(ppt_apu_sppt, handle, attr);
-                            setup_minmax_external!(ppt_apu_sppt, handle, attr, platform);
-                        }
-                        FirmwareAttribute::PptPlatformSppt => {
-                            init_minmax_property!(ppt_platform_sppt, handle, attr);
-                            setup_callback!(ppt_platform_sppt, handle, attr, i32);
-                            setup_callback_restore_default!(ppt_platform_sppt, handle, attr);
-                            setup_minmax_external!(ppt_platform_sppt, handle, attr, platform);
-                        }
-                        FirmwareAttribute::NvDynamicBoost => {
-                            init_minmax_property!(nv_dynamic_boost, handle, attr);
-                            setup_callback!(nv_dynamic_boost, handle, attr, i32);
-                            setup_callback_restore_default!(nv_dynamic_boost, handle, attr);
-                            setup_minmax_external!(nv_dynamic_boost, handle, attr, platform);
-                        }
-                        FirmwareAttribute::NvTempTarget => {
-                            init_minmax_property!(nv_temp_target, handle, attr);
-                            setup_callback!(nv_temp_target, handle, attr, i32);
-                            setup_callback_restore_default!(nv_temp_target, handle, attr);
-                            setup_minmax_external!(nv_temp_target, handle, attr, platform);
-                        }
-                        FirmwareAttribute::DgpuBaseTgp => {}
-                        FirmwareAttribute::DgpuTgp => {}
-                        FirmwareAttribute::ChargeMode => {}
-                        FirmwareAttribute::BootSound => {
-                            init_property!(boot_sound, handle, value, i32);
-                            setup_callback!(boot_sound, handle, attr, i32);
-                            setup_external!(boot_sound, i32, handle, attr, value)
-                        }
-                        FirmwareAttribute::McuPowersave => {}
-                        FirmwareAttribute::PanelOverdrive => {
-                            init_property!(panel_overdrive, handle, value, i32);
-                            setup_callback!(panel_overdrive, handle, attr, i32);
-                            setup_external!(panel_overdrive, i32, handle, attr, value)
-                        }
-                        FirmwareAttribute::PanelHdMode => {}
-                        FirmwareAttribute::EgpuConnected => {}
-                        FirmwareAttribute::EgpuEnable => {}
-                        FirmwareAttribute::DgpuDisable => {}
-                        FirmwareAttribute::GpuMuxMode => {}
-                        FirmwareAttribute::MiniLedMode => {
-                            init_property!(mini_led_mode, handle, value, i32);
-                            setup_callback!(mini_led_mode, handle, attr, i32);
-                            setup_external!(mini_led_mode, i32, handle, attr, value);
-                        }
-                        FirmwareAttribute::PendingReboot => {}
-                        FirmwareAttribute::None => {}
-                    })
-                    .ok();
+                                });
+                                handle
+                                    .global::<SystemPageData>()
+                                    .set_ppt_enabled_available(true);
+                                handle
+                                    .global::<SystemPageData>()
+                                    .set_enable_ppt_group(value == 1);
+                            }
+                            FirmwareAttribute::PptPl1Spl => {
+                                init_minmax_property!(ppt_pl1_spl, handle, attr);
+                                setup_callback!(ppt_pl1_spl, handle, attr, i32);
+                                setup_callback_restore_default!(ppt_pl1_spl, handle, attr);
+                                setup_minmax_external!(ppt_pl1_spl, handle, attr, platform);
+                            }
+                            FirmwareAttribute::PptPl2Sppt => {
+                                init_minmax_property!(ppt_pl2_sppt, handle, attr);
+                                setup_callback!(ppt_pl2_sppt, handle, attr, i32);
+                                setup_callback_restore_default!(ppt_pl2_sppt, handle, attr);
+                                setup_minmax_external!(ppt_pl2_sppt, handle, attr, platform);
+                            }
+                            FirmwareAttribute::PptPl3Fppt => {
+                                init_minmax_property!(ppt_pl3_fppt, handle, attr);
+                                setup_callback!(ppt_pl3_fppt, handle, attr, i32);
+                                setup_callback_restore_default!(ppt_pl3_fppt, handle, attr);
+                                setup_minmax_external!(ppt_pl3_fppt, handle, attr, platform);
+                            }
+                            FirmwareAttribute::PptFppt => {
+                                init_minmax_property!(ppt_fppt, handle, attr);
+                                setup_callback!(ppt_fppt, handle, attr, i32);
+                                setup_callback_restore_default!(ppt_fppt, handle, attr);
+                                setup_minmax_external!(ppt_fppt, handle, attr, platform);
+                            }
+                            FirmwareAttribute::PptApuSppt => {
+                                init_minmax_property!(ppt_apu_sppt, handle, attr);
+                                setup_callback!(ppt_apu_sppt, handle, attr, i32);
+                                setup_callback_restore_default!(ppt_apu_sppt, handle, attr);
+                                setup_minmax_external!(ppt_apu_sppt, handle, attr, platform);
+                            }
+                            FirmwareAttribute::PptPlatformSppt => {
+                                init_minmax_property!(ppt_platform_sppt, handle, attr);
+                                setup_callback!(ppt_platform_sppt, handle, attr, i32);
+                                setup_callback_restore_default!(ppt_platform_sppt, handle, attr);
+                                setup_minmax_external!(ppt_platform_sppt, handle, attr, platform);
+                            }
+                            FirmwareAttribute::NvDynamicBoost => {
+                                init_minmax_property!(nv_dynamic_boost, handle, attr);
+                                setup_callback!(nv_dynamic_boost, handle, attr, i32);
+                                setup_callback_restore_default!(nv_dynamic_boost, handle, attr);
+                                setup_minmax_external!(nv_dynamic_boost, handle, attr, platform);
+                            }
+                            FirmwareAttribute::NvTempTarget => {
+                                init_minmax_property!(nv_temp_target, handle, attr);
+                                setup_callback!(nv_temp_target, handle, attr, i32);
+                                setup_callback_restore_default!(nv_temp_target, handle, attr);
+                                setup_minmax_external!(nv_temp_target, handle, attr, platform);
+                            }
+                            FirmwareAttribute::DgpuBaseTgp => {}
+                            FirmwareAttribute::DgpuTgp => {}
+                            FirmwareAttribute::ChargeMode => {}
+                            FirmwareAttribute::BootSound => {
+                                init_property!(boot_sound, handle, value, i32);
+                                setup_callback!(boot_sound, handle, attr, i32);
+                                setup_external!(boot_sound, i32, handle, attr, value)
+                            }
+                            FirmwareAttribute::McuPowersave => {}
+                            FirmwareAttribute::PanelOverdrive => {
+                                init_property!(panel_overdrive, handle, value, i32);
+                                setup_callback!(panel_overdrive, handle, attr, i32);
+                                setup_external!(panel_overdrive, i32, handle, attr, value)
+                            }
+                            FirmwareAttribute::PanelHdMode => {}
+                            FirmwareAttribute::EgpuConnected => {}
+                            FirmwareAttribute::EgpuEnable => {}
+                            FirmwareAttribute::DgpuDisable => {}
+                            FirmwareAttribute::GpuMuxMode => {}
+                            FirmwareAttribute::MiniLedMode => {
+                                init_property!(mini_led_mode, handle, value, i32);
+                                setup_callback!(mini_led_mode, handle, attr, i32);
+                                setup_external!(mini_led_mode, i32, handle, attr, value);
+                            }
+                            FirmwareAttribute::PendingReboot => {}
+                            FirmwareAttribute::None => {}
+                        })
+                        .ok();
+                } else {
+                    error!("Attribute with no name, skipping");
+                }
             }
         }
         handle

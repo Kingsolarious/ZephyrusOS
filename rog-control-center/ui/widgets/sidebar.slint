@@ -4,7 +4,8 @@
 import { Palette, HorizontalBox, VerticalBox } from "std-widgets.slint";
 
 component SideBarItem inherits Rectangle {
-    padding: 10px;
+    // padding only has effect on layout elements
+    // padding: 10px;
     in property <bool> selected;
     in property <bool> has-focus;
     in-out property <string> text <=> label.text;

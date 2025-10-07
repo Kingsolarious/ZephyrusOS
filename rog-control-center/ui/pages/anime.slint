@@ -37,7 +37,8 @@ export component PageAnime inherits Rectangle {
     property <bool> show_builtin_advanced: false;
     clip: true;
     // TODO: slow with border-radius
-        padding: 8px;
+    //padding only has effect on layout elements
+    //padding: 8px;
     // height: parent.height - infobar.height - mainview.padding - self.padding * 2;
         // TODO: border-radius: 8px;
         VerticalLayout {

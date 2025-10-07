@@ -16,7 +16,9 @@ export component PageAppSettings inherits VerticalLayout {
     Rectangle {
         clip: true;
         // TODO: slow with border-radius
-        padding: 8px;
+        //padding only has effect on layout elements
+        //padding: 8px;
+
         // height: parent.height - infobar.height - mainview.padding - self.padding * 2;
         // TODO: border-radius: 8px;
         mainview := VerticalLayout {
