@@ -207,12 +207,14 @@ mod tests {
     fn single_key_next_state_then_create() {
         let layout = KeyLayout::default_layout();
         let mut seq = AdvancedEffects::new(false);
-        seq.effects
-            .push(Effect::Static(Static::new(LedCode::F, Colour {
+        seq.effects.push(Effect::Static(Static::new(
+            LedCode::F,
+            Colour {
                 r: 255,
                 g: 127,
                 b: 0,
-            })));
+            },
+        )));
 
         seq.next_state(&layout);
         let packets = seq.create_packets();

@@ -120,7 +120,7 @@ impl crate::Reloadable for AsusArmouryAttribute {
     async fn reload(&mut self) -> Result<(), RogError> {
         info!("Reloading {}", self.attr.name());
         let name: FirmwareAttribute = self.attr.name().into();
-        
+
         if name.is_ppt() {
             let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
             let power_plugged = self
@@ -160,7 +160,11 @@ impl crate::Reloadable for AsusArmouryAttribute {
                         self.attr.base_path_exists();
                         e
                     })?;
-                info!("Restored armoury setting {} to {:?}", self.attr.name(), saved_value);
+                info!(
+                    "Restored armoury setting {} to {:?}",
+                    self.attr.name(),
+                    saved_value
+                );
             }
         }
 
@@ -412,21 +416,19 @@ pub async fn start_attributes_zbus(
         match zbus::object_server::SignalEmitter::new(conn, path) {
             Ok(sig) => {
                 if let Err(e) = attr.watch_and_notify(sig).await {
-                    error!(
-                        "Failed to start watcher for '{}': {e:?}",
-                        attr.attr.name()
-                    );
+                    error!("Failed to start watcher for '{}': {e:?}", attr.attr.name());
                 }
             }
             Err(e) => {
-                error!("Failed to create SignalEmitter for '{}': {e:?}", attr.attr.name());
+                error!(
+                    "Failed to create SignalEmitter for '{}': {e:?}",
+                    attr.attr.name()
+                );
             }
         }
 
         if let Err(e) = attr.move_to_zbus(conn).await {
-            error!(
-                "Failed to register attribute '{attr_name}' on zbus: {e:?}"
-            );
+            error!("Failed to register attribute '{attr_name}' on zbus: {e:?}");
         }
     }
     Ok(())
