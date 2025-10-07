@@ -82,8 +82,9 @@ impl AuraConfig {
             config
                 .builtins
                 .insert(*n, AuraEffect::default_with_mode(*n));
-
-            if !config.support_data.basic_zones.is_empty() {
+        }
+        if !config.support_data.basic_zones.is_empty() {
+            for n in &config.support_data.basic_modes {
                 let mut default = vec![];
                 for (i, tmp) in config.support_data.basic_zones.iter().enumerate() {
                     default.push(AuraEffect {
@@ -118,14 +119,14 @@ impl AuraConfig {
             self.multizone_on = false;
         } else {
             if let Some(multi) = self.multizone.as_mut() {
-                if let Some(fx) = multi.get_mut(effect.mode()) {
-                    for fx in fx.iter_mut() {
+                if let Some(fx_vec) = multi.get_mut(effect.mode()) {
+                    for fx in fx_vec.iter_mut() {
                         if fx.zone == effect.zone {
                             *fx = effect;
                             return;
                         }
                     }
-                    fx.push(effect);
+                    fx_vec.push(effect);
                 } else {
                     multi.insert(*effect.mode(), vec![effect]);
                 }
