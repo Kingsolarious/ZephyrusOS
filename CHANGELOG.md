@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v6.1.14]
+
+### Changed
+- Fix formatting
+- Attempt to fix tests
+
 ## [v6.1.13]
 
 ### Changed
