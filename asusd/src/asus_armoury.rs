@@ -91,7 +91,8 @@ impl AsusArmouryAttribute {
                                     .await;
                             } else {
                                 info!(
-                                    "inotify event stream failed for {} ({}). You can ignore this if unsupported",
+                                    "inotify event stream failed for {} ({}). You can ignore this \
+                                     if unsupported",
                                     name, $attr_str
                                 );
                             }
