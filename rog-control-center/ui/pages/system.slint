@@ -302,7 +302,7 @@ export component PageSystem inherits Rectangle {
                 }
             }
 
-            if SystemPageData.ppt_pl1_spl.current != -1 || SystemPageData.ppt_pl2_sppt.current != -1 || SystemPageData.ppt_pl3_fppt.current != -1 || SystemPageData.ppt_fppt.current != -1 || SystemPageData.ppt_apu_sppt.current != -1 || SystemPageData.nv_temp_target.current != -1 || SystemPageData.nv_dynamic_boost.current != -1: HorizontalLayout {
+            if (SystemPageData.ppt_pl1_spl.max > 0 && SystemPageData.ppt_pl1_spl.current != -1) || (SystemPageData.ppt_pl2_sppt.max > 0 && SystemPageData.ppt_pl2_sppt.current != -1) || (SystemPageData.ppt_pl3_fppt.max > 0 && SystemPageData.ppt_pl3_fppt.current != -1) || (SystemPageData.ppt_fppt.max > 0 && SystemPageData.ppt_fppt.current != -1) || (SystemPageData.ppt_apu_sppt.max > 0 && SystemPageData.ppt_apu_sppt.current != -1) || (SystemPageData.nv_temp_target.max > 0 && SystemPageData.nv_temp_target.current != -1) || (SystemPageData.nv_dynamic_boost.max > 0 && SystemPageData.nv_dynamic_boost.current != -1): HorizontalLayout {
                 padding-right: 10px;
                 padding-left: 10px;
                 alignment: LayoutAlignment.space-between;
@@ -331,7 +331,7 @@ export component PageSystem inherits Rectangle {
                 }
             }
 
-            if SystemPageData.ppt_pl1_spl.current != -1: SystemSlider {
+            if SystemPageData.ppt_pl1_spl.max > 0 && SystemPageData.ppt_pl1_spl.current != -1: SystemSlider {
                 text: @tr("ppt_pl1_spl" => "CPU Sustained Power Limit");
                 title: @tr("ppt_pl1_spl" => "CPU Sustained Power Limit");
                 help_text: @tr("ppt_pl1_spl_help" => "Long-term CPU power limit that affects sustained workload performance. Higher values may increase heat and power consumption.");
@@ -349,7 +349,7 @@ export component PageSystem inherits Rectangle {
                 }
             }
 
-            if SystemPageData.ppt_pl2_sppt.current != -1: SystemSlider {
+            if SystemPageData.ppt_pl2_sppt.max > 0 && SystemPageData.ppt_pl2_sppt.current != -1: SystemSlider {
                 text: @tr("ppt_pl2_sppt" => "CPU Turbo Power Limit");
                 title: @tr("ppt_pl2_sppt" => "CPU Turbo Power Limit");
                 help_text: @tr("ppt_pl2_sppt_help" => "Short-term CPU power limit for boost periods. Controls maximum power during brief high-performance bursts.");
@@ -367,7 +367,7 @@ export component PageSystem inherits Rectangle {
                 }
             }
 
-            if SystemPageData.ppt_pl3_fppt.current != -1: SystemSlider {
+            if SystemPageData.ppt_pl3_fppt.max > 0 && SystemPageData.ppt_pl3_fppt.current != -1: SystemSlider {
                 text: @tr("ppt_pl3_fppt" => "CPU Fast Burst Power Limit");
                 title: @tr("ppt_pl3_fppt" => "CPU Fast Burst Power Limit");
                 help_text: @tr("ppt_pl3_fppt_help" => "Ultra-short duration power limit for instantaneous CPU bursts. Affects responsiveness during sudden workload spikes.");
@@ -384,7 +384,7 @@ export component PageSystem inherits Rectangle {
                     SystemPageData.cb_ppt_pl3_fppt(Math.round(value));
                 }
             }
-            if SystemPageData.ppt_fppt.current != -1: SystemSlider {
+            if SystemPageData.ppt_fppt.max > 0 && SystemPageData.ppt_fppt.current != -1: SystemSlider {
                 text: @tr("ppt_fppt" => "Fast Package Power Limit");
                 title: @tr("ppt_fppt" => "Fast Package Power Limit");
                 help_text: @tr("ppt_fppt_help" => "Ultra-short duration power limit for system package. Controls maximum power during millisecond-scale load spikes.");
@@ -402,7 +402,7 @@ export component PageSystem inherits Rectangle {
                 }
             }
 
-            if SystemPageData.ppt_apu_sppt.current != -1: SystemSlider {
+            if SystemPageData.ppt_apu_sppt.max > 0 && SystemPageData.ppt_apu_sppt.current != -1: SystemSlider {
                 text: @tr("ppt_apu_sppt" => "APU Sustained Power Limit");
                 title: @tr("ppt_apu_sppt" => "APU Sustained Power Limit");
                 help_text: @tr("ppt_apu_sppt_help" => "Long-term power limit for integrated graphics and CPU combined. Affects sustained performance of APU-based workloads.");
@@ -420,7 +420,7 @@ export component PageSystem inherits Rectangle {
                 }
             }
 
-            if SystemPageData.ppt_platform_sppt.current != -1: SystemSlider {
+            if SystemPageData.ppt_platform_sppt.max > 0 && SystemPageData.ppt_platform_sppt.current != -1: SystemSlider {
                 text: @tr("ppt_platform_sppt" => "Platform Sustained Power Limit");
                 title: @tr("ppt_platform_sppt" => "Platform Sustained Power Limit");
                 help_text: @tr("ppt_platform_sppt_help" => "Overall system power limit for sustained operations. Controls total platform power consumption over extended periods.");
@@ -438,7 +438,7 @@ export component PageSystem inherits Rectangle {
                 }
             }
 
-            if SystemPageData.nv_dynamic_boost.current != -1: SystemSlider {
+            if SystemPageData.nv_dynamic_boost.max > 0 && SystemPageData.nv_dynamic_boost.current != -1: SystemSlider {
                 text: @tr("nv_dynamic_boost" => "GPU Power Boost");
                 title: @tr("nv_dynamic_boost" => "GPU Power Boost");
                 help_text: @tr("nv_dynamic_boost_help" => "Additional power allocation for GPU dynamic boost. Higher values increase GPU performance but generate more heat.");
@@ -456,7 +456,7 @@ export component PageSystem inherits Rectangle {
                 }
             }
 
-            if SystemPageData.nv_temp_target.current != -1: SystemSlider {
+            if SystemPageData.nv_temp_target.max > 0 && SystemPageData.nv_temp_target.current != -1: SystemSlider {
                 text: @tr("nv_temp_target" => "GPU Temperature Limit");
                 title: @tr("nv_temp_target" => "GPU Temperature Limit");
                 help_text: @tr("nv_temp_target_help" => "Maximum GPU temperature threshold in Celsius. GPU will throttle to maintain temperature below this limit.");

@@ -124,6 +124,22 @@ impl Attribute {
         &self.scalar_increment
     }
 
+    fn read_attr_i32(&self, name: &str) -> Option<i32> {
+        read_i32(&self.base_path.join(name)).ok()
+    }
+
+    pub fn refresh_min_value(&self) -> Option<i32> {
+        self.read_attr_i32("min_value")
+    }
+
+    pub fn refresh_max_value(&self) -> Option<i32> {
+        self.read_attr_i32("max_value")
+    }
+
+    pub fn refresh_scalar_increment(&self) -> Option<i32> {
+        self.read_attr_i32("scalar_increment")
+    }
+
     /// Read all the immutable values to struct data. These should *never*
     /// change, if they do then it is possibly a driver issue - although this is
     /// subject to `firmware_attributes` class changes in kernel.

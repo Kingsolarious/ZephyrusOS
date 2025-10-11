@@ -55,6 +55,25 @@ impl AsusArmouryAttribute {
         String::from(self.attr.name())
     }
 
+    fn resolve_i32_value(refreshed: Option<i32>, cached: &AttrValue) -> i32 {
+        refreshed
+            .or_else(|| match cached {
+                AttrValue::Integer(i) => Some(*i),
+                _ => None,
+            })
+            .unwrap_or(-1)
+    }
+
+    pub async fn emit_limits(&self, connection: &Connection) -> Result<(), RogError> {
+        let path = dbus_path_for_attr(self.attr.name());
+        let signal = SignalEmitter::new(connection, path)?;
+        self.min_value_changed(&signal).await?;
+        self.max_value_changed(&signal).await?;
+        self.scalar_increment_changed(&signal).await?;
+        self.current_value_changed(&signal).await?;
+        Ok(())
+    }
+
     pub async fn move_to_zbus(self, connection: &Connection) -> Result<(), RogError> {
         let path = dbus_path_for_attr(self.attr.name());
         connection
@@ -114,6 +133,35 @@ impl AsusArmouryAttribute {
         watch_value_notify!("max_value", max_value_changed);
 
         Ok(())
+    }
+}
+
+#[derive(Clone, Default)]
+pub struct ArmouryAttributeRegistry {
+    attrs: Vec<AsusArmouryAttribute>,
+}
+
+impl ArmouryAttributeRegistry {
+    pub fn push(&mut self, attr: AsusArmouryAttribute) {
+        self.attrs.push(attr);
+    }
+
+    pub async fn emit_limits(&self, connection: &Connection) -> Result<(), RogError> {
+        let mut last_err: Option<RogError> = None;
+        for attr in &self.attrs {
+            if let Err(e) = attr.emit_limits(connection).await {
+                error!(
+                    "Failed to emit updated limits for attribute '{}': {e:?}",
+                    attr.attribute_name()
+                );
+                last_err = Some(e);
+            }
+        }
+        if let Some(err) = last_err {
+            Err(err)
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -256,26 +304,20 @@ impl AsusArmouryAttribute {
 
     #[zbus(property)]
     async fn min_value(&self) -> i32 {
-        match self.attr.min_value() {
-            AttrValue::Integer(i) => *i,
-            _ => -1,
-        }
+        Self::resolve_i32_value(self.attr.refresh_min_value(), self.attr.min_value())
     }
 
     #[zbus(property)]
     async fn max_value(&self) -> i32 {
-        match self.attr.max_value() {
-            AttrValue::Integer(i) => *i,
-            _ => -1,
-        }
+        Self::resolve_i32_value(self.attr.refresh_max_value(), self.attr.max_value())
     }
 
     #[zbus(property)]
     async fn scalar_increment(&self) -> i32 {
-        match self.attr.scalar_increment() {
-            AttrValue::Integer(i) => *i,
-            _ => -1,
-        }
+        Self::resolve_i32_value(
+            self.attr.refresh_scalar_increment(),
+            self.attr.scalar_increment(),
+        )
     }
 
     #[zbus(property)]
@@ -393,7 +435,8 @@ pub async fn start_attributes_zbus(
     power: AsusPower,
     attributes: FirmwareAttributes,
     config: Arc<Mutex<Config>>,
-) -> Result<(), RogError> {
+) -> Result<ArmouryAttributeRegistry, RogError> {
+    let mut registry = ArmouryAttributeRegistry::default();
     for attr in attributes.attributes() {
         let mut attr = AsusArmouryAttribute::new(
             attr.clone(),
@@ -401,6 +444,8 @@ pub async fn start_attributes_zbus(
             power.clone(),
             config.clone(),
         );
+
+        let registry_attr = attr.clone();
 
         if let Err(e) = attr.reload().await {
             error!(
@@ -430,9 +475,12 @@ pub async fn start_attributes_zbus(
 
         if let Err(e) = attr.move_to_zbus(conn).await {
             error!("Failed to register attribute '{attr_name}' on zbus: {e:?}");
+            continue;
         }
+
+        registry.push(registry_attr);
     }
-    Ok(())
+    Ok(registry)
 }
 
 pub async fn set_config_or_default(

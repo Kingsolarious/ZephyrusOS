@@ -3,7 +3,7 @@ use std::error::Error;
 use std::sync::Arc;
 
 use ::zbus::Connection;
-use asusd::asus_armoury::start_attributes_zbus;
+use asusd::asus_armoury::{start_attributes_zbus, ArmouryAttributeRegistry};
 use asusd::aura_manager::DeviceManager;
 use asusd::config::Config;
 use asusd::ctrl_backlight::CtrlBacklight;
@@ -74,7 +74,7 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
     let platform = RogPlatform::new()?; // TODO: maybe needs async mutex?
     let power = AsusPower::new()?; // TODO: maybe needs async mutex?
     let attributes = FirmwareAttributes::new();
-    if let Err(e) = start_attributes_zbus(
+    let armoury_registry = match start_attributes_zbus(
         &server,
         platform.clone(),
         power.clone(),
@@ -83,8 +83,12 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
     )
     .await
     {
-        error!("Failed to initialize firmware attributes over zbus: {e:?}");
-    }
+        Ok(registry) => registry,
+        Err(e) => {
+            error!("Failed to initialize firmware attributes over zbus: {e:?}");
+            ArmouryAttributeRegistry::default()
+        }
+    };
 
     match CtrlFanCurveZbus::new() {
         Ok(ctrl) => {
@@ -113,6 +117,8 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
         config.clone(),
         &cfg_path,
         CtrlPlatform::signal_context(&server)?,
+        server.clone(),
+        armoury_registry,
     ) {
         Ok(ctrl) => {
             let sig_ctx = CtrlPlatform::signal_context(&server)?;
