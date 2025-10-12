@@ -743,7 +743,7 @@ impl CtrlTask for CtrlPlatform {
                                         let mut cfg = platform1.config.lock().await;
                                         set_config_or_default(
                                             &attrs,
-                                            &mut *cfg,
+                                            &mut cfg,
                                             power_plugged > 0,
                                             profile,
                                         )
@@ -822,7 +822,7 @@ impl CtrlTask for CtrlPlatform {
                         let attrs = FirmwareAttributes::new();
                         {
                             let mut cfg = platform3.config.lock().await;
-                            set_config_or_default(&attrs, &mut *cfg, power_plugged, profile).await;
+                            set_config_or_default(&attrs, &mut cfg, power_plugged, profile).await;
                         }
                         if let Err(e) = platform3
                             .armoury_registry

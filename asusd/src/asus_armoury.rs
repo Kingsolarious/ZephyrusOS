@@ -57,7 +57,7 @@ impl AsusArmouryAttribute {
 
     fn resolve_i32_value(refreshed: Option<i32>, cached: &AttrValue) -> i32 {
         refreshed
-            .or_else(|| match cached {
+            .or(match cached {
                 AttrValue::Integer(i) => Some(*i),
                 _ => None,
             })
