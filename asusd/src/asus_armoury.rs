@@ -179,25 +179,31 @@ impl crate::Reloadable for AsusArmouryAttribute {
                     error!("Could not get power status: {e:?}");
                     e
                 })
-                .unwrap_or_default();
-            let config = if power_plugged == 1 {
-                &self.config.lock().await.ac_profile_tunings
-            } else {
-                &self.config.lock().await.dc_profile_tunings
+                .unwrap_or_default()
+                == 1;
+
+            let apply_value = {
+                let config = self.config.lock().await;
+                config
+                    .select_tunings_ref(power_plugged, profile)
+                    .and_then(|tuning| {
+                        if tuning.enabled {
+                            tuning.group.get(&self.name()).copied()
+                        } else {
+                            None
+                        }
+                    })
             };
-            if let Some(tuning) = config.get(&profile) {
-                if tuning.enabled {
-                    if let Some(tune) = tuning.group.get(&self.name()) {
-                        self.attr
-                            .set_current_value(&AttrValue::Integer(*tune))
-                            .map_err(|e| {
-                                error!("Could not set {} value: {e:?}", self.attr.name());
-                                self.attr.base_path_exists();
-                                e
-                            })?;
-                        info!("Set {} to {:?}", self.attr.name(), tune);
-                    }
-                }
+
+            if let Some(tune) = apply_value {
+                self.attr
+                    .set_current_value(&AttrValue::Integer(tune))
+                    .map_err(|e| {
+                        error!("Could not set {} value: {e:?}", self.attr.name());
+                        self.attr.base_path_exists();
+                        e
+                    })?;
+                info!("Set {} to {:?}", self.attr.name(), tune);
             }
         } else {
             // Handle non-PPT attributes (boolean and other settings)
@@ -339,12 +345,15 @@ impl AsusArmouryAttribute {
                     error!("Could not get power status: {e:?}");
                     e
                 })
-                .unwrap_or_default();
-            let mut config = self.config.lock().await;
-            let tuning = config.select_tunings(power_plugged == 1, profile);
-            if let Some(tune) = tuning.group.get(&self.name()) {
-                return Ok(*tune);
-            } else if let AttrValue::Integer(i) = self.attr.default_value() {
+                .unwrap_or_default()
+                == 1;
+            let config = self.config.lock().await;
+            if let Some(tuning) = config.select_tunings_ref(power_plugged, profile) {
+                if let Some(tune) = tuning.group.get(&self.name()) {
+                    return Ok(*tune);
+                }
+            }
+            if let AttrValue::Integer(i) = self.attr.default_value() {
                 return Ok(*i);
             }
             return Err(fdo::Error::Failed(
@@ -358,6 +367,83 @@ impl AsusArmouryAttribute {
         Err(fdo::Error::Failed(
             "Could not read current value".to_string(),
         ))
+    }
+
+    async fn stored_value_for_power(&self, on_ac: bool) -> fdo::Result<i32> {
+        if !self.name().is_ppt() {
+            return Err(fdo::Error::NotSupported(
+                "Stored values are only available for PPT attributes".to_string(),
+            ));
+        }
+
+        let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
+        let config = self.config.lock().await;
+        if let Some(tuning) = config.select_tunings_ref(on_ac, profile) {
+            if let Some(tune) = tuning.group.get(&self.name()) {
+                return Ok(*tune);
+            }
+        }
+
+        if let AttrValue::Integer(i) = self.attr.default_value() {
+            return Ok(*i);
+        }
+        Err(fdo::Error::Failed(
+            "Could not read stored value".to_string(),
+        ))
+    }
+
+    async fn set_value_for_power(&mut self, on_ac: bool, value: i32) -> fdo::Result<()> {
+        if !self.name().is_ppt() {
+            return Err(fdo::Error::NotSupported(
+                "Setting stored values is only supported for PPT attributes".to_string(),
+            ));
+        }
+
+        let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
+        let apply_now;
+
+        {
+            let mut config = self.config.lock().await;
+            let tuning = config.select_tunings(on_ac, profile);
+
+            if let Some(tune) = tuning.group.get_mut(&self.name()) {
+                *tune = value;
+            } else {
+                tuning.group.insert(self.name(), value);
+                debug!(
+                    "Store {} value for {} power = {}",
+                    self.attr.name(),
+                    if on_ac { "AC" } else { "DC" },
+                    value
+                );
+            }
+
+            apply_now = tuning.enabled;
+            config.write();
+        }
+
+        if apply_now {
+            let power_plugged = self
+                .power
+                .get_online()
+                .map_err(|e| {
+                    error!("Could not get power status: {e:?}");
+                    e
+                })
+                .unwrap_or_default()
+                != 0;
+
+            if power_plugged == on_ac {
+                self.attr
+                    .set_current_value(&AttrValue::Integer(value))
+                    .map_err(|e| {
+                        error!("Could not set value: {e:?}");
+                        e
+                    })?;
+            }
+        }
+
+        Ok(())
     }
 
     #[zbus(property)]
