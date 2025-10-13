@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [v6.1.15]
+
+### Changed
+- Reflect the current asus-armoury status on AC plug connection status change
+
 ## [v6.1.14]
 
 ### Changed

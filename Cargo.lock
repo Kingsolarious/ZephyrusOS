@@ -155,7 +155,7 @@ checksum = "175571dd1d178ced59193a6fc02dde1b972eb0bc56c892cde9beeceac5bf0f6b"
 
 [[package]]
 name = "asusctl"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "dmi_id",
  "env_logger",
@@ -174,7 +174,7 @@ dependencies = [
 
 [[package]]
 name = "asusd"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "cargo-husky",
  "concat-idents",
@@ -201,7 +201,7 @@ dependencies = [
 
 [[package]]
 name = "asusd-user"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "config-traits",
  "dirs",
@@ -892,7 +892,7 @@ dependencies = [
 
 [[package]]
 name = "config-traits"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "log",
  "ron",
@@ -1232,7 +1232,7 @@ dependencies = [
 
 [[package]]
 name = "dmi_id"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "log",
  "udev 0.8.0",
@@ -4371,7 +4371,7 @@ dependencies = [
 
 [[package]]
 name = "rog-control-center"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "asusd",
  "concat-idents",
@@ -4402,7 +4402,7 @@ dependencies = [
 
 [[package]]
 name = "rog_anime"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "dmi_id",
  "gif 0.12.0",
@@ -4416,7 +4416,7 @@ dependencies = [
 
 [[package]]
 name = "rog_aura"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "dmi_id",
  "log",
@@ -4427,7 +4427,7 @@ dependencies = [
 
 [[package]]
 name = "rog_dbus"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "asusd",
  "rog_anime",
@@ -4441,7 +4441,7 @@ dependencies = [
 
 [[package]]
 name = "rog_platform"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "concat-idents",
  "inotify",
@@ -4454,7 +4454,7 @@ dependencies = [
 
 [[package]]
 name = "rog_profiles"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "log",
  "rog_platform",
@@ -4465,7 +4465,7 @@ dependencies = [
 
 [[package]]
 name = "rog_scsi"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "ron",
  "serde",
@@ -4475,7 +4475,7 @@ dependencies = [
 
 [[package]]
 name = "rog_simulators"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "log",
  "rog_anime",
@@ -4485,7 +4485,7 @@ dependencies = [
 
 [[package]]
 name = "rog_slash"
-version = "6.1.14"
+version = "6.1.15"
 dependencies = [
  "dmi_id",
  "serde",
