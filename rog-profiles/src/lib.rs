@@ -37,8 +37,9 @@ pub fn find_fan_curve_node() -> Result<Device, ProfileError> {
     derive(Type, Value, OwnedValue),
     zvariant(signature = "s")
 )]
-#[derive(Deserialize, Serialize, Debug, Hash, PartialEq, Eq, Clone, Copy)]
+#[derive(Default, Deserialize, Serialize, Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum FanCurvePU {
+    #[default]
     CPU = 0,
     GPU = 1,
     MID = 2,
@@ -97,12 +98,6 @@ impl std::str::FromStr for FanCurvePU {
             "mid" => Ok(FanCurvePU::MID),
             _ => Err(ProfileError::ParseProfileName),
         }
-    }
-}
-
-impl Default for FanCurvePU {
-    fn default() -> Self {
-        Self::CPU
     }
 }
 

@@ -55,6 +55,25 @@ impl AsusArmouryAttribute {
         String::from(self.attr.name())
     }
 
+    fn resolve_i32_value(refreshed: Option<i32>, cached: &AttrValue) -> i32 {
+        refreshed
+            .or(match cached {
+                AttrValue::Integer(i) => Some(*i),
+                _ => None,
+            })
+            .unwrap_or(-1)
+    }
+
+    pub async fn emit_limits(&self, connection: &Connection) -> Result<(), RogError> {
+        let path = dbus_path_for_attr(self.attr.name());
+        let signal = SignalEmitter::new(connection, path)?;
+        self.min_value_changed(&signal).await?;
+        self.max_value_changed(&signal).await?;
+        self.scalar_increment_changed(&signal).await?;
+        self.current_value_changed(&signal).await?;
+        Ok(())
+    }
+
     pub async fn move_to_zbus(self, connection: &Connection) -> Result<(), RogError> {
         let path = dbus_path_for_attr(self.attr.name());
         connection
@@ -117,6 +136,35 @@ impl AsusArmouryAttribute {
     }
 }
 
+#[derive(Clone, Default)]
+pub struct ArmouryAttributeRegistry {
+    attrs: Vec<AsusArmouryAttribute>,
+}
+
+impl ArmouryAttributeRegistry {
+    pub fn push(&mut self, attr: AsusArmouryAttribute) {
+        self.attrs.push(attr);
+    }
+
+    pub async fn emit_limits(&self, connection: &Connection) -> Result<(), RogError> {
+        let mut last_err: Option<RogError> = None;
+        for attr in &self.attrs {
+            if let Err(e) = attr.emit_limits(connection).await {
+                error!(
+                    "Failed to emit updated limits for attribute '{}': {e:?}",
+                    attr.attribute_name()
+                );
+                last_err = Some(e);
+            }
+        }
+        if let Some(err) = last_err {
+            Err(err)
+        } else {
+            Ok(())
+        }
+    }
+}
+
 impl crate::Reloadable for AsusArmouryAttribute {
     async fn reload(&mut self) -> Result<(), RogError> {
         info!("Reloading {}", self.attr.name());
@@ -131,25 +179,31 @@ impl crate::Reloadable for AsusArmouryAttribute {
                     error!("Could not get power status: {e:?}");
                     e
                 })
-                .unwrap_or_default();
-            let config = if power_plugged == 1 {
-                &self.config.lock().await.ac_profile_tunings
-            } else {
-                &self.config.lock().await.dc_profile_tunings
+                .unwrap_or_default()
+                == 1;
+
+            let apply_value = {
+                let config = self.config.lock().await;
+                config
+                    .select_tunings_ref(power_plugged, profile)
+                    .and_then(|tuning| {
+                        if tuning.enabled {
+                            tuning.group.get(&self.name()).copied()
+                        } else {
+                            None
+                        }
+                    })
             };
-            if let Some(tuning) = config.get(&profile) {
-                if tuning.enabled {
-                    if let Some(tune) = tuning.group.get(&self.name()) {
-                        self.attr
-                            .set_current_value(&AttrValue::Integer(*tune))
-                            .map_err(|e| {
-                                error!("Could not set {} value: {e:?}", self.attr.name());
-                                self.attr.base_path_exists();
-                                e
-                            })?;
-                        info!("Set {} to {:?}", self.attr.name(), tune);
-                    }
-                }
+
+            if let Some(tune) = apply_value {
+                self.attr
+                    .set_current_value(&AttrValue::Integer(tune))
+                    .map_err(|e| {
+                        error!("Could not set {} value: {e:?}", self.attr.name());
+                        self.attr.base_path_exists();
+                        e
+                    })?;
+                info!("Set {} to {:?}", self.attr.name(), tune);
             }
         } else {
             // Handle non-PPT attributes (boolean and other settings)
@@ -256,26 +310,20 @@ impl AsusArmouryAttribute {
 
     #[zbus(property)]
     async fn min_value(&self) -> i32 {
-        match self.attr.min_value() {
-            AttrValue::Integer(i) => *i,
-            _ => -1,
-        }
+        Self::resolve_i32_value(self.attr.refresh_min_value(), self.attr.min_value())
     }
 
     #[zbus(property)]
     async fn max_value(&self) -> i32 {
-        match self.attr.max_value() {
-            AttrValue::Integer(i) => *i,
-            _ => -1,
-        }
+        Self::resolve_i32_value(self.attr.refresh_max_value(), self.attr.max_value())
     }
 
     #[zbus(property)]
     async fn scalar_increment(&self) -> i32 {
-        match self.attr.scalar_increment() {
-            AttrValue::Integer(i) => *i,
-            _ => -1,
-        }
+        Self::resolve_i32_value(
+            self.attr.refresh_scalar_increment(),
+            self.attr.scalar_increment(),
+        )
     }
 
     #[zbus(property)]
@@ -297,12 +345,15 @@ impl AsusArmouryAttribute {
                     error!("Could not get power status: {e:?}");
                     e
                 })
-                .unwrap_or_default();
-            let mut config = self.config.lock().await;
-            let tuning = config.select_tunings(power_plugged == 1, profile);
-            if let Some(tune) = tuning.group.get(&self.name()) {
-                return Ok(*tune);
-            } else if let AttrValue::Integer(i) = self.attr.default_value() {
+                .unwrap_or_default()
+                == 1;
+            let config = self.config.lock().await;
+            if let Some(tuning) = config.select_tunings_ref(power_plugged, profile) {
+                if let Some(tune) = tuning.group.get(&self.name()) {
+                    return Ok(*tune);
+                }
+            }
+            if let AttrValue::Integer(i) = self.attr.default_value() {
                 return Ok(*i);
             }
             return Err(fdo::Error::Failed(
@@ -316,6 +367,83 @@ impl AsusArmouryAttribute {
         Err(fdo::Error::Failed(
             "Could not read current value".to_string(),
         ))
+    }
+
+    async fn stored_value_for_power(&self, on_ac: bool) -> fdo::Result<i32> {
+        if !self.name().is_ppt() {
+            return Err(fdo::Error::NotSupported(
+                "Stored values are only available for PPT attributes".to_string(),
+            ));
+        }
+
+        let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
+        let config = self.config.lock().await;
+        if let Some(tuning) = config.select_tunings_ref(on_ac, profile) {
+            if let Some(tune) = tuning.group.get(&self.name()) {
+                return Ok(*tune);
+            }
+        }
+
+        if let AttrValue::Integer(i) = self.attr.default_value() {
+            return Ok(*i);
+        }
+        Err(fdo::Error::Failed(
+            "Could not read stored value".to_string(),
+        ))
+    }
+
+    async fn set_value_for_power(&mut self, on_ac: bool, value: i32) -> fdo::Result<()> {
+        if !self.name().is_ppt() {
+            return Err(fdo::Error::NotSupported(
+                "Setting stored values is only supported for PPT attributes".to_string(),
+            ));
+        }
+
+        let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
+        let apply_now;
+
+        {
+            let mut config = self.config.lock().await;
+            let tuning = config.select_tunings(on_ac, profile);
+
+            if let Some(tune) = tuning.group.get_mut(&self.name()) {
+                *tune = value;
+            } else {
+                tuning.group.insert(self.name(), value);
+                debug!(
+                    "Store {} value for {} power = {}",
+                    self.attr.name(),
+                    if on_ac { "AC" } else { "DC" },
+                    value
+                );
+            }
+
+            apply_now = tuning.enabled;
+            config.write();
+        }
+
+        if apply_now {
+            let power_plugged = self
+                .power
+                .get_online()
+                .map_err(|e| {
+                    error!("Could not get power status: {e:?}");
+                    e
+                })
+                .unwrap_or_default()
+                != 0;
+
+            if power_plugged == on_ac {
+                self.attr
+                    .set_current_value(&AttrValue::Integer(value))
+                    .map_err(|e| {
+                        error!("Could not set value: {e:?}");
+                        e
+                    })?;
+            }
+        }
+
+        Ok(())
     }
 
     #[zbus(property)]
@@ -393,7 +521,8 @@ pub async fn start_attributes_zbus(
     power: AsusPower,
     attributes: FirmwareAttributes,
     config: Arc<Mutex<Config>>,
-) -> Result<(), RogError> {
+) -> Result<ArmouryAttributeRegistry, RogError> {
+    let mut registry = ArmouryAttributeRegistry::default();
     for attr in attributes.attributes() {
         let mut attr = AsusArmouryAttribute::new(
             attr.clone(),
@@ -401,6 +530,8 @@ pub async fn start_attributes_zbus(
             power.clone(),
             config.clone(),
         );
+
+        let registry_attr = attr.clone();
 
         if let Err(e) = attr.reload().await {
             error!(
@@ -430,9 +561,12 @@ pub async fn start_attributes_zbus(
 
         if let Err(e) = attr.move_to_zbus(conn).await {
             error!("Failed to register attribute '{attr_name}' on zbus: {e:?}");
+            continue;
         }
+
+        registry.push(registry_attr);
     }
-    Ok(())
+    Ok(registry)
 }
 
 pub async fn set_config_or_default(

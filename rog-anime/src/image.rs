@@ -169,7 +169,7 @@ impl AnimeImage {
                     // first 5 rows for GA401 are always at X = 0
                     return 0;
                 }
-                (y + 1) / 2 - 3
+                y.div_ceil(2) - 3
             }
             AnimeType::GU604 => {
                 // first 9 rows start at zero
@@ -185,7 +185,7 @@ impl AnimeImage {
                     return 0;
                 }
                 // and then their offset grows by one every two rows
-                (y + 1) / 2 - 5
+                y.div_ceil(2) - 5
             }
         }
     }
@@ -213,7 +213,7 @@ impl AnimeImage {
                     // First 5 rows for GA401 are always 33 physical LEDs long
                     return 33;
                 }
-                36 - (y + 1) / 2
+                36 - y.div_ceil(2)
             }
             AnimeType::GU604 => {
                 if y <= 9 {

@@ -13,7 +13,7 @@ use zbus::fdo::Error as FdoErr;
 use zbus::object_server::SignalEmitter;
 use zbus::{interface, Connection};
 
-use crate::asus_armoury::set_config_or_default;
+use crate::asus_armoury::{set_config_or_default, ArmouryAttributeRegistry};
 use crate::config::Config;
 use crate::error::RogError;
 use crate::{task_watch_item, CtrlTask, ReloadAndNotify};
@@ -46,6 +46,8 @@ pub struct CtrlPlatform {
     attributes: FirmwareAttributes,
     cpu_control: Option<CPUControl>,
     config: Arc<Mutex<Config>>,
+    connection: Connection,
+    armoury_registry: ArmouryAttributeRegistry,
 }
 
 impl CtrlPlatform {
@@ -56,6 +58,8 @@ impl CtrlPlatform {
         config: Arc<Mutex<Config>>,
         config_path: &Path,
         signal_context: SignalEmitter<'static>,
+        connection: Connection,
+        armoury_registry: ArmouryAttributeRegistry,
     ) -> Result<Self, RogError> {
         let config1 = config.clone();
         let config_path = config_path.to_owned();
@@ -68,6 +72,8 @@ impl CtrlPlatform {
             cpu_control: CPUControl::new()
                 .map_err(|e| error!("Couldn't get CPU control sysfs: {e}"))
                 .ok(),
+            connection,
+            armoury_registry,
         };
         let mut inotify_self = ret_self.clone();
 
@@ -729,6 +735,31 @@ impl CtrlTask for CtrlPlatform {
                             }
                             if !sleeping {
                                 platform1.run_ac_or_bat_cmd(power_plugged > 0).await;
+                                if let Ok(profile) =
+                                    platform1.platform.get_platform_profile().map(|p| p.into())
+                                {
+                                    let attrs = FirmwareAttributes::new();
+                                    {
+                                        let mut cfg = platform1.config.lock().await;
+                                        set_config_or_default(
+                                            &attrs,
+                                            &mut cfg,
+                                            power_plugged > 0,
+                                            profile,
+                                        )
+                                        .await;
+                                    }
+                                    if let Err(e) = platform1
+                                        .armoury_registry
+                                        .emit_limits(&platform1.connection)
+                                        .await
+                                    {
+                                        error!(
+                                            "Failed to emit armoury updates after power change: \
+                                             {e:?}"
+                                        );
+                                    }
+                                }
                             }
                             platform1.config.lock().await.last_power_plugged = power_plugged;
                         }
@@ -789,13 +820,17 @@ impl CtrlTask for CtrlPlatform {
                     {
                         // TODO: manage this better, shouldn't need to create every time
                         let attrs = FirmwareAttributes::new();
-                        set_config_or_default(
-                            &attrs,
-                            &mut *platform3.config.lock().await,
-                            power_plugged,
-                            profile,
-                        )
-                        .await;
+                        {
+                            let mut cfg = platform3.config.lock().await;
+                            set_config_or_default(&attrs, &mut cfg, power_plugged, profile).await;
+                        }
+                        if let Err(e) = platform3
+                            .armoury_registry
+                            .emit_limits(&platform3.connection)
+                            .await
+                        {
+                            error!("Failed to emit armoury updates after AC/DC toggle: {e:?}");
+                        }
                         platform3
                             .enable_ppt_group_changed(&signal_ctxt_copy)
                             .await
@@ -852,6 +887,9 @@ impl CtrlTask for CtrlPlatform {
                             profile,
                         )
                         .await;
+                        if let Err(e) = ctrl.armoury_registry.emit_limits(&ctrl.connection).await {
+                            error!("Failed to emit armoury updates after profile change: {e:?}");
+                        }
                     }
                 }
             }

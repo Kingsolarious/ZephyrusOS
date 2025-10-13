@@ -67,6 +67,19 @@ impl Config {
         };
         config.entry(profile).or_insert_with(Tuning::default)
     }
+
+    pub fn select_tunings_ref(
+        &self,
+        power_plugged: bool,
+        profile: PlatformProfile,
+    ) -> Option<&Tuning> {
+        let config = if power_plugged {
+            &self.ac_profile_tunings
+        } else {
+            &self.dc_profile_tunings
+        };
+        config.get(&profile)
+    }
 }
 
 impl Default for Config {
@@ -146,7 +159,7 @@ pub struct Config611 {
 
 impl From<Config611> for Config {
     fn from(c: Config611) -> Self {
-        Self {
+        let mut config = Self {
             // Restore the base charge limit
             charge_control_end_threshold: c.charge_control_end_threshold,
             base_charge_control_end_threshold: c.charge_control_end_threshold,
@@ -168,7 +181,12 @@ impl From<Config611> for Config {
             armoury_settings: HashMap::default(),
             screenpad_gamma: None,
             screenpad_sync_primary: Default::default(),
-        }
+        };
+
+        config.ac_profile_tunings = c.ac_profile_tunings;
+        config.dc_profile_tunings = c.dc_profile_tunings;
+        config.armoury_settings = c.armoury_settings;
+        config
     }
 }
 
