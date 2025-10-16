@@ -20,6 +20,8 @@ use zbus::fdo::ObjectManager;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Starting asusd daemon...");
+
     // console_subscriber::init();
     let mut logger = env_logger::Builder::new();
     logger
@@ -83,7 +85,10 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
     )
     .await
     {
-        Ok(registry) => registry,
+        Ok(registry) => {
+            info!("attribute on zbus initialized");
+            registry
+        },
         Err(e) => {
             error!("Failed to initialize firmware attributes over zbus: {e:?}");
             ArmouryAttributeRegistry::default()
@@ -92,8 +97,10 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
 
     match CtrlFanCurveZbus::new() {
         Ok(ctrl) => {
+            info!("FanCurves: found supported fancurves");
             let sig_ctx = CtrlFanCurveZbus::signal_context(&server)?;
             start_tasks(ctrl, &mut server, sig_ctx).await?;
+            info!("FanCurves: initialized");
         }
         Err(err) => {
             error!("FanCurves: {}", err);
@@ -102,8 +109,10 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
 
     match CtrlBacklight::new(config.clone()) {
         Ok(backlight) => {
+            info!("Backlight: found supported backlight");
             backlight.start_watch_primary().await?;
             backlight.add_to_server(&mut server).await;
+            info!("Backlight: initialized");
         }
         Err(err) => {
             error!("Backlight: {}", err);
@@ -121,8 +130,10 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
         armoury_registry,
     ) {
         Ok(ctrl) => {
+            info!("CtrlPlatform: initialized");
             let sig_ctx = CtrlPlatform::signal_context(&server)?;
             start_tasks(ctrl, &mut server, sig_ctx).await?;
+            info!("CtrlPlatform: tasks started");
         }
         Err(err) => {
             error!("CtrlPlatform: {}", err);
@@ -130,11 +141,13 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
     }
 
     let _ = DeviceManager::new(server.clone()).await?;
+    
+    info!("DeviceManager initialized");
 
     // Request dbus name after finishing initalizing all functions
     server.request_name(DBUS_NAME).await?;
 
-    info!("Startup success, begining dbus server loop");
+    info!("Startup success on dbus name {DBUS_NAME}: begining dbus server loop");
     loop {
         // This is just a blocker to idle and ensure the reator reacts
         server.executor().tick().await;
