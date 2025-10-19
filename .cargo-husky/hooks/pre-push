@@ -2,8 +2,8 @@
 
 set -e
 
-echo '+cargo +nightly fmt --all -- --check'
-cargo +nightly fmt --all -- --check
+echo '+cargo fmt --all -- --check'
+cargo fmt --all -- --check
 echo '+cargo clippy --all -- -D warnings'
 cargo clippy --all -- -D warnings
 echo '+cargo cranky'

@@ -84,7 +84,7 @@ A gui is now in the repo - ROG Control Center. At this time it is still a WIP, b
 
 Rust and cargo are required, they can be installed from [rustup.rs](https://rustup.rs/).
 
-Distro repos probably won't work (unless rustup is shipped like in the case of archlinux) as nightly is needed.
+Distro packaging should work with the stable toolchain. If your distro does not provide a recent Rust toolchain, install rustup and use the stable toolchain.
 
 **fedora:**
 
