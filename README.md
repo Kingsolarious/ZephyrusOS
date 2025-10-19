@@ -82,7 +82,9 @@ A gui is now in the repo - ROG Control Center. At this time it is still a WIP, b
 
 # BUILDING
 
-Rust and cargo are required, they can be installed from [rustup.rs](https://rustup.rs/) or from the distro repos if newer than 1.75.
+Rust and cargo are required, they can be installed from [rustup.rs](https://rustup.rs/).
+
+Distro repos probably won't work (unless rustup is shipped like in the case of archlinux) as nightly is needed.
 
 **fedora:**
 
