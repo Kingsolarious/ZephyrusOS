@@ -88,7 +88,7 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
         Ok(registry) => {
             info!("attribute on zbus initialized");
             registry
-        },
+        }
         Err(e) => {
             error!("Failed to initialize firmware attributes over zbus: {e:?}");
             ArmouryAttributeRegistry::default()
@@ -141,7 +141,7 @@ async fn start_daemon() -> Result<(), Box<dyn Error>> {
     }
 
     let _ = DeviceManager::new(server.clone()).await?;
-    
+
     info!("DeviceManager initialized");
 
     // Request dbus name after finishing initalizing all functions
