@@ -116,26 +116,26 @@ pub fn start_notifications(
 
                 if p == 0 && p != last_state {
                     let prog: Vec<&str> = bat.split_whitespace().collect();
-                    if prog.len() > 1 {
+                    if (!prog.is_empty()) && (!prog[0].is_empty()) {
                         let mut cmd = Command::new(prog[0]);
 
                         for arg in prog.iter().skip(1) {
                             cmd.arg(*arg);
                         }
                         cmd.spawn()
-                            .map_err(|e| error!("AC command error: {e:?}"))
+                            .map_err(|e| error!("Battery power command error: {e:?}"))
                             .ok();
                     }
                 } else if p != last_state {
                     let prog: Vec<&str> = ac.split_whitespace().collect();
-                    if prog.len() > 1 {
+                    if (!prog.is_empty()) && (!prog[0].is_empty()) {
                         let mut cmd = Command::new(prog[0]);
 
                         for arg in prog.iter().skip(1) {
                             cmd.arg(*arg);
                         }
                         cmd.spawn()
-                            .map_err(|e| error!("AC command error: {e:?}"))
+                            .map_err(|e| error!("AC power command error: {e:?}"))
                             .ok();
                     }
                 }

@@ -167,7 +167,7 @@ impl CtrlPlatform {
                 .map(|s| s.to_string())
                 .collect()
         };
-        if prog.len() > 1 {
+        if (!prog.is_empty()) && (!prog[0].is_empty()) {
             let mut cmd = Command::new(&prog[0]);
             for arg in prog.iter().skip(1) {
                 cmd.arg(arg);
