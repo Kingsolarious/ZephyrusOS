@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v6.1.16]
+
+### Changed
+- Expose more properties via rog-control-center
+- Add support for a few more models
+
 ## [v6.1.15]
 
 ### Changed
