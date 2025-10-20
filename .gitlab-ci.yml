@@ -31,8 +31,7 @@ format:
     - tags
   <<: *rust_cache
   script:
-    - echo "nightly" > rust-toolchain
-    - rustup component add rustfmt
+    - rustup component add rustfmt || true
     - cargo fmt --check
 
 check:
@@ -40,8 +39,8 @@ check:
     - tags
   <<: *rust_cache
   script:
-    - rustup component add clippy
-    - cargo check
+    - rustup component add clippy || true
+    - cargo check --locked --workspace
     # deny currently catches too much
     #- cargo install cargo-deny && cargo deny
     - cargo install cargo-cranky && cargo cranky
@@ -52,7 +51,7 @@ test:
   <<: *rust_cache
   script:
     - mkdir -p .git/hooks > /dev/null
-    - cargo test --all -- --test-threads=1
+    - cargo test --locked --all
 
 release:
   only:
@@ -60,7 +59,7 @@ release:
   <<: *rust_cache
   script:
     - cargo install cargo-vendor-filterer
-    - make && make vendor
+    - make FROZEN=1 && make vendor
   artifacts:
     paths:
       - vendor_asusctl*.tar.xz
@@ -72,7 +71,7 @@ pages:
     - tags
   <<: *rust_cache
   script:
-    - cargo doc --document-private-items --no-deps --workspace
+    - cargo doc --locked --document-private-items --no-deps --workspace
     - rm -rf public
     - mkdir public
     - cp -R target/doc/* public

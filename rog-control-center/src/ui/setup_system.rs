@@ -40,6 +40,8 @@ pub fn setup_system_page(ui: &MainWindow, _config: Arc<Mutex<Config>>) {
     ui.global::<SystemPageData>().set_platform_profile(-1);
     ui.global::<SystemPageData>().set_panel_overdrive(-1);
     ui.global::<SystemPageData>().set_boot_sound(-1);
+    ui.global::<SystemPageData>().set_screen_auto_brightness(-1);
+    ui.global::<SystemPageData>().set_mcu_powersave(-1);
     ui.global::<SystemPageData>().set_mini_led_mode(-1);
     ui.global::<SystemPageData>().set_screenpad_brightness(-1);
     ui.global::<SystemPageData>().set_ppt_pl1_spl(MINMAX);
@@ -308,6 +310,7 @@ pub fn setup_system_page_callbacks(ui: &MainWindow, _states: Arc<Mutex<Config>>)
 
         let platform_copy = platform.clone();
         if let Ok(mut value) = platform.platform_profile_choices().await {
+            debug!("Available platform profile choices: {:?}", value);
             handle
                 .upgrade_in_event_loop(move |handle| {
                     value.sort();
@@ -519,7 +522,7 @@ pub fn setup_system_page_callbacks(ui: &MainWindow, _states: Arc<Mutex<Config>>)
                 set_ui_callbacks!(handle,
                     SystemPageData(as i32),
                     platform_copy.platform_profile_on_battery(.into()),
-                    "Throttle policy on abttery set to {}",
+                    "Throttle policy on battery set to {}",
                     "Setting Throttle policy on battery failed"
                 );
                 set_ui_callbacks!(handle,
@@ -666,7 +669,16 @@ pub fn setup_system_page_callbacks(ui: &MainWindow, _states: Arc<Mutex<Config>>)
                                 setup_callback!(boot_sound, handle, attr, i32);
                                 setup_external!(boot_sound, i32, handle, attr, value)
                             }
-                            FirmwareAttribute::McuPowersave => {}
+                            FirmwareAttribute::ScreenAutoBrightness => {
+                                init_property!(screen_auto_brightness, handle, value, i32);
+                                setup_callback!(screen_auto_brightness, handle, attr, i32);
+                                setup_external!(screen_auto_brightness, i32, handle, attr, value)
+                            }
+                            FirmwareAttribute::McuPowersave => {
+                                init_property!(mcu_powersave, handle, value, i32);
+                                setup_callback!(mcu_powersave, handle, attr, i32);
+                                setup_external!(mcu_powersave, i32, handle, attr, value)
+                            }
                             FirmwareAttribute::PanelOverdrive => {
                                 init_property!(panel_overdrive, handle, value, i32);
                                 setup_callback!(panel_overdrive, handle, attr, i32);

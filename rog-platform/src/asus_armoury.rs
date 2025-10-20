@@ -272,10 +272,29 @@ macro_rules! define_attribute_getters {
 }
 
 define_attribute_getters!(
-    apu_mem, cores_performance, cores_efficiency, ppt_pl1_spl, ppt_pl2_sppt, ppt_apu_sppt,
-    ppt_platform_sppt, ppt_fppt, nv_dynamic_boost, nv_temp_target, dgpu_base_tgp, dgpu_tgp,
-    charge_mode, boot_sound, mcu_powersave, panel_od, panel_hd_mode, egpu_connected, egpu_enable,
-    dgpu_disable, gpu_mux_mode, mini_led_mode
+    apu_mem,
+    cores_performance,
+    cores_efficiency,
+    ppt_pl1_spl,
+    ppt_pl2_sppt,
+    ppt_apu_sppt,
+    ppt_platform_sppt,
+    ppt_fppt,
+    nv_dynamic_boost,
+    nv_temp_target,
+    dgpu_base_tgp,
+    dgpu_tgp,
+    charge_mode,
+    boot_sound,
+    mcu_powersave,
+    panel_od,
+    panel_hd_mode,
+    egpu_connected,
+    egpu_enable,
+    dgpu_disable,
+    gpu_mux_mode,
+    mini_led_mode,
+    screen_auto_brightness
 );
 
 /// CamelCase names of the properties. Intended for use with DBUS
@@ -322,6 +341,7 @@ pub enum FirmwareAttribute {
     PendingReboot = 23,
     PptEnabled = 24,
     None = 25,
+    ScreenAutoBrightness = 26,
 }
 
 impl FirmwareAttribute {
@@ -375,6 +395,7 @@ impl From<&str> for FirmwareAttribute {
             "gpu_mux_mode" => Self::GpuMuxMode,
             "mini_led_mode" => Self::MiniLedMode,
             "pending_reboot" => Self::PendingReboot,
+            "screen_auto_brightness" => Self::ScreenAutoBrightness,
             _ => {
                 error!("Invalid firmware attribute: {}", s);
                 Self::None
@@ -411,6 +432,7 @@ impl From<FirmwareAttribute> for &str {
             FirmwareAttribute::GpuMuxMode => "gpu_mux_mode",
             FirmwareAttribute::MiniLedMode => "mini_led_mode",
             FirmwareAttribute::PendingReboot => "pending_reboot",
+            FirmwareAttribute::ScreenAutoBrightness => "screen_auto_brightness",
             FirmwareAttribute::None => "none",
         }
     }

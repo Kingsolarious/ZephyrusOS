@@ -37,6 +37,15 @@ ifeq ($(X11),1)
 	ARGS += --features "rog-control-center/x11"
 endif
 
+# Always use the versions in Cargo.lock by default
+ARGS += --locked
+
+# Allow optionally freezing the build to avoid any network access and enforce Cargo.lock strictly
+FROZEN ?= 0
+ifeq ($(FROZEN),1)
+	ARGS += --frozen
+endif
+
 VENDORED ?= 0
 ifeq ($(VENDORED),1)
 	ARGS += --frozen

@@ -231,6 +231,8 @@ impl AuraConfig {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::{Mutex, MutexGuard, OnceLock};
+
     use rog_aura::keyboard::AuraPowerState;
     use rog_aura::{
         AuraEffect, AuraModeNum, AuraZone, Colour, Direction, LedBrightness, PowerZones, Speed,
@@ -238,8 +240,20 @@ mod tests {
 
     use super::AuraConfig;
 
+    // Global mutex to serialize tests that rely on process-wide environment
+    // variables
+    static TEST_MUTEX: OnceLock<Mutex<()>> = OnceLock::new();
+
+    fn test_lock() -> MutexGuard<'static, ()> {
+        TEST_MUTEX
+            .get_or_init(|| Mutex::new(()))
+            .lock()
+            .expect("TEST_MUTEX poisoned")
+    }
+
     #[test]
     fn set_multizone_4key_config() {
+        let _guard = test_lock();
         std::env::set_var("BOARD_NAME", "");
         let mut config = AuraConfig::new("19b6");
 
@@ -319,6 +333,7 @@ mod tests {
 
     #[test]
     fn set_multizone_multimode_config() {
+        let _guard = test_lock();
         std::env::set_var("BOARD_NAME", "");
         let mut config = AuraConfig::new("19b6");
 
@@ -367,6 +382,7 @@ mod tests {
 
     #[test]
     fn verify_0x1866_g531i() {
+        let _guard = test_lock();
         std::env::set_var("BOARD_NAME", "G513I");
         let mut config = AuraConfig::new("1866");
 
@@ -392,6 +408,7 @@ mod tests {
 
     #[test]
     fn verify_0x19b6_g634j() {
+        let _guard = test_lock();
         std::env::set_var("BOARD_NAME", "G634J");
         let mut config = AuraConfig::new("19b6");
 
