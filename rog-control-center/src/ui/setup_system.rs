@@ -309,6 +309,7 @@ pub fn setup_system_page_callbacks(ui: &MainWindow, _states: Arc<Mutex<Config>>)
 
         let platform_copy = platform.clone();
         if let Ok(mut value) = platform.platform_profile_choices().await {
+            debug!("Available platform profile choices: {:?}", value);
             handle
                 .upgrade_in_event_loop(move |handle| {
                     value.sort();
