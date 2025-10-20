@@ -41,6 +41,7 @@ pub fn setup_system_page(ui: &MainWindow, _config: Arc<Mutex<Config>>) {
     ui.global::<SystemPageData>().set_panel_overdrive(-1);
     ui.global::<SystemPageData>().set_boot_sound(-1);
     ui.global::<SystemPageData>().set_screen_auto_brightness(-1);
+    ui.global::<SystemPageData>().set_mcu_powersave(-1);
     ui.global::<SystemPageData>().set_mini_led_mode(-1);
     ui.global::<SystemPageData>().set_screenpad_brightness(-1);
     ui.global::<SystemPageData>().set_ppt_pl1_spl(MINMAX);
@@ -673,7 +674,11 @@ pub fn setup_system_page_callbacks(ui: &MainWindow, _states: Arc<Mutex<Config>>)
                                 setup_callback!(screen_auto_brightness, handle, attr, i32);
                                 setup_external!(screen_auto_brightness, i32, handle, attr, value)
                             }
-                            FirmwareAttribute::McuPowersave => {}
+                            FirmwareAttribute::McuPowersave => {
+                                init_property!(mcu_powersave, handle, value, i32);
+                                setup_callback!(mcu_powersave, handle, attr, i32);
+                                setup_external!(mcu_powersave, i32, handle, attr, value)
+                            }
                             FirmwareAttribute::PanelOverdrive => {
                                 init_property!(panel_overdrive, handle, value, i32);
                                 setup_callback!(panel_overdrive, handle, attr, i32);
