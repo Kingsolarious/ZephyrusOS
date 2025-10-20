@@ -520,7 +520,7 @@ pub fn setup_system_page_callbacks(ui: &MainWindow, _states: Arc<Mutex<Config>>)
                 set_ui_callbacks!(handle,
                     SystemPageData(as i32),
                     platform_copy.platform_profile_on_battery(.into()),
-                    "Throttle policy on abttery set to {}",
+                    "Throttle policy on battery set to {}",
                     "Setting Throttle policy on battery failed"
                 );
                 set_ui_callbacks!(handle,
