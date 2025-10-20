@@ -275,11 +275,16 @@ impl std::str::FromStr for PlatformProfile {
     type Err = PlatformError;
 
     fn from_str(profile: &str) -> Result<Self> {
-        match profile.to_ascii_lowercase().trim() {
+        match profile
+            .to_ascii_lowercase()
+            .trim()
+            .replace(|c| !char::is_alphabetic(c), "")
+            .as_str()
+        {
             "balanced" => Ok(PlatformProfile::Balanced),
             "performance" => Ok(PlatformProfile::Performance),
             "quiet" => Ok(PlatformProfile::Quiet),
-            "low-power" => Ok(PlatformProfile::LowPower),
+            "lowpower" => Ok(PlatformProfile::LowPower),
             "custom" => Ok(PlatformProfile::Custom),
             _ => Err(PlatformError::NotSupported),
         }
@@ -288,11 +293,16 @@ impl std::str::FromStr for PlatformProfile {
 
 impl From<&str> for PlatformProfile {
     fn from(profile: &str) -> Self {
-        match profile.to_ascii_lowercase().trim() {
+        match profile
+            .to_ascii_lowercase()
+            .trim()
+            .replace(|c| !char::is_alphabetic(c), "")
+            .as_str()
+        {
             "balanced" => PlatformProfile::Balanced,
             "performance" => PlatformProfile::Performance,
             "quiet" => PlatformProfile::Quiet,
-            "low-power" => PlatformProfile::LowPower,
+            "lowpower" => PlatformProfile::LowPower,
             "custom" => PlatformProfile::Custom,
             _ => {
                 warn!("{profile} is unknown, using ThrottlePolicy::Balanced");
