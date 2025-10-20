@@ -51,6 +51,8 @@ export global SystemPageData {
     callback cb_panel_overdrive(int);
     in-out property <int> boot_sound;
     callback cb_boot_sound(int);
+    in-out property <int> screen_auto_brightness;
+    callback cb_screen_auto_brightness(int);
     in-out property <int> mini_led_mode;
     callback cb_mini_led_mode(int);
 
@@ -298,6 +300,14 @@ export component PageSystem inherits Rectangle {
                     checked_int <=> SystemPageData.boot_sound;
                     toggled => {
                         SystemPageData.cb_boot_sound(SystemPageData.boot_sound)
+                    }
+                }
+
+                if SystemPageData.screen_auto_brightness != -1: SystemToggleInt {
+                    text: @tr("Screen Auto Brightness");
+                    checked_int <=> SystemPageData.screen_auto_brightness;
+                    toggled => {
+                        SystemPageData.cb_screen_auto_brightness(SystemPageData.screen_auto_brightness)
                     }
                 }
             }
