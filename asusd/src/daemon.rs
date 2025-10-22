@@ -11,11 +11,11 @@ use asusd::ctrl_fancurves::CtrlFanCurveZbus;
 use asusd::ctrl_platform::CtrlPlatform;
 use asusd::{print_board_info, start_tasks, CtrlTask, ZbusRun, DBUS_NAME};
 use config_traits::{StdConfig, StdConfigLoad2};
-use futures_util::lock::Mutex;
 use log::{error, info};
 use rog_platform::asus_armoury::FirmwareAttributes;
 use rog_platform::platform::RogPlatform;
 use rog_platform::power::AsusPower;
+use tokio::sync::Mutex;
 use zbus::fdo::ObjectManager;
 
 #[tokio::main]

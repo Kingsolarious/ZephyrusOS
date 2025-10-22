@@ -3,12 +3,12 @@ use std::process::Command;
 use std::sync::Arc;
 
 use config_traits::StdConfig;
-use futures_util::lock::Mutex;
 use log::{debug, error, info, warn};
 use rog_platform::asus_armoury::{AttrValue, FirmwareAttribute, FirmwareAttributes};
 use rog_platform::cpu::{CPUControl, CPUGovernor, CPUEPP};
 use rog_platform::platform::{PlatformProfile, Properties, RogPlatform};
 use rog_platform::power::AsusPower;
+use tokio::sync::Mutex;
 use zbus::fdo::Error as FdoErr;
 use zbus::object_server::SignalEmitter;
 use zbus::{interface, Connection};
