@@ -113,7 +113,7 @@ install-data-asusd_user:
 
 .PHONY: install-data-asusd install-data-asusd_user
 
-install-data: install-data-asusd install-data-rog_gui
+install-data: install-data-asusd install-data-asusd_user install-data-rog_gui
 
 install: install-program install-data
 	$(INSTALL_DATA) "./LICENSE" "$(DESTDIR)$(datarootdir)/asusctl/LICENSE"
