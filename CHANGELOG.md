@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v6.1.17]
+
+### Changed
+- Fix Makefile
+- Share a single HID device
+
 ## [v6.1.16]
 
 ### Changed
