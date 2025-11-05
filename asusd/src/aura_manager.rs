@@ -4,15 +4,16 @@
 // - Add it to Zbus server
 // - If udev sees device removed then remove the zbus path
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use dmi_id::DMIID;
 use futures_lite::future::block_on;
-use futures_util::lock::Mutex;
 use log::{debug, error, info, warn};
 use mio::{Events, Interest, Poll, Token};
 use rog_platform::error::PlatformError;
 use rog_platform::hid_raw::HidRaw;
+use tokio::sync::Mutex;
 use udev::{Device, MonitorBuilder};
 use zbus::zvariant::{ObjectPath, OwnedObjectPath};
 use zbus::Connection;
@@ -92,16 +93,38 @@ fn dev_prop_matches(dev: &Device, prop: &str, value: &str) -> bool {
 pub struct AsusDevice {
     device: DeviceHandle,
     dbus_path: OwnedObjectPath,
+    hid_key: Option<String>,
 }
 
 pub struct DeviceManager {
     _dbus_connection: Connection,
+    _hid_handles: Arc<Mutex<HashMap<String, Arc<Mutex<HidRaw>>>>>,
 }
 
 impl DeviceManager {
+    async fn get_or_create_hid_handle(
+        handles: &Arc<Mutex<HashMap<String, Arc<Mutex<HidRaw>>>>>,
+        endpoint: &Device,
+    ) -> Result<(Arc<Mutex<HidRaw>>, String), RogError> {
+        let dev_node = endpoint
+            .devnode()
+            .ok_or_else(|| RogError::MissingFunction("hidraw devnode missing".to_string()))?;
+        let key = dev_node.to_string_lossy().to_string();
+
+        if let Some(existing) = handles.lock().await.get(&key).cloned() {
+            return Ok((existing, key));
+        }
+
+        let hidraw = HidRaw::from_device(endpoint.clone())?;
+        let handle = Arc::new(Mutex::new(hidraw));
+        handles.lock().await.insert(key.clone(), handle.clone());
+        Ok((handle, key))
+    }
+
     async fn init_hid_devices(
         connection: &Connection,
         device: Device,
+        handles: Arc<Mutex<HashMap<String, Arc<Mutex<HidRaw>>>>>,
     ) -> Result<Vec<AsusDevice>, RogError> {
         let mut devices = Vec::new();
         if let Some(usb_device) = device.parent_with_subsystem_devtype("usb", "usb_device")? {
@@ -116,9 +139,10 @@ impl DeviceManager {
                     // 1. Generate an interface path
                     // 2. Create the device
                     // Use the top-level endpoint, not the parent
-                    if let Ok(hidraw) = HidRaw::from_device(device) {
+                    if let Ok((dev, hid_key)) =
+                        Self::get_or_create_hid_handle(&handles, &device).await
+                    {
                         debug!("Testing device {usb_id:?}");
-                        let dev = Arc::new(Mutex::new(hidraw));
                         // SLASH DEVICE
                         if let Ok(dev_type) = DeviceHandle::new_slash_hid(
                             dev.clone(),
@@ -134,6 +158,7 @@ impl DeviceManager {
                                 devices.push(AsusDevice {
                                     device: dev_type,
                                     dbus_path: path,
+                                    hid_key: Some(hid_key.clone()),
                                 });
                             }
                         }
@@ -152,6 +177,7 @@ impl DeviceManager {
                                 devices.push(AsusDevice {
                                     device: dev_type,
                                     dbus_path: path,
+                                    hid_key: Some(hid_key.clone()),
                                 });
                             }
                         }
@@ -170,9 +196,12 @@ impl DeviceManager {
                                 devices.push(AsusDevice {
                                     device: dev_type,
                                     dbus_path: path,
+                                    hid_key: Some(hid_key),
                                 });
                             }
                         }
+                    } else {
+                        warn!("Failed to initialise shared hid handle for {usb_id:?}");
                     }
                 }
             }
@@ -181,7 +210,10 @@ impl DeviceManager {
     }
 
     /// To be called on daemon startup
-    async fn init_all_hid(connection: &Connection) -> Result<Vec<AsusDevice>, RogError> {
+    async fn init_all_hid(
+        connection: &Connection,
+        handles: Arc<Mutex<HashMap<String, Arc<Mutex<HidRaw>>>>>,
+    ) -> Result<Vec<AsusDevice>, RogError> {
         // track and ensure we use only one hidraw per prod_id
         // let mut interfaces = HashSet::new();
         let mut devices: Vec<AsusDevice> = Vec::new();
@@ -200,7 +232,7 @@ impl DeviceManager {
             .scan_devices()
             .map_err(|e| PlatformError::IoPath("enumerator".to_owned(), e))?
         {
-            devices.append(&mut Self::init_hid_devices(connection, device).await?);
+            devices.append(&mut Self::init_hid_devices(connection, device, handles.clone()).await?);
         }
 
         Ok(devices)
@@ -228,6 +260,7 @@ impl DeviceManager {
                         return Some(AsusDevice {
                             device: dev_type,
                             dbus_path: path,
+                            hid_key: None,
                         });
                     }
                 }
@@ -275,10 +308,13 @@ impl DeviceManager {
         Ok(devices)
     }
 
-    pub async fn find_all_devices(connection: &Connection) -> Vec<AsusDevice> {
+    pub async fn find_all_devices(
+        connection: &Connection,
+        handles: Arc<Mutex<HashMap<String, Arc<Mutex<HidRaw>>>>>,
+    ) -> Vec<AsusDevice> {
         let mut devices: Vec<AsusDevice> = Vec::new();
         // HID first, always
-        if let Ok(devs) = &mut Self::init_all_hid(connection).await {
+        if let Ok(devs) = &mut Self::init_all_hid(connection, handles.clone()).await {
             devices.append(devs);
         }
         // USB after, need to check if HID picked something up and if so, skip it
@@ -306,6 +342,7 @@ impl DeviceManager {
                     devices.push(AsusDevice {
                         device: dev_type,
                         dbus_path: path,
+                        hid_key: None,
                     });
                 }
             } else {
@@ -328,6 +365,7 @@ impl DeviceManager {
                         devices.push(AsusDevice {
                             device: dev_type,
                             dbus_path: path,
+                            hid_key: None,
                         });
                     }
                 }
@@ -355,6 +393,7 @@ impl DeviceManager {
                         devices.push(AsusDevice {
                             device: dev_type,
                             dbus_path: path,
+                            hid_key: None,
                         });
                     }
                 }
@@ -370,16 +409,19 @@ impl DeviceManager {
 
     pub async fn new(connection: Connection) -> Result<Self, RogError> {
         let conn_copy = connection.clone();
-        let devices = Self::find_all_devices(&conn_copy).await;
+        let hid_handles = Arc::new(Mutex::new(HashMap::new()));
+        let devices = Self::find_all_devices(&conn_copy, hid_handles.clone()).await;
         info!("Found {} valid devices on startup", devices.len());
         let devices = Arc::new(Mutex::new(devices));
         let manager = Self {
             _dbus_connection: connection,
+            _hid_handles: hid_handles.clone(),
         };
 
         // TODO: The /sysfs/ LEDs don't cause events, so they need to be manually
         // checked for and added
 
+        let hid_handles_thread = hid_handles.clone();
         std::thread::spawn(move || {
             let mut monitor = MonitorBuilder::new()?.listen()?;
             let mut poll = Poll::new()?;
@@ -408,6 +450,7 @@ impl DeviceManager {
 
                     let devices = devices.clone();
                     let conn_copy = conn_copy.clone();
+                    let hid_handles = hid_handles_thread.clone();
                     block_on(async move {
                         // SCSCI devs
                         if subsys == "block" {
@@ -483,6 +526,7 @@ impl DeviceManager {
                                         // Iter in reverse so as to not screw up indexing
                                         for index in removals.iter().rev() {
                                             let dev = devices.lock().await.remove(*index);
+                                            let hid_key = dev.hid_key.clone();
                                             let path = path.clone();
                                             let res = match dev.device {
                                                 DeviceHandle::Aura(_) => {
@@ -512,14 +556,20 @@ impl DeviceManager {
                                                 _ => todo!(),
                                             };
                                             info!("AuraManager removed: {path:?}, {res}");
+                                            if let Some(key) = hid_key {
+                                                hid_handles.lock().await.remove(&key);
+                                            }
                                         }
                                     }
                                 } else if action == "add" {
                                     let evdev = event.device();
-                                    if let Ok(mut new_devs) =
-                                        Self::init_hid_devices(&conn_copy, evdev)
-                                            .await
-                                            .map_err(|e| error!("Couldn't add new device: {e:?}"))
+                                    if let Ok(mut new_devs) = Self::init_hid_devices(
+                                        &conn_copy,
+                                        evdev,
+                                        hid_handles.clone(),
+                                    )
+                                    .await
+                                    .map_err(|e| error!("Couldn't add new device: {e:?}"))
                                     {
                                         devices.lock().await.append(&mut new_devs);
                                     }

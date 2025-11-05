@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
 use config_traits::StdConfig;
-use futures_util::lock::Mutex;
 use log::{debug, error, info};
 use rog_platform::asus_armoury::{AttrValue, Attribute, FirmwareAttribute, FirmwareAttributes};
 use rog_platform::platform::{PlatformProfile, RogPlatform};
 use rog_platform::power::AsusPower;
 use serde::{Deserialize, Serialize};
+use tokio::sync::Mutex;
 use zbus::object_server::SignalEmitter;
 use zbus::zvariant::{ObjectPath, OwnedObjectPath, OwnedValue, Type, Value};
 use zbus::{fdo, interface, Connection};

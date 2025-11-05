@@ -267,18 +267,24 @@ mod tests {
     fn check_cpu() {
         let cpu = CPUControl::new().unwrap();
         assert_eq!(cpu.get_governor().unwrap(), CPUGovernor::Powersave);
-        assert_eq!(cpu.get_available_governors().unwrap(), vec![
-            CPUGovernor::Performance,
-            CPUGovernor::Powersave
-        ]);
+        assert_eq!(
+            cpu.get_available_governors().unwrap(),
+            vec![
+                CPUGovernor::Performance,
+                CPUGovernor::Powersave
+            ]
+        );
 
         assert_eq!(cpu.get_epp().unwrap(), CPUEPP::BalancePower);
-        assert_eq!(cpu.get_available_epp().unwrap(), vec![
-            CPUEPP::Default,
-            CPUEPP::Performance,
-            CPUEPP::BalancePerformance,
-            CPUEPP::BalancePower,
-            CPUEPP::Power,
-        ]);
+        assert_eq!(
+            cpu.get_available_epp().unwrap(),
+            vec![
+                CPUEPP::Default,
+                CPUEPP::Performance,
+                CPUEPP::BalancePerformance,
+                CPUEPP::BalancePower,
+                CPUEPP::Power,
+            ]
+        );
     }
 }

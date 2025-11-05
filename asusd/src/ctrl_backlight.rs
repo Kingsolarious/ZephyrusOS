@@ -2,9 +2,9 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use config_traits::StdConfig;
-use futures_util::lock::Mutex;
 use log::{info, warn};
 use rog_platform::backlight::{Backlight, BacklightType};
+use tokio::sync::Mutex;
 use zbus::fdo::Error as FdoErr;
 use zbus::object_server::SignalEmitter;
 use zbus::{interface, Connection};
@@ -13,7 +13,7 @@ use crate::config::Config;
 use crate::error::RogError;
 use crate::ASUS_ZBUS_PATH;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct CtrlBacklight {
     backlights: Vec<Backlight>,
     config: Arc<Mutex<Config>>,

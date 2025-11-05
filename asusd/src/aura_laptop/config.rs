@@ -309,26 +309,38 @@ mod tests {
         let res = config.multizone.unwrap();
         let sta = res.get(&AuraModeNum::Static).unwrap();
         assert_eq!(sta.len(), 4);
-        assert_eq!(sta[0].colour1, Colour {
-            r: 0xff,
-            g: 0x00,
-            b: 0xff
-        });
-        assert_eq!(sta[1].colour1, Colour {
-            r: 0x00,
-            g: 0xff,
-            b: 0xff
-        });
-        assert_eq!(sta[2].colour1, Colour {
-            r: 0xff,
-            g: 0xff,
-            b: 0x00
-        });
-        assert_eq!(sta[3].colour1, Colour {
-            r: 0x00,
-            g: 0xff,
-            b: 0x00
-        });
+        assert_eq!(
+            sta[0].colour1,
+            Colour {
+                r: 0xff,
+                g: 0x00,
+                b: 0xff
+            }
+        );
+        assert_eq!(
+            sta[1].colour1,
+            Colour {
+                r: 0x00,
+                g: 0xff,
+                b: 0xff
+            }
+        );
+        assert_eq!(
+            sta[2].colour1,
+            Colour {
+                r: 0xff,
+                g: 0xff,
+                b: 0x00
+            }
+        );
+        assert_eq!(
+            sta[3].colour1,
+            Colour {
+                r: 0x00,
+                g: 0xff,
+                b: 0x00
+            }
+        );
     }
 
     #[test]
@@ -388,22 +400,28 @@ mod tests {
 
         assert_eq!(config.brightness, LedBrightness::Med);
         assert_eq!(config.builtins.len(), 5);
-        assert_eq!(config.builtins.first_entry().unwrap().get(), &AuraEffect {
-            mode: AuraModeNum::Static,
-            zone: AuraZone::None,
-            colour1: Colour { r: 166, g: 0, b: 0 },
-            colour2: Colour { r: 0, g: 0, b: 0 },
-            speed: Speed::Med,
-            direction: Direction::Right
-        });
+        assert_eq!(
+            config.builtins.first_entry().unwrap().get(),
+            &AuraEffect {
+                mode: AuraModeNum::Static,
+                zone: AuraZone::None,
+                colour1: Colour { r: 166, g: 0, b: 0 },
+                colour2: Colour { r: 0, g: 0, b: 0 },
+                speed: Speed::Med,
+                direction: Direction::Right
+            }
+        );
         assert_eq!(config.enabled.states.len(), 1);
-        assert_eq!(config.enabled.states[0], AuraPowerState {
-            zone: PowerZones::KeyboardAndLightbar,
-            boot: true,
-            awake: true,
-            sleep: true,
-            shutdown: true
-        });
+        assert_eq!(
+            config.enabled.states[0],
+            AuraPowerState {
+                zone: PowerZones::KeyboardAndLightbar,
+                boot: true,
+                awake: true,
+                sleep: true,
+                shutdown: true
+            }
+        );
     }
 
     #[test]
@@ -414,21 +432,27 @@ mod tests {
 
         assert_eq!(config.brightness, LedBrightness::Med);
         assert_eq!(config.builtins.len(), 12);
-        assert_eq!(config.builtins.first_entry().unwrap().get(), &AuraEffect {
-            mode: AuraModeNum::Static,
-            zone: AuraZone::None,
-            colour1: Colour { r: 166, g: 0, b: 0 },
-            colour2: Colour { r: 0, g: 0, b: 0 },
-            speed: Speed::Med,
-            direction: Direction::Right
-        });
+        assert_eq!(
+            config.builtins.first_entry().unwrap().get(),
+            &AuraEffect {
+                mode: AuraModeNum::Static,
+                zone: AuraZone::None,
+                colour1: Colour { r: 166, g: 0, b: 0 },
+                colour2: Colour { r: 0, g: 0, b: 0 },
+                speed: Speed::Med,
+                direction: Direction::Right
+            }
+        );
         assert_eq!(config.enabled.states.len(), 4);
-        assert_eq!(config.enabled.states[0], AuraPowerState {
-            zone: PowerZones::Keyboard,
-            boot: true,
-            awake: true,
-            sleep: true,
-            shutdown: true
-        });
+        assert_eq!(
+            config.enabled.states[0],
+            AuraPowerState {
+                zone: PowerZones::Keyboard,
+                boot: true,
+                awake: true,
+                sleep: true,
+                shutdown: true
+            }
+        );
     }
 }

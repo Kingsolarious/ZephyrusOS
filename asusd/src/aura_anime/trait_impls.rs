@@ -85,7 +85,7 @@ impl AniMeZbus {
     /// Set base brightness level
     #[zbus(property)]
     async fn brightness(&self) -> Brightness {
-        if let Some(config) = self.0.config.try_lock() {
+        if let Ok(config) = self.0.config.try_lock() {
             return config.display_brightness;
         }
         Brightness::Off
@@ -117,7 +117,7 @@ impl AniMeZbus {
 
     #[zbus(property)]
     async fn builtins_enabled(&self) -> bool {
-        if let Some(config) = self.0.config.try_lock() {
+        if let Ok(config) = self.0.config.try_lock() {
             return config.builtin_anims_enabled;
         }
         false
@@ -162,7 +162,7 @@ impl AniMeZbus {
 
     #[zbus(property)]
     async fn builtin_animations(&self) -> Animations {
-        if let Some(config) = self.0.config.try_lock() {
+        if let Ok(config) = self.0.config.try_lock() {
             return config.builtin_anims;
         }
         Animations::default()
@@ -195,7 +195,7 @@ impl AniMeZbus {
 
     #[zbus(property)]
     async fn enable_display(&self) -> bool {
-        if let Some(config) = self.0.config.try_lock() {
+        if let Ok(config) = self.0.config.try_lock() {
             return config.display_enabled;
         }
         false
@@ -218,7 +218,7 @@ impl AniMeZbus {
 
     #[zbus(property)]
     async fn off_when_unplugged(&self) -> bool {
-        if let Some(config) = self.0.config.try_lock() {
+        if let Ok(config) = self.0.config.try_lock() {
             return config.off_when_unplugged;
         }
         false
@@ -245,7 +245,7 @@ impl AniMeZbus {
 
     #[zbus(property)]
     async fn off_when_suspended(&self) -> bool {
-        if let Some(config) = self.0.config.try_lock() {
+        if let Ok(config) = self.0.config.try_lock() {
             return config.off_when_suspended;
         }
         false
@@ -261,7 +261,7 @@ impl AniMeZbus {
 
     #[zbus(property)]
     async fn off_when_lid_closed(&self) -> bool {
-        if let Some(config) = self.0.config.try_lock() {
+        if let Ok(config) = self.0.config.try_lock() {
             return config.off_when_lid_closed;
         }
         false
