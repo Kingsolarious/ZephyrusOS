@@ -92,7 +92,9 @@ EOF
 %build
 export RUSTFLAGS="%{rustflags}"
 %if %{defined fedora}
-%cargo_build
+%# Use an explicit cargo invocation for Fedora to avoid the macro adding `--locked`.
+%# `--locked` breaks Fedora builds because the lockfile may not be appropriate for the distro buildroot.
+/usr/bin/cargo auditable build --release
 %else
 /usr/bin/cargo auditable build --release
 %endif
