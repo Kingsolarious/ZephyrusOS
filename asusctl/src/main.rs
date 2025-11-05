@@ -979,7 +979,7 @@ fn handle_throttle_profile(
         return Err(ProfileError::NotSupported.into());
     }
 
-    if !cmd.next && !cmd.list && cmd.profile_set.is_none() && !cmd.profile_get {
+    if !cmd.next && !cmd.list && cmd.profile_set.is_none() && !cmd.profile_get && cmd.profile_set_ac.is_none() && cmd.profile_set_bat.is_none() {
         if !cmd.help {
             println!("Missing arg or command\n");
         }
@@ -999,6 +999,10 @@ fn handle_throttle_profile(
         proxy.set_platform_profile(PlatformProfile::next(current, &choices))?;
     } else if let Some(profile) = cmd.profile_set {
         proxy.set_platform_profile(profile)?;
+    } else if let Some(profile) = cmd.profile_set_ac {
+        proxy.set_platform_profile_on_ac(profile)?;
+    } else if let Some(profile) = cmd.profile_set_bat {
+        proxy.set_platform_profile_on_battery(profile)?;
     }
 
     if cmd.list {
@@ -1009,6 +1013,8 @@ fn handle_throttle_profile(
 
     if cmd.profile_get {
         println!("Active profile is {current:?}");
+        println!("Profile on AC is {:?}", proxy.platform_profile_on_ac()?);
+        println!("Profile on Battery is {:?}", proxy.platform_profile_on_battery()?);
     }
 
     Ok(())
