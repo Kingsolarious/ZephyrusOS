@@ -78,7 +78,11 @@ pub struct ProfileCommand {
     #[options(short = "a", meta = "", help = "set the profile to use on AC power")]
     pub profile_set_ac: Option<PlatformProfile>,
 
-    #[options(short = "b", meta = "", help = "set the profile to use on battery power")]
+    #[options(
+        short = "b",
+        meta = "",
+        help = "set the profile to use on battery power"
+    )]
     pub profile_set_bat: Option<PlatformProfile>,
 }
 

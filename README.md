@@ -46,13 +46,13 @@ See the [rog-aura readme](./rog-aura/README.md) for more details.
 Most ASUS gaming laptops that have a USB keyboard. If `lsusb` shows something similar
 to this:
 
-```
+```plain
 Bus 001 Device 002: ID 0b05:1866 ASUSTek Computer, Inc. N-KEY Device
 ```
 
 or
 
-```
+```plain
 Bus 003 Device 002: ID 0b05:19b6 ASUSTek Computer, Inc. [unknown]
 ```
 
@@ -74,13 +74,13 @@ The list is a bit outdated as many features have been enabled in the Linux kerne
 - [x] Toggle bios setting for boot/POST sound
 - [x] Toggle GPU MUX (g-sync, or called MUX on 2022+ laptops)
 
-# GUI
+## GUI
 
 A gui is now in the repo - ROG Control Center. At this time it is still a WIP, but it has almost all features in place already.
 
 **NOTE**: Xorg is not supported.
 
-# BUILDING
+## BUILDING
 
 Rust and cargo are required, they can be installed from [rustup.rs](https://rustup.rs/).
 
@@ -88,27 +88,33 @@ Distro packaging should work with the stable toolchain. If your distro does not 
 
 **fedora:**
 
-    dnf install cmake clang-devel  libxkbcommon-devel systemd-devel expat-devel pcre2-devel libzstd-devel gtk3-devel
-    make
-    sudo make install
+```sh
+dnf install cmake clang-devel  libxkbcommon-devel systemd-devel expat-devel pcre2-devel libzstd-devel gtk3-devel
+make
+sudo make install
+```
 
 **openSUSE:**
 
 Works with KDE Plasma (without GTK packages)
 
-    zypper in -t pattern devel_basis
-    zypper in rustup make cmake clang-devel libxkbcommon-devel systemd-devel expat-devel pcre2-devel libzstd-devel gtk3-devel
-    make
-    sudo make install
+```sh
+zypper in -t pattern devel_basis
+zypper in rustup make cmake clang-devel libxkbcommon-devel systemd-devel expat-devel pcre2-devel libzstd-devel gtk3-devel
+make
+sudo make install
+```
 
 **Debian(unsuported):**
 
 officially unsuported,but you can still try and test it by yourself(some features may not be available).
 
-    sudo apt install libclang-dev libudev-dev libfontconfig-dev build-essential cmake libxkbcommon-dev
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    make
-    sudo make install
+```sh
+sudo apt install libclang-dev libudev-dev libfontconfig-dev build-essential cmake libxkbcommon-dev
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+make
+sudo make install
+```
 
 **Ubuntu, Popos (unsuported):**
 
@@ -135,15 +141,15 @@ You may also need to activate the service for debian install. If running Pop!\_O
 
 If you are upgrading from a previous installed version, you will need to restart the service or reboot.
 
-```
-$ systemctl daemon-reload && systemctl restart asusd
+```sh
+systemctl daemon-reload && systemctl restart asusd
 ```
 
 ## Uninstalling
 
 Run `sudo make uninstall` in the source repo, and remove `/etc/asusd/`.
 
-# Contributing
+## Contributing
 
 See `CONTRIBUTING.md`. Additionally, also do `cargo clean` and `cargo test` on first checkout to ensure the commit hooks are used (via `cargo-husky`).
 
@@ -151,17 +157,17 @@ Generation of the bindings with `make bindings` requires `typeshare` to be insta
 
 Dbus introsepction XML requires with `make introspection` requires `anime_sim` to be running before starting `asusd`.
 
-# OTHER
+## OTHER
 
-## AniMe Matrix simulator
+### AniMe Matrix simulator
 
 A simulator using SDL2 can be built using `cargo build --package rog_simulators` and run with `./target/debug/anime_sim`. Once started `asusd` will need restarting to pick it up. If running this sim on a laptop _with_ the display, the simulated display will be used instead of the physical display.
 
-## Supporting more laptops
+### Supporting more laptops
 
 Please file a support request.
 
-# License & Trademarks
+## License & Trademarks
 
 Mozilla Public License 2 (MPL-2.0)
 
