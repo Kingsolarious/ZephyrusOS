@@ -203,11 +203,19 @@ pub fn start_notifications(
         })?;
 
         let proxy_copy = proxy.clone();
+        let enabled_notifications_copy_action = enabled_notifications_copy.clone();
         let mut p = proxy.receive_notify_action().await?;
         tokio::spawn(async move {
             info!("Started zbus signal thread: receive_notify_action");
             while let Some(e) = p.next().await {
                 if let Ok(out) = e.args() {
+                    // Respect user notification settings for gpu actions
+                    if let Ok(cfg) = enabled_notifications_copy_action.lock() {
+                        if !cfg.notifications.enabled || !cfg.notifications.receive_notify_gfx {
+                            continue;
+                        }
+                    }
+
                     let action = out.action();
                     let mode = convert_gfx_mode(proxy.mode().await.unwrap_or_default());
                     match action {
@@ -309,7 +317,9 @@ fn do_gfx_action_notif(message: &str, action: GfxUserAction, mode: GpuMode) -> R
         //.hint(Hint::Resident(true))
         .hint(Hint::Category("device".into()))
         .urgency(Urgency::Critical)
-        .timeout(Timeout::Never)
+        // For user-action notifications keep them visible if they require interaction
+        // but for non-interactive actions we prefer they auto-hide like other notifs.
+        .timeout(Timeout::Milliseconds(6000))
         .icon("dialog-warning")
         .hint(Hint::Transient(true));
 
