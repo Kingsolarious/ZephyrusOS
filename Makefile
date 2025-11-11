@@ -59,10 +59,17 @@ clean:
 distclean:
 	rm -rf .cargo vendor vendor.tar.xz
 
-target/$(TARGET)/$(BIN_D): build
-target/$(TARGET)/$(BIN_C): build
-target/$(TARGET)/$(BIN_U): build
-target/$(TARGET)/$(BIN_ROG): build
+target/$(TARGET)/$(BIN_D): $(SRC)
+	$(MAKE) build
+
+target/$(TARGET)/$(BIN_C): $(SRC)
+	$(MAKE) build
+
+target/$(TARGET)/$(BIN_U): $(SRC)
+	$(MAKE) build
+
+target/$(TARGET)/$(BIN_ROG): $(SRC)
+	$(MAKE) build
 
 install-asusd: target/$(TARGET)/$(BIN_D)
 	$(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_D)" "$(DESTDIR)$(bindir)/$(BIN_D)"
