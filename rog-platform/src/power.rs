@@ -101,8 +101,15 @@ impl AsusPower {
             });
         }
 
-        Err(PlatformError::MissingFunction(
-            "Did not find a battery".to_owned(),
-        ))
+        // No battery found. Return an AsusPower with an empty battery path so
+        // callers can still be constructed and query `has_*` methods which
+        // will correctly report absence. This avoids hard-failing on systems
+        // where the asus-nb-wmi driver loads on desktops with no battery.
+        info!("Did not find a battery, continuing without battery support");
+        Ok(Self {
+            mains,
+            battery: PathBuf::new(),
+            usb,
+        })
     }
 }
