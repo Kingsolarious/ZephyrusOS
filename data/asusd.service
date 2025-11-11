@@ -6,7 +6,10 @@ After=nvidia-powerd.service systemd-udevd.service
 
 [Service]
 Environment=IS_SERVICE=1
-Environment=RUST_LOG="debug"
+# Reduce noisy span logs while keeping useful debug info for asusd and related crates.
+# Keep global level at info but allow debug for our crates; silence tracing::span (very noisy)
+# RUST_LOG format: <module>=<level>,...  (levels: error,warn,info,debug,trace)
+Environment=RUST_LOG="info,asusd=debug,rog_platform=debug,tracing::span=error"
 # required to prevent init issues with hid_asus and MCU
 ExecStartPre=/bin/sleep 1
 ExecStart=/usr/bin/asusd
