@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [6.1.18]
+
+### Changed
+- all notifications now respects the timeout 
+- improve udev daemon-starting rule
+- reduce log noise
+
 ## [v6.1.17]
 
 ### Changed
