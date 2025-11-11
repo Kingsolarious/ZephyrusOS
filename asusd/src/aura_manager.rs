@@ -102,6 +102,7 @@ pub struct DeviceManager {
 }
 
 impl DeviceManager {
+    #[allow(clippy::type_complexity)]
     async fn get_or_create_hid_handle(
         handles: &Arc<Mutex<HashMap<String, Arc<Mutex<HidRaw>>>>>,
         endpoint: &Device,

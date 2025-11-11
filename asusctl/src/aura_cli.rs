@@ -181,6 +181,7 @@ pub struct TwoColourSpeed {
 }
 
 #[derive(Debug, Clone, Default, Options)]
+#[allow(dead_code)]
 pub struct MultiZone {
     #[options(help = "print help message")]
     help: bool,
@@ -195,6 +196,7 @@ pub struct MultiZone {
 }
 
 #[derive(Debug, Clone, Default, Options)]
+#[allow(dead_code)]
 pub struct MultiColourSpeed {
     #[options(help = "print help message")]
     help: bool,

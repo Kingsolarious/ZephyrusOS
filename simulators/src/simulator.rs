@@ -157,8 +157,9 @@ fn main() -> Result<(), Box<dyn Error>> {
                 for (x_count, b) in dev.buffer[start..=end].iter().enumerate() {
                     canvas.set_draw_color(Color::RGB(*b, *b, *b));
 
+                    #[allow(clippy::manual_is_multiple_of)]
                     let x: i32 = w + x_count as i32 * w
-                        - if !((y_count + y_offset as usize) % 2 == 0) {
+                        - if (y_count + y_offset as usize) % 2 != 0 {
                             0
                         } else {
                             w / 2
