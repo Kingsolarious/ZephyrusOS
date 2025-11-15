@@ -5,6 +5,7 @@
 ## [6.1.18]
 
 ### Changed
+- Add aura support for G614FR (ROG Strix G16 2025)
 - all notifications now respects the timeout 
 - improve udev daemon-starting rule
 - reduce log noise
