@@ -168,20 +168,18 @@ impl LedSupportFile {
         // development environments), attempt to load the bundled
         // `data/aura_support.ron` from the crate so tests and local runs
         // behave the same as when the package is installed.
-        if let Ok(path) = std::env::var("CARGO_MANIFEST_DIR") {
-            let mut pb = std::path::PathBuf::from(path);
-            pb.push("data/aura_support.ron");
-            if let Ok(buf) = std::fs::read_to_string(&pb) {
-                if !buf.is_empty() {
-                    if let Ok(tmp) = ron::from_str::<LedSupportFile>(&buf) {
-                        data.0.append(&mut tmp.0.clone());
-                        data.0.sort_by(|a, b| a.device_name.cmp(&b.device_name));
-                        info!("Loaded bundled LED support data from {}", pb.display());
-                        return Some(data);
-                    } else {
-                        warn!("Could not parse bundled data file: {}", pb.display());
-                    }
-                }
+        // Attempt to load a bundled `aura_support.ron` included at compile time.
+        // Using `include_str!` ensures the data is available regardless of
+        // runtime `CARGO_MANIFEST_DIR` or CI environment differences.
+        let bundled_buf = include_str!("../data/aura_support.ron");
+        if !bundled_buf.is_empty() {
+            if let Ok(tmp) = ron::from_str::<LedSupportFile>(bundled_buf) {
+                data.0.append(&mut tmp.0.clone());
+                data.0.sort_by(|a, b| a.device_name.cmp(&b.device_name));
+                info!("Loaded bundled LED support data (embedded)");
+                return Some(data);
+            } else {
+                warn!("Could not parse embedded bundled data file");
             }
         }
 
