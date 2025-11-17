@@ -251,6 +251,8 @@ pub fn get_anime_type() -> AnimeType {
         AnimeType::GA402
     } else if board_name.contains("GU604V") {
         AnimeType::GU604
+    } else if board_name.contains("G635L") {
+        AnimeType::G635L
     } else {
         AnimeType::Unsupported
     }
