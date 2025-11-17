@@ -306,6 +306,15 @@
         power_zones: [Keyboard, Lightbar, Logo, RearGlow],
     ),
     (
+            device_name: "G635L",
+            product_id: "",
+            layout_name: "g635l-per-key",
+            basic_modes: [Static, Breathe, RainbowCycle, RainbowWave, Star, Rain, Highlight, Laser, Ripple, Pulse, Comet, Flash],
+            basic_zones: [],
+            advanced_type: PerKey,
+            power_zones: [Keyboard, Lightbar, Logo],
+    ),
+    (
         device_name: "G712LI",
         product_id: "",
         layout_name: "gl503",
