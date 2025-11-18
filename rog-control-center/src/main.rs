@@ -24,11 +24,16 @@ use tokio::runtime::Runtime;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // Ensure tracing spans are quiet by default unless user overrides
+    if std::env::var_os("RUST_LOG").is_none() {
+        std::env::set_var("RUST_LOG", "warn,tracing=error,zbus=error");
+    }
     let mut logger = env_logger::Builder::new();
     logger
-        .filter_level(LevelFilter::Warn)
         .parse_default_env()
-        .target(env_logger::Target::Stdout)
+        .filter_level(LevelFilter::Info)
+        .parse_default_env()
+        .target(env_logger::Target::Stderr)
         .format_timestamp(None)
         .init();
 

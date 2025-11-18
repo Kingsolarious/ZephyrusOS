@@ -89,7 +89,7 @@ where
         }
     }
     if paths.len() > 1 {
-        println!("Multiple asusd interfaces devices found");
+        log::warn!("Multiple asusd interfaces devices found");
     }
     if !paths.is_empty() {
         let mut ctrl = Vec::new();
@@ -129,7 +129,7 @@ where
         }
     }
     if paths.len() > 1 {
-        println!("Multiple asusd interfaces devices found");
+        log::warn!("Multiple asusd interfaces devices found");
     }
     if !paths.is_empty() {
         let mut ctrl = Vec::new();
