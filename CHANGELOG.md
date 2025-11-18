@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [6.1.20]
+
+### Changed
+- Addded support for G635L: thanks @luca_pisl !
+- Suppress verbose output in applications too, not just daemon
+
 ## [6.1.18]
 
 ### Changed
