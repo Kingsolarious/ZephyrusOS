@@ -9,7 +9,7 @@ use aura_cli::{LedPowerCommand1, LedPowerCommand2};
 use dmi_id::DMIID;
 use fan_curve_cli::FanCurveCommand;
 use gumdrop::{Opt, Options};
-use log::{error, info};
+use log::{error, info, LevelFilter};
 use rog_anime::usb::get_anime_type;
 use rog_anime::{AnimTime, AnimeDataBuffer, AnimeDiagonal, AnimeGif, AnimeImage, AnimeType, Vec2};
 use rog_aura::keyboard::{AuraPowerState, LaptopAuraPower};
@@ -44,12 +44,16 @@ mod scsi_cli;
 mod slash_cli;
 
 fn main() {
+    // Ensure tracing spans are quiet by default unless user overrides
+    if std::env::var_os("RUST_LOG").is_none() {
+        std::env::set_var("RUST_LOG", "warn,tracing=error,zbus=error");
+    }
     let mut logger = env_logger::Builder::new();
     logger
         .parse_default_env()
-        .target(env_logger::Target::Stdout)
+        .filter_level(LevelFilter::Info)
+        .target(env_logger::Target::Stderr)
         .format_timestamp(None)
-        .filter_level(log::LevelFilter::Debug)
         .init();
 
     let self_version = env!("CARGO_PKG_VERSION");
