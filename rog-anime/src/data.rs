@@ -63,6 +63,7 @@ pub enum AnimeType {
     GA401,
     GA402,
     GU604,
+    G635L,
     #[default]
     Unsupported,
 }
@@ -75,6 +76,7 @@ impl FromStr for AnimeType {
             "ga401" | "GA401" => Self::GA401,
             "ga402" | "GA402" => Self::GA402,
             "gu604" | "GU604" => Self::GU604,
+            "g635L" | "G635L" => Self::G635L,
             _ => Self::Unsupported,
         })
     }
@@ -89,6 +91,8 @@ impl AnimeType {
             AnimeType::GA402
         } else if board_name.contains("GU604V") {
             AnimeType::GU604
+        } else if board_name.contains("G635L") || board_name.contains("G635L") {
+            AnimeType::G635L
         } else {
             AnimeType::Unsupported
         }
@@ -180,7 +184,9 @@ impl TryFrom<AnimeDataBuffer> for AnimePacketType {
 
         let mut buffers = match anime.anime {
             AnimeType::GA401 => vec![[0; 640]; 2],
-            AnimeType::GA402 | AnimeType::GU604 | AnimeType::Unsupported => vec![[0; 640]; 3],
+            AnimeType::GA402 | AnimeType::GU604 | AnimeType::G635L | AnimeType::Unsupported => {
+                vec![[0; 640]; 3]
+            }
         };
 
         for (idx, chunk) in anime.data.as_slice().chunks(PANE_LEN).enumerate() {
