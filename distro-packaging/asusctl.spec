@@ -20,7 +20,7 @@
 %global debug_package %{nil}
 %endif
 
-%define version 6.1.18
+%define version 6.1.20
 %define specrelease %{?dist}
 %define pkg_release 9%{specrelease}
 
@@ -31,7 +31,6 @@ Version: %{version}
 Release: %{pkg_release}
 Summary: Control fan speeds, LEDs, graphics modes, and charge levels for ASUS notebooks
 License: MPLv2
-Requires: power-profiles-daemon
 
 Group:   System Environment/Kernel
 
