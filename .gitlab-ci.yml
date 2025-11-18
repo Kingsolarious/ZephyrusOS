@@ -70,6 +70,7 @@ release:
   <<: *rust_cache
   script:
     - cargo install cargo-vendor-filterer
+    - cargo fetch
     - make FROZEN=1 && make vendor
   artifacts:
     paths:
