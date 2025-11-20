@@ -158,6 +158,8 @@ vendor:
 	mv .cargo/config ./cargo-config
 	rm -rf .cargo
 	rm -rf vendor
+	# Ensure cargo-vendor-filterer is installed (CI installs it already)
+	command -v cargo-vendor-filterer >/dev/null 2>&1 || cargo install --locked cargo-vendor-filterer
 	cargo vendor-filterer --all-features --platform x86_64-unknown-linux-gnu vendor
 	tar pcfJ vendor_asusctl_$(VERSION).tar.xz vendor
 	rm -rf vendor
