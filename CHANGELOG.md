@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [6.1.21]
+
+### Changed
+- Kill Fedora: screw your cursed cargo bullshit
+- Restore CI building
+
 ## [6.1.20]
 
 ### Changed
