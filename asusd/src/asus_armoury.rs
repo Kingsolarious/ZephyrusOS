@@ -170,7 +170,9 @@ impl crate::Reloadable for AsusArmouryAttribute {
         info!("Reloading {}", self.attr.name());
         let name: FirmwareAttribute = self.attr.name().into();
 
-        if name.is_ppt() {
+        // Treat dGPU attributes the same as PPT attributes for power-profile
+        // behaviour so they follow AC/DC tuning groups.
+        if name.is_ppt() || name.is_dgpu() {
             let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
             let power_plugged = self
                 .power
@@ -277,7 +279,7 @@ impl AsusArmouryAttribute {
 
     async fn restore_default(&self) -> fdo::Result<()> {
         self.attr.restore_default()?;
-        if self.name().is_ppt() {
+        if self.name().is_ppt() || self.name().is_dgpu() {
             let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
             let power_plugged = self
                 .power
@@ -336,7 +338,7 @@ impl AsusArmouryAttribute {
 
     #[zbus(property)]
     async fn current_value(&self) -> fdo::Result<i32> {
-        if self.name().is_ppt() {
+        if self.name().is_ppt() || self.name().is_dgpu() {
             let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
             let power_plugged = self
                 .power
@@ -369,86 +371,9 @@ impl AsusArmouryAttribute {
         ))
     }
 
-    async fn stored_value_for_power(&self, on_ac: bool) -> fdo::Result<i32> {
-        if !self.name().is_ppt() {
-            return Err(fdo::Error::NotSupported(
-                "Stored values are only available for PPT attributes".to_string(),
-            ));
-        }
-
-        let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
-        let config = self.config.lock().await;
-        if let Some(tuning) = config.select_tunings_ref(on_ac, profile) {
-            if let Some(tune) = tuning.group.get(&self.name()) {
-                return Ok(*tune);
-            }
-        }
-
-        if let AttrValue::Integer(i) = self.attr.default_value() {
-            return Ok(*i);
-        }
-        Err(fdo::Error::Failed(
-            "Could not read stored value".to_string(),
-        ))
-    }
-
-    async fn set_value_for_power(&mut self, on_ac: bool, value: i32) -> fdo::Result<()> {
-        if !self.name().is_ppt() {
-            return Err(fdo::Error::NotSupported(
-                "Setting stored values is only supported for PPT attributes".to_string(),
-            ));
-        }
-
-        let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
-        let apply_now;
-
-        {
-            let mut config = self.config.lock().await;
-            let tuning = config.select_tunings(on_ac, profile);
-
-            if let Some(tune) = tuning.group.get_mut(&self.name()) {
-                *tune = value;
-            } else {
-                tuning.group.insert(self.name(), value);
-                debug!(
-                    "Store {} value for {} power = {}",
-                    self.attr.name(),
-                    if on_ac { "AC" } else { "DC" },
-                    value
-                );
-            }
-
-            apply_now = tuning.enabled;
-            config.write();
-        }
-
-        if apply_now {
-            let power_plugged = self
-                .power
-                .get_online()
-                .map_err(|e| {
-                    error!("Could not get power status: {e:?}");
-                    e
-                })
-                .unwrap_or_default()
-                != 0;
-
-            if power_plugged == on_ac {
-                self.attr
-                    .set_current_value(&AttrValue::Integer(value))
-                    .map_err(|e| {
-                        error!("Could not set value: {e:?}");
-                        e
-                    })?;
-            }
-        }
-
-        Ok(())
-    }
-
     #[zbus(property)]
     async fn set_current_value(&mut self, value: i32) -> fdo::Result<()> {
-        if self.name().is_ppt() {
+        if self.name().is_ppt() || self.name().is_dgpu() {
             let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
             let power_plugged = self
                 .power
@@ -538,8 +463,7 @@ pub async fn start_attributes_zbus(
                 "Skipping attribute '{}' due to reload error: {e:?}",
                 attr.attr.name()
             );
-            // continue with others
-            continue;
+            break;
         }
 
         let attr_name = attr.attribute_name();
@@ -577,7 +501,7 @@ pub async fn set_config_or_default(
 ) {
     for attr in attrs.attributes().iter() {
         let name: FirmwareAttribute = attr.name().into();
-        if name.is_ppt() {
+        if name.is_ppt() || name.is_dgpu() {
             let tuning = config.select_tunings(power_plugged, profile);
             if !tuning.enabled {
                 debug!("Tuning group is not enabled, skipping");
