@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [6.1.22]
+- Allow configuration of nv_tgp
+- Treat dGPU attributes as power profiles
+- Add EXPERTBOOK DMI match to ensure the service is loaded
+
 ## [6.1.21]
 
 ### Changed
