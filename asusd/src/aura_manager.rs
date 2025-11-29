@@ -132,7 +132,7 @@ impl DeviceManager {
             if let Some(usb_id) = usb_device.attribute_value("idProduct") {
                 if let Some(vendor_id) = usb_device.attribute_value("idVendor") {
                     if vendor_id != "0b05" {
-                        debug!("Not ASUS vendor ID");
+                        debug!("Not ASUS vendor ID: {}", vendor_id.to_string_lossy());
                         return Ok(devices);
                     }
                     // Almost all devices are identified by the productId.
