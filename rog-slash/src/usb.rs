@@ -38,8 +38,9 @@ pub fn get_slash_type() -> SlashType {
         .map_err(|_| SlashError::NoDevice)
         .unwrap_or_default();
     let board_name = dmi.board_name;
-
-    if board_name.contains("GA403") {
+    if board_name.contains("GA403WR") {
+        SlashType::GA403WR
+    } else if board_name.contains("GA403") {
         SlashType::GA403
     } else if board_name.contains("GA605") {
         SlashType::GA605
@@ -52,6 +53,7 @@ pub fn get_slash_type() -> SlashType {
 
 pub const fn report_id(slash_type: SlashType) -> u8 {
     match slash_type {
+        SlashType::GA403WR => REPORT_ID_19B6,
         SlashType::GA403 => REPORT_ID_193B,
         SlashType::GA605 => REPORT_ID_19B6,
         SlashType::GU605 => REPORT_ID_193B,
