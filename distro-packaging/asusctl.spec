@@ -116,7 +116,6 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/rog-control-center.d
 %{_unitdir}/asusd.service
 %{_userunitdir}/asusd-user.service
 %{_udevrulesdir}/99-asusd.rules
-%{_datadir}/asusd/aura_support.ron
 %{_datadir}/dbus-1/system.d/asusd.conf
 %{_datadir}/icons/hicolor/512x512/apps/asus_notif_yellow.png
 %{_datadir}/icons/hicolor/512x512/apps/asus_notif_green.png
@@ -131,6 +130,7 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/rog-control-center.d
 %{_datadir}/icons/hicolor/scalable/status/gpu-vfio.svg
 %{_datadir}/icons/hicolor/scalable/status/notification-reboot.svg
 %{_docdir}/%{name}/
+%{_datadir}/asusctl/
 %{_datadir}/asusd/
 
 %files rog-gui
