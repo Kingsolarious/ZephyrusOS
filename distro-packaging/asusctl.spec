@@ -92,9 +92,9 @@ EOF
 %build
 export RUSTFLAGS="%{rustflags}"
 %if %{defined fedora}
-%cargo_build
+%cargo_build --locked
 %else
-/usr/bin/cargo auditable build --release
+/usr/bin/cargo auditable build --release --locked
 %endif
 
 %install
