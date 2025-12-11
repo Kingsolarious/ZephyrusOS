@@ -75,11 +75,6 @@ a notification service, and ability to run in the background.
 
 %prep
 %autosetup
-%if %{defined fedora}
-%cargo_prep
-sed -i 's|offline = true|offline = false|' .cargo/config.toml
-sed -i 's|source.crates-io|source.ignore_this|' .cargo/config.toml
-%else
 mkdir -p .cargo
 cat > .cargo/config.toml << 'EOF'
 [term]
@@ -87,7 +82,6 @@ verbose = true
 [net]
 offline = false
 EOF
-%endif
 
 %build
 export RUSTFLAGS="%{rustflags}"
