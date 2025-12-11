@@ -92,7 +92,7 @@ EOF
 %build
 export RUSTFLAGS="%{rustflags}"
 %if %{defined fedora}
-%cargo_build --locked
+/usr/bin/cargo build --release --locked
 %else
 /usr/bin/cargo auditable build --release --locked
 %endif
@@ -100,11 +100,7 @@ export RUSTFLAGS="%{rustflags}"
 %install
 export RUSTFLAGS="%{rustflags}"
 
-%if %{defined fedora}
-%define _target_dir target/rpm
-%else
 %define _target_dir target/release
-%endif
 
 # Install binaries
 install -D -m 0755 %{_target_dir}/asusd %{buildroot}%{_bindir}/asusd
