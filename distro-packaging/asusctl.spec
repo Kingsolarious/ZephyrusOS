@@ -55,6 +55,7 @@ BuildRequires:  pkgconfig(libseat)
 BuildRequires:  pkgconfig(libudev)
 BuildRequires:  pkgconfig(xkbcommon)
 BuildRequires:  pkgconfig(libzstd)
+BuildRequires:  pkgconfig(fontconfig)
 BuildRequires:  desktop-file-utils
 
 %description
