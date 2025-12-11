@@ -68,6 +68,7 @@ asus-nb-ctrl enables third-party apps to use the above with dbus methods.
 
 %package rog-gui
 Summary: An experimental GUI for %{name}
+Requires: %{name} = %{version}-%{release}
 
 %description rog-gui
 A one-stop-shop GUI tool for asusd/asusctl. It aims to provide most controls,
