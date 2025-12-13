@@ -44,6 +44,8 @@ pub fn get_slash_type() -> SlashType {
         SlashType::GA403
     } else if board_name.contains("GA605") {
         SlashType::GA605
+    } else if board_name.contains("GU605C") {
+        SlashType::GU605C
     } else if board_name.contains("GU605") {
         SlashType::GU605
     } else {
@@ -57,6 +59,7 @@ pub const fn report_id(slash_type: SlashType) -> u8 {
         SlashType::GA403 => REPORT_ID_193B,
         SlashType::GA605 => REPORT_ID_19B6,
         SlashType::GU605 => REPORT_ID_193B,
+        SlashType::GU605C => REPORT_ID_19B6,
         SlashType::Unsupported => REPORT_ID_19B6,
     }
 }

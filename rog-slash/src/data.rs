@@ -16,6 +16,7 @@ pub enum SlashType {
     GA403W,
     GA605,
     GU605,
+    GU605C,
     #[default]
     Unsupported,
 }
@@ -27,6 +28,7 @@ impl SlashType {
             SlashType::GA403 => PROD_ID1,
             SlashType::GA605 => PROD_ID2,
             SlashType::GU605 => PROD_ID1,
+            SlashType::GU605C => PROD_ID2,
             SlashType::Unsupported => 0,
         }
     }
@@ -37,6 +39,7 @@ impl SlashType {
             SlashType::GA403 => PROD_ID1_STR,
             SlashType::GA605 => PROD_ID2_STR,
             SlashType::GU605 => PROD_ID1_STR,
+            SlashType::GU605C => PROD_ID2_STR,
             SlashType::Unsupported => "",
         }
     }
@@ -49,6 +52,8 @@ impl SlashType {
             SlashType::GA403
         } else if board_name.contains("GA605") {
             SlashType::GA605
+        } else if board_name.contains("GU605C") {
+            SlashType::GU605C
         } else if board_name.contains("GU605") {
             SlashType::GU605
         } else {
@@ -65,6 +70,7 @@ impl FromStr for SlashType {
             "GA403W" => Self::GA403W,
             "GA403" => Self::GA403,
             "GA605" => Self::GA605,
+            "GU605C" => Self::GU605C,
             "GU605" => Self::GU605,
             _ => Self::Unsupported,
         })
