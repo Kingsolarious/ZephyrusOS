@@ -243,7 +243,7 @@ impl From<AnimShutdown> for i32 {
 #[inline]
 pub fn get_anime_type() -> AnimeType {
     let dmi = DMIID::new().unwrap_or_default();
-    let board_name = dmi.board_name;
+    let board_name = dmi.board_name.to_uppercase();
 
     if board_name.contains("GA401I") || board_name.contains("GA401Q") {
         AnimeType::GA401
