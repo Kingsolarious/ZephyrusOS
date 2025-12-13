@@ -4,7 +4,7 @@
 
 ## [6.2.0]
 
-## Changed
+### Changed
 - Added aura support for FX607V: thanks @jomp16
 - Added testing support for G835LW
 - Added support for GU605C models slash lighting: thanks @Otters
