@@ -17,6 +17,7 @@ pub enum SlashType {
     GA605,
     GU605,
     GU605C,
+    G614F,
     #[default]
     Unsupported,
 }
@@ -29,6 +30,7 @@ impl SlashType {
             SlashType::GA605 => PROD_ID2,
             SlashType::GU605 => PROD_ID1,
             SlashType::GU605C => PROD_ID2,
+            SlashType::G614F => PROD_ID2,
             SlashType::Unsupported => 0,
         }
     }
@@ -40,13 +42,16 @@ impl SlashType {
             SlashType::GA605 => PROD_ID2_STR,
             SlashType::GU605 => PROD_ID1_STR,
             SlashType::GU605C => PROD_ID2_STR,
+            SlashType::G614F => PROD_ID2_STR,
             SlashType::Unsupported => "",
         }
     }
 
     pub fn from_dmi() -> Self {
         let board_name = DMIID::new().unwrap_or_default().board_name.to_uppercase();
-        if board_name.contains("GA403W") {
+        if board_name.contains("G614F") {
+            SlashType::G614F
+        } else if board_name.contains("GA403W") {
             SlashType::GA403W
         } else if board_name.contains("GA403") {
             SlashType::GA403
@@ -72,6 +77,7 @@ impl FromStr for SlashType {
             "GA605" => Self::GA605,
             "GU605C" => Self::GU605C,
             "GU605" => Self::GU605,
+            "G614FR" => Self::G614F,
             _ => Self::Unsupported,
         })
     }

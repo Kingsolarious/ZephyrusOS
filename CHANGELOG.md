@@ -9,6 +9,7 @@
 - Added testing support for G835LW
 - Added support for GU605C models slash lighting: thanks @Otters
 - Restore fedora: thanks @ali205412
+- Add support to G614F models slash lighting
 
 ## [6.1.22]
 
