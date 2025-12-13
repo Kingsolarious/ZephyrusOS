@@ -245,13 +245,16 @@ pub fn get_anime_type() -> AnimeType {
     let dmi = DMIID::new().unwrap_or_default();
     let board_name = dmi.board_name;
 
-    match board_name.to_uppercase().as_str() {
-        "GA401I" | "GA401Q" => AnimeType::GA401,
-        "GA402R" | "GA402X" => AnimeType::GA402,
-        "GU604V" => AnimeType::GU604,
-        "G635L" => AnimeType::G635L,
-        "G835LW" => AnimeType::G835LW,
-        _ => AnimeType::Unsupported,
+    if board_name.contains("GA401I") || board_name.contains("GA401Q") {
+        AnimeType::GA401
+    } else if board_name.contains("GA402R") || board_name.contains("GA402X") {
+        AnimeType::GA402
+    } else if board_name.contains("GU604V") {
+        AnimeType::GU604
+    } else if board_name.contains("G635L") {
+        AnimeType::G635L
+    } else {
+        AnimeType::Unsupported
     }
 }
 
