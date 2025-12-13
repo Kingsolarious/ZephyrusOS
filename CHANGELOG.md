@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [6.2.0]
+
+## Changed
+- Added aura support for FX607V: thanks @jomp16
+- Added testing support for G835LW
+
 ## [6.1.22]
 
 ### Changed
