@@ -43,7 +43,7 @@ impl AniMatrix {
                 vertical: 2,
                 horizontal: 5,
             },
-            AnimeType::GA402 | AnimeType::G635L | AnimeType::G835LW | AnimeType::Unsupported => {
+            AnimeType::GA402 | AnimeType::G635L | AnimeType::G835L | AnimeType::Unsupported => {
                 LedShape {
                     vertical: 2,
                     horizontal: 5,
@@ -58,7 +58,7 @@ impl AniMatrix {
         // Do a hard mapping of each (derived from wireshardk captures)
         let rows = match model {
             AnimeType::GA401 => GA401.to_vec(),
-            AnimeType::GA402 | AnimeType::G635L | AnimeType::G835LW | AnimeType::Unsupported => {
+            AnimeType::GA402 | AnimeType::G635L | AnimeType::G835L | AnimeType::Unsupported => {
                 GA402.to_vec()
             }
             AnimeType::GU604 => GU604.to_vec(),

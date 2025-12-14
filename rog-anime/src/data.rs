@@ -64,7 +64,7 @@ pub enum AnimeType {
     GA402,
     GU604,
     G635L,
-    G835LW,
+    G835L,
     #[default]
     Unsupported,
 }
@@ -73,14 +73,21 @@ impl FromStr for AnimeType {
     type Err = AnimeError;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        Ok(match s.to_uppercase().as_str() {
-            "GA401" => Self::GA401,
-            "GA402" => Self::GA402,
-            "GU604" => Self::GU604,
-            "G635L" => Self::G635L,
-            "G835LW" => Self::G835LW,
-            _ => Self::Unsupported,
-        })
+        let dmi = s.to_uppercase();
+
+        if dmi.contains("GA401") {
+            return Ok(Self::GA401);
+        } else if dmi.contains("GA402") {
+            return Ok(Self::GA402);
+        } else if dmi.contains("GU604") {
+            return Ok(Self::GU604);
+        } else if dmi.contains("G635L") {
+            return Ok(Self::G635L);
+        } else if dmi.contains("G835L") {
+            return Ok(Self::G835L);
+        }
+
+        Ok(Self::Unsupported)
     }
 }
 
@@ -104,7 +111,7 @@ impl AnimeType {
     pub fn width(&self) -> usize {
         match self {
             AnimeType::GU604 => 70,
-            AnimeType::G835LW => 74,
+            AnimeType::G835L => 74,
             _ => 74,
         }
     }
@@ -114,7 +121,7 @@ impl AnimeType {
         match self {
             AnimeType::GA401 => 36,
             AnimeType::GU604 => 43,
-            AnimeType::G835LW => 39,
+            AnimeType::G835L => 39,
             _ => 39,
         }
     }
@@ -124,7 +131,7 @@ impl AnimeType {
         match self {
             AnimeType::GA401 => PANE_LEN * 2,
             AnimeType::GU604 => PANE_LEN * 3,
-            AnimeType::G835LW => PANE_LEN * 3,
+            AnimeType::G835L => PANE_LEN * 3,
             _ => PANE_LEN * 3,
         }
     }
@@ -192,7 +199,7 @@ impl TryFrom<AnimeDataBuffer> for AnimePacketType {
             AnimeType::GA402
             | AnimeType::GU604
             | AnimeType::G635L
-            | AnimeType::G835LW
+            | AnimeType::G835L
             | AnimeType::Unsupported => {
                 vec![[0; 640]; 3]
             }
@@ -209,7 +216,7 @@ impl TryFrom<AnimeDataBuffer> for AnimePacketType {
             AnimeType::GA402
                 | AnimeType::GU604
                 | AnimeType::G635L
-                | AnimeType::G835LW
+                | AnimeType::G835L
                 | AnimeType::Unsupported
         ) {
             buffers[2][..7].copy_from_slice(&USB_PREFIX3);
