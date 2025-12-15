@@ -2,7 +2,18 @@
 
 ## [Unreleased]
 
+## [6.2.0]
+
+## Changed
+- Added aura support for FX607V: thanks @jomp16
+- Added testing support for G835LW
+- Added support for GU605C models slash lighting: thanks @Otters
+- Restore fedora: thanks @ali205412
+- Add support to G614F models slash lighting
+
 ## [6.1.22]
+
+### Changed
 - Allow configuration of nv_tgp
 - Treat dGPU attributes as power profiles
 - Add EXPERTBOOK DMI match to ensure the service is loaded

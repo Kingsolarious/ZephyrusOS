@@ -13,8 +13,11 @@ use crate::usb::{PROD_ID1, PROD_ID1_STR, PROD_ID2, PROD_ID2_STR};
 #[derive(Default, Debug, Copy, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub enum SlashType {
     GA403,
+    GA403W,
     GA605,
     GU605,
+    GU605C,
+    G614F,
     #[default]
     Unsupported,
 }
@@ -22,28 +25,40 @@ pub enum SlashType {
 impl SlashType {
     pub const fn prod_id(&self) -> u16 {
         match self {
+            SlashType::GA403W => PROD_ID2,
             SlashType::GA403 => PROD_ID1,
             SlashType::GA605 => PROD_ID2,
             SlashType::GU605 => PROD_ID1,
+            SlashType::GU605C => PROD_ID2,
+            SlashType::G614F => PROD_ID2,
             SlashType::Unsupported => 0,
         }
     }
 
     pub const fn prod_id_str(&self) -> &str {
         match self {
+            SlashType::GA403W => PROD_ID2_STR,
             SlashType::GA403 => PROD_ID1_STR,
             SlashType::GA605 => PROD_ID2_STR,
             SlashType::GU605 => PROD_ID1_STR,
+            SlashType::GU605C => PROD_ID2_STR,
+            SlashType::G614F => PROD_ID2_STR,
             SlashType::Unsupported => "",
         }
     }
 
     pub fn from_dmi() -> Self {
         let board_name = DMIID::new().unwrap_or_default().board_name.to_uppercase();
-        if board_name.contains("GA403") {
+        if board_name.contains("G614F") {
+            SlashType::G614F
+        } else if board_name.contains("GA403W") {
+            SlashType::GA403W
+        } else if board_name.contains("GA403") {
             SlashType::GA403
         } else if board_name.contains("GA605") {
             SlashType::GA605
+        } else if board_name.contains("GU605C") {
+            SlashType::GU605C
         } else if board_name.contains("GU605") {
             SlashType::GU605
         } else {
@@ -56,10 +71,13 @@ impl FromStr for SlashType {
     type Err = SlashError;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        Ok(match s {
-            "ga403" | "GA403" => Self::GA403,
-            "ga605" | "GA605" => Self::GA605,
-            "gu605" | "GU605" => Self::GU605,
+        Ok(match s.to_uppercase().as_str() {
+            "GA403W" => Self::GA403W,
+            "GA403" => Self::GA403,
+            "GA605" => Self::GA605,
+            "GU605C" => Self::GU605C,
+            "GU605" => Self::GU605,
+            "G614FR" => Self::G614F,
             _ => Self::Unsupported,
         })
     }

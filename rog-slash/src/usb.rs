@@ -37,12 +37,17 @@ pub fn get_slash_type() -> SlashType {
     let dmi = DMIID::new()
         .map_err(|_| SlashError::NoDevice)
         .unwrap_or_default();
-    let board_name = dmi.board_name;
-
-    if board_name.contains("GA403") {
+    let board_name = dmi.board_name.to_uppercase();
+    if board_name.contains("G614F") {
+        SlashType::G614F
+    } else if board_name.contains("GA403W") {
+        SlashType::GA403W
+    } else if board_name.contains("GA403") {
         SlashType::GA403
     } else if board_name.contains("GA605") {
         SlashType::GA605
+    } else if board_name.contains("GU605C") {
+        SlashType::GU605C
     } else if board_name.contains("GU605") {
         SlashType::GU605
     } else {
@@ -52,9 +57,12 @@ pub fn get_slash_type() -> SlashType {
 
 pub const fn report_id(slash_type: SlashType) -> u8 {
     match slash_type {
+        SlashType::GA403W => REPORT_ID_19B6,
         SlashType::GA403 => REPORT_ID_193B,
         SlashType::GA605 => REPORT_ID_19B6,
+        SlashType::G614F => REPORT_ID_19B6,
         SlashType::GU605 => REPORT_ID_193B,
+        SlashType::GU605C => REPORT_ID_19B6,
         SlashType::Unsupported => REPORT_ID_19B6,
     }
 }

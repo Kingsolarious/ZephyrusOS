@@ -1,5 +1,5 @@
 [workspace.package]
-version = "6.1.22"
+version = "6.2.0"
 rust-version = "1.82"
 license = "MPL-2.0"
 readme = "README.md"
@@ -57,12 +57,12 @@ glam = { version = "^0.22", features = ["serde"] }
 gumdrop = "^0.8"
 udev = { version = "^0.8", features = ["mio"] }
 rusb = "^0.9"
-inotify = "^0.10.0"
+inotify = "^0.10"
 
 png_pong = "^0.8"
 pix = "^0.13"
-tinybmp = "^0.4.0"
-gif = "^0.12.0"
+tinybmp = "^0.4"
+gif = "^0.12"
 
 versions = "6.2"
 
