@@ -147,6 +147,15 @@ install -D -m 0644 LICENSE %{buildroot}%{_datadir}/asusctl/LICENSE
 
 desktop-file-validate %{buildroot}%{_datadir}/applications/rog-control-center.desktop
 
+%post
+%systemd_post asusd.service
+
+%preun
+%systemd_preun asusd.service
+
+%postun
+%systemd_postun_with_restart asusd.service
+
 %files
 %license LICENSE
 %{_bindir}/asusd
