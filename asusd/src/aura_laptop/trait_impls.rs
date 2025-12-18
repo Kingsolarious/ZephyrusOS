@@ -71,7 +71,13 @@ impl AuraZbus {
     #[zbus(property)]
     async fn set_brightness(&mut self, brightness: LedBrightness) -> Result<(), ZbErr> {
         if let Some(bl) = self.0.backlight.as_ref() {
-            return Ok(bl.lock().await.set_brightness(brightness.into())?);
+            let res = bl.lock().await.set_brightness(brightness.into());
+            if res.is_ok() {
+                let mut config = self.0.config.lock().await;
+                config.brightness = brightness;
+                config.write();
+            }
+            return Ok(res?);
         }
         Err(ZbErr::Failed("No sysfs brightness control".to_string()))
     }
