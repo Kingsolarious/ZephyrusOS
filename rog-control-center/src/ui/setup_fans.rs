@@ -168,15 +168,24 @@ pub fn setup_fan_curve_page(ui: &MainWindow, _config: Arc<Mutex<Config>>) {
 
         update_fan_data(handle, balanced, perf, quiet);
 
+        let choices_for_ui = platform_profile_choices.clone();
         let handle_next1 = handle_copy.clone();
         if let Err(e) = handle_copy.upgrade_in_event_loop(move |handle| {
             let global = handle.global::<FanPageData>();
             let fans1 = fans.clone();
+            let choices = choices_for_ui.clone();
             global.on_set_profile_default(move |profile| {
                 let fans = fans1.clone();
                 let handle_next = handle_next1.clone();
+                let choices = choices.clone();
                 tokio::spawn(async move {
-                    if fans.set_curves_to_defaults(profile.into()).await.is_err() {
+                    let mut target: PlatformProfile = profile.into();
+                    if target == PlatformProfile::Quiet
+                        && !choices.contains(&PlatformProfile::Quiet)
+                    {
+                        target = PlatformProfile::LowPower;
+                    }
+                    if fans.set_curves_to_defaults(target).await.is_err() {
                         return;
                     }
                     let Ok(balanced) = fans
