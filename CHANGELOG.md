@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Changed
+- Added support for TUF keyboard powerstate control
+
 ## [6.2.0]
 
 ### Changed
