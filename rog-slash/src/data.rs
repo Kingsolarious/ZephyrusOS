@@ -86,6 +86,7 @@ impl FromStr for SlashType {
 #[cfg_attr(feature = "dbus", derive(Type, Value, OwnedValue))]
 #[derive(Debug, Default, PartialEq, Eq, Copy, Clone, Deserialize, Serialize)]
 pub enum SlashMode {
+    Static = 0x06,
     Bounce = 0x10,
     Slash = 0x12,
     Loading = 0x13,
@@ -109,6 +110,7 @@ impl FromStr for SlashMode {
 
     fn from_str(s: &str) -> Result<Self, SlashError> {
         match s {
+            "Static" => Ok(SlashMode::Static),
             "Bounce" => Ok(SlashMode::Bounce),
             "Slash" => Ok(SlashMode::Slash),
             "Loading" => Ok(SlashMode::Loading),
@@ -132,6 +134,7 @@ impl FromStr for SlashMode {
 impl Display for SlashMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match &self {
+            SlashMode::Static => String::from("Static"),
             SlashMode::Bounce => String::from("Bounce"),
             SlashMode::Slash => String::from("Slash"),
             SlashMode::Loading => String::from("Loading"),
@@ -153,8 +156,9 @@ impl Display for SlashMode {
 }
 
 impl SlashMode {
-    pub fn list() -> [String; 15] {
+    pub fn list() -> [String; 16] {
         [
+            SlashMode::Static.to_string(),
             SlashMode::Bounce.to_string(),
             SlashMode::Slash.to_string(),
             SlashMode::Loading.to_string(),
