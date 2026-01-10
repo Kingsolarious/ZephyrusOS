@@ -39,17 +39,19 @@ pub fn get_slash_type() -> SlashType {
         .unwrap_or_default();
     let board_name = dmi.board_name.to_uppercase();
     if board_name.contains("G614F") {
-        SlashType::G614F
-    } else if board_name.contains("GA403W") {
-        SlashType::GA403W
+        SlashType::G614_2025
+    } else if ["GA403W", "GA403UH", "GA403UM", "GA403UP"].iter().any(|s| board_name.contains(s)) {
+        SlashType::GA403_2025
     } else if board_name.contains("GA403") {
-        SlashType::GA403
+        SlashType::GA403_2024
+    } else if board_name.contains("GA605K") {
+        SlashType::GA605_2025
     } else if board_name.contains("GA605") {
-        SlashType::GA605
+        SlashType::GA605_2024
     } else if board_name.contains("GU605C") {
-        SlashType::GU605C
+        SlashType::GU605_2025
     } else if board_name.contains("GU605") {
-        SlashType::GU605
+        SlashType::GU605_2024
     } else {
         SlashType::Unsupported
     }
@@ -57,12 +59,13 @@ pub fn get_slash_type() -> SlashType {
 
 pub const fn report_id(slash_type: SlashType) -> u8 {
     match slash_type {
-        SlashType::GA403W => REPORT_ID_19B6,
-        SlashType::GA403 => REPORT_ID_193B,
-        SlashType::GA605 => REPORT_ID_19B6,
-        SlashType::G614F => REPORT_ID_19B6,
-        SlashType::GU605 => REPORT_ID_193B,
-        SlashType::GU605C => REPORT_ID_19B6,
+        SlashType::GA403_2025 => REPORT_ID_19B6,
+        SlashType::GA403_2024 => REPORT_ID_193B,
+        SlashType::GA605_2025 => REPORT_ID_19B6,
+        SlashType::GA605_2024 => REPORT_ID_19B6,
+        SlashType::GU605_2025 => REPORT_ID_19B6,
+        SlashType::GU605_2024 => REPORT_ID_193B,
+        SlashType::G614_2025 => REPORT_ID_19B6,
         SlashType::Unsupported => REPORT_ID_19B6,
     }
 }

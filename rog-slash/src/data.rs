@@ -12,12 +12,13 @@ use crate::usb::{PROD_ID1, PROD_ID1_STR, PROD_ID2, PROD_ID2_STR};
 
 #[derive(Default, Debug, Copy, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub enum SlashType {
-    GA403,
-    GA403W,
-    GA605,
-    GU605,
-    GU605C,
-    G614F,
+    GA403_2024,
+    GA403_2025,
+    GA605_2024,
+    GA605_2025,
+    GU605_2024,
+    GU605_2025,
+    G614_2025,
     #[default]
     Unsupported,
 }
@@ -25,24 +26,26 @@ pub enum SlashType {
 impl SlashType {
     pub const fn prod_id(&self) -> u16 {
         match self {
-            SlashType::GA403W => PROD_ID2,
-            SlashType::GA403 => PROD_ID1,
-            SlashType::GA605 => PROD_ID2,
-            SlashType::GU605 => PROD_ID1,
-            SlashType::GU605C => PROD_ID2,
-            SlashType::G614F => PROD_ID2,
+            SlashType::GA403_2025 => PROD_ID2,
+            SlashType::GA403_2024 => PROD_ID1,
+            SlashType::GA605_2025 => PROD_ID2,
+            SlashType::GA605_2024 => PROD_ID2,
+            SlashType::GU605_2025 => PROD_ID2,
+            SlashType::GU605_2024 => PROD_ID1,
+            SlashType::G614_2025 => PROD_ID2,
             SlashType::Unsupported => 0,
         }
     }
 
     pub const fn prod_id_str(&self) -> &str {
         match self {
-            SlashType::GA403W => PROD_ID2_STR,
-            SlashType::GA403 => PROD_ID1_STR,
-            SlashType::GA605 => PROD_ID2_STR,
-            SlashType::GU605 => PROD_ID1_STR,
-            SlashType::GU605C => PROD_ID2_STR,
-            SlashType::G614F => PROD_ID2_STR,
+            SlashType::GA403_2025 => PROD_ID2_STR,
+            SlashType::GA403_2024 => PROD_ID1_STR,
+            SlashType::GA605_2025 => PROD_ID2_STR,
+            SlashType::GA605_2024 => PROD_ID2_STR,
+            SlashType::GU605_2025 => PROD_ID2_STR,
+            SlashType::GU605_2024 => PROD_ID1_STR,
+            SlashType::G614_2025 => PROD_ID2_STR,
             SlashType::Unsupported => "",
         }
     }
@@ -50,17 +53,19 @@ impl SlashType {
     pub fn from_dmi() -> Self {
         let board_name = DMIID::new().unwrap_or_default().board_name.to_uppercase();
         if board_name.contains("G614F") {
-            SlashType::G614F
-        } else if board_name.contains("GA403W") {
-            SlashType::GA403W
+            SlashType::G614_2025
+        } else if ["GA403W", "GA403UH", "GA403UM", "GA403UP"].iter().any(|s| board_name.contains(s)) {
+            SlashType::GA403_2025
         } else if board_name.contains("GA403") {
-            SlashType::GA403
+            SlashType::GA403_2024
+        } else if board_name.contains("GA605K") {
+            SlashType::GA605_2025
         } else if board_name.contains("GA605") {
-            SlashType::GA605
+            SlashType::GA605_2024
         } else if board_name.contains("GU605C") {
-            SlashType::GU605C
+            SlashType::GU605_2025
         } else if board_name.contains("GU605") {
-            SlashType::GU605
+            SlashType::GU605_2024
         } else {
             SlashType::Unsupported
         }
@@ -72,12 +77,13 @@ impl FromStr for SlashType {
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         Ok(match s.to_uppercase().as_str() {
-            "GA403W" => Self::GA403W,
-            "GA403" => Self::GA403,
-            "GA605" => Self::GA605,
-            "GU605C" => Self::GU605C,
-            "GU605" => Self::GU605,
-            "G614FR" => Self::G614F,
+            "GA403_2025" => Self::GA403_2025,
+            "GA403_2024" => Self::GA403_2024,
+            "GA605_2025" => Self::GA605_2025,
+            "GA605_2024" => Self::GA605_2024,
+            "GU605_2025" => Self::GU605_2025,
+            "GU605_2024" => Self::GU605_2024,
+            "G614_2025" => Self::G614_2025,
             _ => Self::Unsupported,
         })
     }
