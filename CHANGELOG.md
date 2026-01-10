@@ -4,6 +4,9 @@
 
 ### Changed
 - Added support for TUF keyboard powerstate control
+- Improved AniMe Matrix support thanks to @Seom1177 !
+- Fixed a bug with one-shot battery change, thanks @bitr8 !
+
 
 ## [6.2.0]
 

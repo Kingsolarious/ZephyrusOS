@@ -54,7 +54,12 @@ impl SlashType {
         let board_name = DMIID::new().unwrap_or_default().board_name.to_uppercase();
         if board_name.contains("G614F") {
             SlashType::G614_2025
-        } else if ["GA403W", "GA403UH", "GA403UM", "GA403UP"].iter().any(|s| board_name.contains(s)) {
+        } else if [
+            "GA403W", "GA403UH", "GA403UM", "GA403UP",
+        ]
+        .iter()
+        .any(|s| board_name.contains(s))
+        {
             SlashType::GA403_2025
         } else if board_name.contains("GA403") {
             SlashType::GA403_2024
