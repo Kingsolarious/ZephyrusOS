@@ -203,7 +203,6 @@ fn do_parsed(
         Some(CliCommand::FanCurve(cmd)) => {
             handle_fan_curve(&conn, cmd)?;
         }
-        Some(CliCommand::Graphics(_)) => do_gfx(),
         Some(CliCommand::Anime(cmd)) => handle_anime(cmd)?,
         Some(CliCommand::Slash(cmd)) => handle_slash(cmd)?,
         Some(CliCommand::Scsi(cmd)) => handle_scsi(cmd)?,
@@ -292,14 +291,6 @@ fn do_parsed(
     }
 
     Ok(())
-}
-
-fn do_gfx() {
-    println!(
-        "Please use supergfxctl for graphics switching. supergfxctl is the result of making \
-         asusctl graphics switching generic so all laptops can use it"
-    );
-    println!("This command will be removed in future");
 }
 
 fn handle_backlight(cmd: &BacklightCommand) -> Result<(), Box<dyn std::error::Error>> {

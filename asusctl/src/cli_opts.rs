@@ -44,7 +44,6 @@ pub enum CliCommand {
     AuraPower(LedPowerCommand2),
     Profile(ProfileCommand),
     FanCurve(FanCurveCommand),
-    Graphics(GraphicsCommand),
     Anime(AnimeCommand),
     Slash(SlashCommand),
     Scsi(ScsiCommand),
@@ -94,14 +93,6 @@ pub struct LedModeCommand {
     #[argh(subcommand)]
     pub command: Option<SetAuraBuiltin>,
 }
-
-#[derive(FromArgs, Debug, Default)]
-#[argh(
-    subcommand,
-    name = "graphics",
-    description = "graphics command (deprecated)"
-)]
-pub struct GraphicsCommand {}
 
 #[derive(FromArgs, Debug, Default)]
 #[argh(
