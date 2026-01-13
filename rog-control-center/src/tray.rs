@@ -170,7 +170,7 @@ pub fn init_tray(_supported_properties: Vec<Properties>, config: Arc<Mutex<Confi
 
         // TODO: return an error to the UI
         let mut tray;
-        match tray_init.spawn_without_dbus_name().await {
+        match tray_init.disable_dbus_name(true).spawn().await {
             Ok(t) => tray = t,
             Err(e) => {
                 log::error!(
