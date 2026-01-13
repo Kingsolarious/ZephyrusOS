@@ -10,9 +10,6 @@ use crate::slash_cli::SlashCommand;
 #[derive(FromArgs, Default, Debug)]
 /// asusctl command-line options
 pub struct CliStart {
-    #[argh(switch, description = "show program version number")]
-    pub version: bool,
-
     #[argh(switch, description = "show supported functions of this laptop")]
     pub show_supported: bool,
 
@@ -49,6 +46,7 @@ pub enum CliCommand {
     Scsi(ScsiCommand),
     Armoury(ArmouryCommand),
     Backlight(BacklightCommand),
+    Info(InfoCommand),
 }
 
 #[derive(FromArgs, Debug, Clone, Default)]
@@ -126,3 +124,11 @@ pub struct BacklightCommand {
     )]
     pub sync_screenpad_brightness: Option<bool>,
 }
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "info",
+    description = "show program version and system info"
+)]
+pub struct InfoCommand {}

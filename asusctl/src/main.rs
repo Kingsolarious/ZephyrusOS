@@ -54,8 +54,6 @@ fn main() {
         .format_timestamp(None)
         .init();
 
-    let self_version = env!("CARGO_PKG_VERSION");
-    println!("Starting version {self_version}");
     let parsed: CliStart = argh::from_env();
 
     let conn = Connection::system().unwrap();
@@ -75,6 +73,7 @@ fn main() {
             }
         };
 
+        let self_version = env!("CARGO_PKG_VERSION");
         if asusd_version != self_version {
             println!("Version mismatch: asusctl = {self_version}, asusd = {asusd_version}");
             return;
@@ -94,12 +93,6 @@ fn main() {
                 return;
             }
         };
-
-        if parsed.version {
-            println!("asusctl v{}", env!("CARGO_PKG_VERSION"));
-            println!();
-            print_info();
-        }
 
         if let Err(err) = do_parsed(&parsed, &supported_interfaces, &supported_properties, conn) {
             print_error_help(&*err, &supported_interfaces, &supported_properties);
@@ -127,9 +120,9 @@ fn print_info() {
     let dmi = DMIID::new().unwrap_or_default();
     let board_name = dmi.board_name;
     let prod_family = dmi.product_family;
-    println!("asusctl version: {}", env!("CARGO_PKG_VERSION"));
-    println!(" Product family: {}", prod_family.trim());
-    println!("     Board name: {}", board_name.trim());
+    println!("Software version: {}", env!("CARGO_PKG_VERSION"));
+    println!("  Product family: {}", prod_family.trim());
+    println!("      Board name: {}", board_name.trim());
 }
 
 fn check_service(name: &str) -> bool {
@@ -208,6 +201,11 @@ fn do_parsed(
         Some(CliCommand::Scsi(cmd)) => handle_scsi(cmd)?,
         Some(CliCommand::Armoury(cmd)) => handle_armoury_command(cmd)?,
         Some(CliCommand::Backlight(cmd)) => handle_backlight(cmd)?,
+        Some(CliCommand::Info(_)) => {
+            println!("asusctl v{}", env!("CARGO_PKG_VERSION"));
+            println!();
+            print_info();
+        }
         None => {
             if !parsed.show_supported
                 && parsed.kbd_bright.is_none()
