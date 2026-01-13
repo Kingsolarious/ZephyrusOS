@@ -99,11 +99,61 @@ pub struct LedModeCommand {
     description = "armoury / firmware attributes"
 )]
 pub struct ArmouryCommand {
+    #[argh(subcommand)]
+    pub command: ArmourySubCommand,
+}
+
+#[derive(FromArgs, Debug)]
+#[argh(subcommand)]
+pub enum ArmourySubCommand {
+    Set(ArmouryPropertySetCommand),
+    Get(ArmouryPropertyGetCommand),
+    List(ArmouryPropertyListCommand),
+}
+
+impl Default for ArmourySubCommand {
+    fn default() -> Self {
+        ArmourySubCommand::List(ArmouryPropertyListCommand::default())
+    }
+}
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "set",
+    description = "set an asus-armoury firmware-attribute"
+)]
+pub struct ArmouryPropertySetCommand {
     #[argh(
         positional,
-        description = "append each value name followed by the value to set. `-1` sets to default"
+        description = "name of the attribute to set (see asus-armoury list for available properties)"
     )]
-    pub free: Vec<String>,
+    pub property: String,
+
+    #[argh(positional, description = "value to set for the given attribute")]
+    pub value: i32,
+}
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "list",
+    description = "list all firmware-attributes supported by asus-armoury"
+)]
+pub struct ArmouryPropertyListCommand {}
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "get",
+    description = "get a firmware-attribute from asus-armoury"
+)]
+pub struct ArmouryPropertyGetCommand {
+    #[argh(
+        positional,
+        description = "name of the property to get (see asus-armoury list for available properties)"
+    )]
+    pub property: String,
 }
 
 #[derive(FromArgs, Debug, Default)]

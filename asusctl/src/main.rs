@@ -1009,33 +1009,33 @@ fn print_firmware_attr(attr: &AsusArmouryProxyBlocking) -> Result<(), Box<dyn st
 
 #[allow(clippy::manual_is_multiple_of, clippy::nonminimal_bool)]
 fn handle_armoury_command(cmd: &ArmouryCommand) -> Result<(), Box<dyn std::error::Error>> {
-    {
-        if cmd.free.is_empty() || (cmd.free.len() % 2 != 0) {
-            const USAGE: &str = "Usage: asusctl armoury panel_overdrive 1 nv_dynamic_boost 5";
-            if cmd.free.len() % 2 != 0 {
-                println!(
-                    "Incorrect number of args, each attribute label must be paired with a setting:"
-                );
-                println!("{USAGE}");
-                return Ok(());
-            }
-
-            if let Ok(attr) = find_iface::<AsusArmouryProxyBlocking>("xyz.ljones.AsusArmoury") {
-                println!("\n{USAGE}\n");
-                println!("Available firmware attributes: ");
-                for attr in attr.iter() {
+    // If nested subcommand provided, handle set/get/list.
+    match &cmd.command {
+        ArmourySubCommand::List(_) => {
+            if let Ok(attrs) = find_iface::<AsusArmouryProxyBlocking>("xyz.ljones.AsusArmoury") {
+                for attr in attrs.iter() {
                     print_firmware_attr(attr)?;
                 }
             }
             return Ok(());
         }
-
-        if let Ok(attr) = find_iface::<AsusArmouryProxyBlocking>("xyz.ljones.AsusArmoury") {
-            for cmd in cmd.free.chunks(2) {
-                for attr in attr.iter() {
+        ArmourySubCommand::Get(g) => {
+            if let Ok(attrs) = find_iface::<AsusArmouryProxyBlocking>("xyz.ljones.AsusArmoury") {
+                for attr in attrs.iter() {
                     let name = attr.name()?;
-                    if <&str>::from(name) == cmd[0] {
-                        let mut value: i32 = cmd[1].parse()?;
+                    if <&str>::from(name) == g.property {
+                        print_firmware_attr(attr)?;
+                    }
+                }
+            }
+            return Ok(());
+        }
+        ArmourySubCommand::Set(s) => {
+            if let Ok(attrs) = find_iface::<AsusArmouryProxyBlocking>("xyz.ljones.AsusArmoury") {
+                for attr in attrs.iter() {
+                    let name = attr.name()?;
+                    if <&str>::from(name) == s.property {
+                        let mut value: i32 = s.value;
                         if value == -1 {
                             info!("Setting to default");
                             value = attr.default_value()?;
@@ -1045,7 +1045,7 @@ fn handle_armoury_command(cmd: &ArmouryCommand) -> Result<(), Box<dyn std::error
                     }
                 }
             }
+            return Ok(());
         }
     }
-    Ok(())
 }
