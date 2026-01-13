@@ -1,35 +1,30 @@
-use gumdrop::Options;
+use argh::FromArgs;
 use rog_scsi::{AuraMode, Colour, Direction, Speed};
 
-#[derive(Options)]
+#[derive(FromArgs, Debug)]
+#[argh(subcommand, name = "scsi", description = "scsi LED commands")]
 pub struct ScsiCommand {
-    #[options(help = "print help message")]
-    pub help: bool,
-
-    #[options(help = "Enable the SCSI drive LEDs")]
+    #[argh(option, description = "enable the SCSI drive LEDs")]
     pub enable: Option<bool>,
 
-    #[options(meta = "", help = "Set LED mode (so 'list' for all options)")]
+    #[argh(option, description = "set LED mode (use 'list' for all options)")]
     pub mode: Option<AuraMode>,
 
-    #[options(
-        meta = "",
-        help = "Set LED mode speed <slowest, slow, med, fast, fastest> (does not apply to all)"
+    #[argh(
+        option,
+        description = "set LED mode speed <slowest, slow, med, fast, fastest>"
     )]
     pub speed: Option<Speed>,
 
-    #[options(
-        meta = "",
-        help = "Set LED mode direction <forward, reverse> (does not apply to all)"
-    )]
+    #[argh(option, description = "set LED mode direction <forward, reverse>")]
     pub direction: Option<Direction>,
 
-    #[options(
-        meta = "",
-        help = "Set LED colours <hex>, specify up to 4 with repeated arg"
+    #[argh(
+        option,
+        description = "set LED colours <hex>, specify up to 4 with repeated arg"
     )]
     pub colours: Vec<Colour>,
 
-    #[options(help = "list available animations")]
+    #[argh(switch, description = "list available animations")]
     pub list: bool,
 }

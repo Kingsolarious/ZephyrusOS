@@ -1,154 +1,151 @@
-use gumdrop::Options;
-use rog_anime::usb::{AnimAwake, AnimBooting, AnimShutdown, AnimSleeping, Brightness};
+use argh::FromArgs;
+use rog_anime::usb::{AnimAwake, AnimBooting, AnimShutdown, AnimSleeping};
 use rog_anime::AnimeType;
 
-#[derive(Options)]
+#[derive(FromArgs, Debug)]
+#[argh(subcommand, name = "anime", description = "anime commands")]
 pub struct AnimeCommand {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(meta = "", help = "override the display type")]
+    #[argh(option, description = "override the display type")]
     pub override_type: Option<AnimeType>,
-    #[options(meta = "", help = "enable/disable the display")]
+    #[argh(option, description = "enable/disable the display")]
     pub enable_display: Option<bool>,
-    #[options(meta = "", help = "enable/disable the builtin run/powersave animation")]
-    pub enable_powersave_anim: Option<bool>,
-    #[options(
-        meta = "",
-        help = "set global base brightness value <Off, Low, Med, High>"
+    #[argh(
+        option,
+        description = "enable/disable the builtin run/powersave animation"
     )]
-    pub brightness: Option<Brightness>,
-    #[options(help = "clear the display")]
+    pub enable_powersave_anim: Option<bool>,
+    #[argh(
+        option,
+        description = "set global base brightness value <off, low, med, high>"
+    )]
+    pub brightness: Option<rog_anime::usb::Brightness>,
+    #[argh(switch, description = "clear the display")]
     pub clear: bool,
-    #[options(
-        no_short,
-        meta = "",
-        help = "turn the anime off when external power is unplugged"
+    #[argh(
+        option,
+        description = "turn the anime off when external power is unplugged"
     )]
     pub off_when_unplugged: Option<bool>,
-    #[options(
-        no_short,
-        meta = "",
-        help = "turn the anime off when the laptop suspends"
-    )]
+    #[argh(option, description = "turn the anime off when the laptop suspends")]
     pub off_when_suspended: Option<bool>,
-    #[options(
-        no_short,
-        meta = "",
-        help = "turn the anime off when the lid is closed"
-    )]
+    #[argh(option, description = "turn the anime off when the lid is closed")]
     pub off_when_lid_closed: Option<bool>,
-    #[options(no_short, meta = "", help = "Off with his head!!!")]
+    #[argh(option, description = "off with his head!!!")]
     pub off_with_his_head: Option<bool>,
-    #[options(command)]
+    #[argh(subcommand)]
     pub command: Option<AnimeActions>,
 }
 
-#[derive(Options)]
+/// Anime subcommands (image, gif, builtins, etc.)
+#[derive(FromArgs, Debug)]
+#[argh(subcommand)]
 pub enum AnimeActions {
-    #[options(help = "display a PNG image")]
     Image(AnimeImage),
-    #[options(help = "display a diagonal/pixel-perfect PNG")]
     PixelImage(AnimeImageDiagonal),
-    #[options(help = "display an animated GIF")]
     Gif(AnimeGif),
-    #[options(help = "display an animated diagonal/pixel-perfect GIF")]
     PixelGif(AnimeGifDiagonal),
-    #[options(help = "change which builtin animations are shown")]
     SetBuiltins(Builtins),
 }
 
-#[derive(Options)]
+#[derive(FromArgs, Debug)]
+#[argh(
+    subcommand,
+    name = "set-builtins",
+    description = "change which builtin animations are shown"
+)]
 pub struct Builtins {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(
-        meta = "",
-        help = "Default is used if unspecified, <default:GlitchConstruction, StaticEmergence>"
+    #[argh(
+        option,
+        description = "default is used if unspecified, <default:GlitchConstruction, StaticEmergence>"
     )]
     pub boot: AnimBooting,
-    #[options(
-        meta = "",
-        help = "Default is used if unspecified, <default:BinaryBannerScroll, RogLogoGlitch>"
+    #[argh(
+        option,
+        description = "default is used if unspecified, <default:BinaryBannerScroll, RogLogoGlitch>"
     )]
     pub awake: AnimAwake,
-    #[options(
-        meta = "",
-        help = "Default is used if unspecified, <default:BannerSwipe, Starfield>"
+    #[argh(
+        option,
+        description = "default is used if unspecified, <default:BannerSwipe, Starfield>"
     )]
     pub sleep: AnimSleeping,
-    #[options(
-        meta = "",
-        help = "Default is used if unspecified, <default:GlitchOut, SeeYa>"
+    #[argh(
+        option,
+        description = "default is used if unspecified, <default:GlitchOut, SeeYa>"
     )]
     pub shutdown: AnimShutdown,
-    #[options(meta = "", help = "set/apply the animations <true/false>")]
+    #[argh(option, description = "set/apply the animations <true/false>")]
     pub set: Option<bool>,
 }
 
-#[derive(Options)]
+#[derive(FromArgs, Debug)]
+#[argh(subcommand, name = "image", description = "display a PNG image")]
 pub struct AnimeImage {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(meta = "", help = "full path to the png to display")]
+    #[argh(option, description = "full path to the png to display")]
     pub path: String,
-    #[options(meta = "", default = "1.0", help = "scale 1.0 == normal")]
+    #[argh(option, default = "1.0", description = "scale 1.0 == normal")]
     pub scale: f32,
-    #[options(meta = "", default = "0.0", help = "x position (float)")]
+    #[argh(option, default = "0.0", description = "x position (float)")]
     pub x_pos: f32,
-    #[options(meta = "", default = "0.0", help = "y position (float)")]
+    #[argh(option, default = "0.0", description = "y position (float)")]
     pub y_pos: f32,
-    #[options(meta = "", default = "0.0", help = "the angle in radians")]
+    #[argh(option, default = "0.0", description = "the angle in radians")]
     pub angle: f32,
-    #[options(meta = "", default = "1.0", help = "brightness 0.0-1.0")]
+    #[argh(option, default = "1.0", description = "brightness 0.0-1.0")]
     pub bright: f32,
 }
 
-#[derive(Options)]
+#[derive(FromArgs, Debug)]
+#[argh(
+    subcommand,
+    name = "pixel-image",
+    description = "display a diagonal/pixel-perfect PNG"
+)]
 pub struct AnimeImageDiagonal {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(meta = "", help = "full path to the png to display")]
+    #[argh(option, description = "full path to the png to display")]
     pub path: String,
-    #[options(meta = "", default = "1.0", help = "brightness 0.0-1.0")]
+    #[argh(option, default = "1.0", description = "brightness 0.0-1.0")]
     pub bright: f32,
 }
 
-#[derive(Options)]
+#[derive(FromArgs, Debug)]
+#[argh(subcommand, name = "gif", description = "display an animated GIF")]
 pub struct AnimeGif {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(meta = "", help = "full path to the png to display")]
+    #[argh(option, description = "full path to the gif to display")]
     pub path: String,
-    #[options(meta = "", default = "1.0", help = "scale 1.0 == normal")]
+    #[argh(option, default = "1.0", description = "scale 1.0 == normal")]
     pub scale: f32,
-    #[options(meta = "", default = "0.0", help = "x position (float)")]
+    #[argh(option, default = "0.0", description = "x position (float)")]
     pub x_pos: f32,
-    #[options(meta = "", default = "0.0", help = "y position (float)")]
+    #[argh(option, default = "0.0", description = "y position (float)")]
     pub y_pos: f32,
-    #[options(meta = "", default = "0.0", help = "the angle in radians")]
+    #[argh(option, default = "0.0", description = "the angle in radians")]
     pub angle: f32,
-    #[options(meta = "", default = "1.0", help = "brightness 0.0-1.0")]
+    #[argh(option, default = "1.0", description = "brightness 0.0-1.0")]
     pub bright: f32,
-    #[options(
-        meta = "",
+    #[argh(
+        option,
         default = "1",
-        help = "how many loops to play - 0 is infinite"
+        description = "how many loops to play - 0 is infinite"
     )]
     pub loops: u32,
 }
 
-#[derive(Options)]
+#[derive(FromArgs, Debug)]
+#[argh(
+    subcommand,
+    name = "pixel-gif",
+    description = "display an animated diagonal/pixel-perfect GIF"
+)]
 pub struct AnimeGifDiagonal {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(meta = "", help = "full path to the png to display")]
+    #[argh(option, description = "full path to the gif to display")]
     pub path: String,
-    #[options(meta = "", default = "1.0", help = "brightness 0.0-1.0")]
+    #[argh(option, default = "1.0", description = "brightness 0.0-1.0")]
     pub bright: f32,
-    #[options(
-        meta = "",
+    #[argh(
+        option,
         default = "1",
-        help = "how many loops to play - 0 is infinite"
+        description = "how many loops to play - 0 is infinite"
     )]
     pub loops: u32,
 }

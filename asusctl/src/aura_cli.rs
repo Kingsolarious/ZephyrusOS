@@ -1,68 +1,66 @@
 use std::str::FromStr;
 
-use gumdrop::Options;
+use argh::FromArgs;
 use rog_aura::error::Error;
 use rog_aura::{AuraEffect, AuraModeNum, AuraZone, Colour, Direction, Speed};
 
-#[derive(Options, Debug)]
+#[derive(FromArgs, Debug, Clone)]
+#[argh(
+    subcommand,
+    name = "aura-power-old",
+    description = "aura power (old api)"
+)]
 pub struct LedPowerCommand1 {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(meta = "", help = "Control if LEDs enabled while awake <true/false>")]
+    #[argh(
+        option,
+        description = "control if LEDs enabled while awake <true/false>"
+    )]
     pub awake: Option<bool>,
-    #[options(help = "Use with awake option, if excluded defaults to false")]
+
+    #[argh(
+        switch,
+        description = "use with awake option; if excluded defaults to false"
+    )]
     pub keyboard: bool,
-    #[options(help = "Use with awake option, if excluded defaults to false")]
+
+    #[argh(
+        switch,
+        description = "use with awake option; if excluded defaults to false"
+    )]
     pub lightbar: bool,
-    #[options(meta = "", help = "Control boot animations <true/false>")]
+
+    #[argh(option, description = "control boot animations <true/false>")]
     pub boot: Option<bool>,
-    #[options(meta = "", help = "Control suspend animations <true/false>")]
+
+    #[argh(option, description = "control suspend animations <true/false>")]
     pub sleep: Option<bool>,
 }
 
-#[derive(Options, Debug)]
+#[derive(FromArgs, Debug, Clone)]
+#[argh(subcommand, name = "aura-power", description = "aura power")]
 pub struct LedPowerCommand2 {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(command)]
+    #[argh(subcommand)]
     pub command: Option<SetAuraZoneEnabled>,
 }
 
-#[derive(Options, Debug)]
+/// Subcommands to enable/disable specific aura zones
+#[derive(FromArgs, Debug, Clone)]
+#[argh(subcommand)]
 pub enum SetAuraZoneEnabled {
-    /// Applies to both old and new models
-    #[options(help = "")]
-    Keyboard(AuraPowerStates),
-    #[options(help = "")]
-    Logo(AuraPowerStates),
-    #[options(help = "")]
-    Lightbar(AuraPowerStates),
-    #[options(help = "")]
-    Lid(AuraPowerStates),
-    #[options(help = "")]
-    RearGlow(AuraPowerStates),
-    #[options(help = "")]
-    Ally(AuraPowerStates),
+    Keyboard(KeyboardPower),
+    Logo(LogoPower),
+    Lightbar(LightbarPower),
+    Lid(LidPower),
+    RearGlow(RearGlowPower),
+    Ally(AllyPower),
 }
 
-#[derive(Debug, Clone, Options)]
-pub struct AuraPowerStates {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(help = "defaults to false if option unused")]
-    pub boot: bool,
-    #[options(help = "defaults to false if option unused")]
-    pub awake: bool,
-    #[options(help = "defaults to false if option unused")]
-    pub sleep: bool,
-    #[options(help = "defaults to false if option unused")]
-    pub shutdown: bool,
-}
-
-#[derive(Options)]
+/// Keyboard brightness argument helper
+#[derive(Debug, Clone)]
 pub struct LedBrightness {
     level: Option<u8>,
 }
+
 impl LedBrightness {
     pub fn new(level: Option<u8>) -> Self {
         LedBrightness { level }
@@ -72,176 +70,296 @@ impl LedBrightness {
         self.level
     }
 }
+
 impl FromStr for LedBrightness {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let s = s.to_lowercase();
         match s.as_str() {
-            "off" => Ok(LedBrightness { level: Some(0x00) }),
-            "low" => Ok(LedBrightness { level: Some(0x01) }),
-            "med" => Ok(LedBrightness { level: Some(0x02) }),
-            "high" => Ok(LedBrightness { level: Some(0x03) }),
-            _ => {
-                print!("Invalid argument, must be one of: off, low, med, high");
-                Err(Error::ParseBrightness)
-            }
+            "off" => Ok(Self::new(Some(0x00))),
+            "low" => Ok(Self::new(Some(0x01))),
+            "med" => Ok(Self::new(Some(0x02))),
+            "high" => Ok(Self::new(Some(0x03))),
+            _ => Err(Error::ParseBrightness),
         }
     }
 }
-#[allow(clippy::to_string_trait_impl)]
+
 impl ToString for LedBrightness {
     fn to_string(&self) -> String {
-        let s = match self.level {
-            Some(0x00) => "low",
-            Some(0x01) => "med",
-            Some(0x02) => "high",
-            _ => "unknown",
-        };
-        s.to_owned()
+        match self.level {
+            Some(0x00) => "off".to_owned(),
+            Some(0x01) => "low".to_owned(),
+            Some(0x02) => "med".to_owned(),
+            Some(0x03) => "high".to_owned(),
+            _ => "unknown".to_owned(),
+        }
     }
 }
 
-#[derive(Debug, Clone, Options, Default)]
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "keyboard",
+    description = "set power states for keyboard zone"
+)]
+pub struct KeyboardPower {
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub boot: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub awake: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub sleep: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub shutdown: bool,
+}
+
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "logo",
+    description = "set power states for logo zone"
+)]
+pub struct LogoPower {
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub boot: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub awake: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub sleep: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub shutdown: bool,
+}
+
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "lightbar",
+    description = "set power states for lightbar zone"
+)]
+pub struct LightbarPower {
+    #[argh(switch, description = "enable power while device is booting")]
+    pub boot: bool,
+    #[argh(switch, description = "enable power while device is awake")]
+    pub awake: bool,
+    #[argh(switch, description = "enable power while device is sleeping")]
+    pub sleep: bool,
+    #[argh(
+        switch,
+        description = "enable power while device is shutting down or hibernating"
+    )]
+    pub shutdown: bool,
+}
+
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "lid",
+    description = "set power states for lid zone"
+)]
+pub struct LidPower {
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub boot: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub awake: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub sleep: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub shutdown: bool,
+}
+
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "rear-glow",
+    description = "set power states for rear glow zone"
+)]
+pub struct RearGlowPower {
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub boot: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub awake: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub sleep: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub shutdown: bool,
+}
+
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "ally",
+    description = "set power states for ally zone"
+)]
+pub struct AllyPower {
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub boot: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub awake: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub sleep: bool,
+    #[argh(switch, description = "defaults to false if option unused")]
+    pub shutdown: bool,
+}
+
+/// Single speed-based effect
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "rainbow-cycle",
+    description = "single speed-based effect"
+)]
 pub struct SingleSpeed {
-    #[options(help = "print help message")]
-    help: bool,
-    #[options(no_long, meta = "WORD", help = "set the speed: low, med, high")]
+    #[argh(option, description = "set the speed: low, med, high")]
     pub speed: Speed,
-    #[options(
-        no_long,
-        meta = "",
-        help = "set the zone for this effect e.g, 0, 1, one, logo, lightbar-left"
+
+    #[argh(
+        option,
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
     )]
     pub zone: AuraZone,
 }
 
-#[derive(Debug, Clone, Options, Default)]
+/// Single speed effect with direction
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "rainbow-wave",
+    description = "single speed effect with direction"
+)]
 pub struct SingleSpeedDirection {
-    #[options(help = "print help message")]
-    help: bool,
-    #[options(no_long, meta = "", help = "set the direction: up, down, left, right")]
+    #[argh(option, description = "set the direction: up, down, left, right")]
     pub direction: Direction,
-    #[options(no_long, meta = "", help = "set the speed: low, med, high")]
+
+    #[argh(option, description = "set the speed: low, med, high")]
     pub speed: Speed,
-    #[options(
-        no_long,
-        meta = "",
-        help = "set the zone for this effect e.g, 0, 1, one, logo, lightbar-left"
+
+    #[argh(
+        option,
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
     )]
     pub zone: AuraZone,
 }
 
-#[derive(Debug, Clone, Default, Options)]
+/// Static single-colour effect
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "static",
+    description = "static single-colour effect"
+)]
 pub struct SingleColour {
-    #[options(help = "print help message")]
-    help: bool,
-    #[options(no_long, meta = "", help = "set the RGB value e.g, ff00ff")]
+    #[argh(option, description = "set the RGB value e.g. ff00ff")]
     pub colour: Colour,
-    #[options(
-        no_long,
-        meta = "",
-        help = "set the zone for this effect e.g, 0, 1, one, logo, lightbar-left"
+
+    #[argh(
+        option,
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
     )]
     pub zone: AuraZone,
 }
 
-#[derive(Debug, Clone, Default, Options)]
+/// Single-colour effect with speed
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "highlight",
+    description = "single-colour effect with speed"
+)]
 pub struct SingleColourSpeed {
-    #[options(help = "print help message")]
-    help: bool,
-    #[options(no_long, meta = "", help = "set the RGB value e.g, ff00ff")]
+    #[argh(option, description = "set the RGB value e.g. ff00ff")]
     pub colour: Colour,
-    #[options(no_long, meta = "", help = "set the speed: low, med, high")]
+
+    #[argh(option, description = "set the speed: low, med, high")]
     pub speed: Speed,
-    #[options(
-        no_long,
-        meta = "",
-        help = "set the zone for this effect e.g, 0, 1, one, logo, lightbar-left"
+
+    #[argh(
+        option,
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
     )]
     pub zone: AuraZone,
 }
 
-#[derive(Debug, Clone, Options, Default)]
+/// Two-colour breathing effect
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "breathe",
+    description = "two-colour breathing effect"
+)]
 pub struct TwoColourSpeed {
-    #[options(help = "print help message")]
-    help: bool,
-    #[options(no_long, meta = "", help = "set the first RGB value e.g, ff00ff")]
+    #[argh(option, description = "set the first RGB value e.g. ff00ff")]
     pub colour: Colour,
-    #[options(no_long, meta = "", help = "set the second RGB value e.g, ff00ff")]
+
+    #[argh(option, description = "set the second RGB value e.g. ff00ff")]
     pub colour2: Colour,
-    #[options(no_long, meta = "", help = "set the speed: low, med, high")]
+
+    #[argh(option, description = "set the speed: low, med, high")]
     pub speed: Speed,
-    #[options(
-        no_long,
-        meta = "",
-        help = "set the zone for this effect e.g, 0, 1, one, logo, lightbar-left"
+
+    #[argh(
+        option,
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
     )]
     pub zone: AuraZone,
 }
 
-#[derive(Debug, Clone, Default, Options)]
+/// Multi-zone colour settings
+#[derive(FromArgs, Debug, Clone, Default)]
 #[allow(dead_code)]
+#[argh(description = "multi-zone colour settings")]
 pub struct MultiZone {
-    #[options(help = "print help message")]
-    help: bool,
-    #[options(short = "a", meta = "", help = "set the RGB value e.g, ff00ff")]
+    #[argh(option, short = 'a', description = "set the RGB value e.g. ff00ff")]
     pub colour1: Colour,
-    #[options(short = "b", meta = "", help = "set the RGB value e.g, ff00ff")]
+
+    #[argh(option, short = 'b', description = "set the RGB value e.g. ff00ff")]
     pub colour2: Colour,
-    #[options(short = "c", meta = "", help = "set the RGB value e.g, ff00ff")]
+
+    #[argh(option, short = 'c', description = "set the RGB value e.g. ff00ff")]
     pub colour3: Colour,
-    #[options(short = "d", meta = "", help = "set the RGB value e.g, ff00ff")]
+
+    #[argh(option, short = 'd', description = "set the RGB value e.g. ff00ff")]
     pub colour4: Colour,
 }
 
-#[derive(Debug, Clone, Default, Options)]
+/// Multi-colour with speed
+#[derive(FromArgs, Debug, Clone, Default)]
 #[allow(dead_code)]
+#[argh(description = "multi-colour with speed")]
 pub struct MultiColourSpeed {
-    #[options(help = "print help message")]
-    help: bool,
-    #[options(short = "a", meta = "", help = "set the RGB value e.g, ff00ff")]
+    #[argh(option, short = 'a', description = "set the RGB value e.g. ff00ff")]
     pub colour1: Colour,
-    #[options(short = "b", meta = "", help = "set the RGB value e.g, ff00ff")]
+
+    #[argh(option, short = 'b', description = "set the RGB value e.g. ff00ff")]
     pub colour2: Colour,
-    #[options(short = "c", meta = "", help = "set the RGB value e.g, ff00ff")]
+
+    #[argh(option, short = 'c', description = "set the RGB value e.g. ff00ff")]
     pub colour3: Colour,
-    #[options(short = "d", meta = "", help = "set the RGB value e.g, ff00ff")]
+
+    #[argh(option, short = 'd', description = "set the RGB value e.g. ff00ff")]
     pub colour4: Colour,
-    #[options(no_long, meta = "", help = "set the speed: low, med, high")]
+
+    #[argh(option, description = "set the speed: low, med, high")]
     pub speed: Speed,
 }
 
-/// Byte value for setting the built-in mode.
-///
-/// Enum corresponds to the required integer value
-// NOTE: The option names here must match those in rog-aura crate
-#[derive(Options)]
+/// Builtin aura effects
+#[derive(FromArgs, Debug)]
+#[argh(subcommand)]
 pub enum SetAuraBuiltin {
-    #[options(help = "set a single static colour")]
-    Static(SingleColour), // 0
-    #[options(help = "pulse between one or two colours")]
-    Breathe(TwoColourSpeed), // 1
-    #[options(help = "strobe through all colours")]
-    RainbowCycle(SingleSpeed), // 2
-    #[options(help = "rainbow cycling in one of four directions")]
+    Static(SingleColour),              // 0
+    Breathe(TwoColourSpeed),           // 1
+    RainbowCycle(SingleSpeed),         // 2
     RainbowWave(SingleSpeedDirection), // 3
-    #[options(help = "rain pattern mimicking raindrops")]
-    Stars(TwoColourSpeed), // 4
-    #[options(help = "rain pattern of three preset colours")]
-    Rain(SingleSpeed), // 5
-    #[options(help = "pressed keys are highlighted to fade")]
-    Highlight(SingleColourSpeed), // 6
-    #[options(help = "pressed keys generate horizontal laser")]
-    Laser(SingleColourSpeed), // 7
-    #[options(help = "pressed keys ripple outwards like a splash")]
-    Ripple(SingleColourSpeed), // 8
-    #[options(help = "set a rapid pulse")]
-    Pulse(SingleColour), // 10
-    #[options(help = "set a vertical line zooming from left")]
-    Comet(SingleColour), // 11
-    #[options(help = "set a wide vertical line zooming from left")]
-    Flash(SingleColour), // 12
+    Stars(TwoColourSpeed),             // 4
+    Rain(SingleSpeed),                 // 5
+    Highlight(SingleColourSpeed),      // 6
+    Laser(SingleColourSpeed),          // 7
+    Ripple(SingleColourSpeed),         // 8
+    Pulse(SingleColour),               // 10
+    Comet(SingleColour),               // 11
+    Flash(SingleColour),               // 12
 }
 
 impl Default for SetAuraBuiltin {

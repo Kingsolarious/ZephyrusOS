@@ -1,4 +1,4 @@
-use gumdrop::Options;
+use argh::FromArgs;
 use rog_platform::platform::PlatformProfile;
 
 use crate::anime_cli::AnimeCommand;
@@ -7,128 +7,131 @@ use crate::fan_curve_cli::FanCurveCommand;
 use crate::scsi_cli::ScsiCommand;
 use crate::slash_cli::SlashCommand;
 
-#[derive(Default, Options)]
+#[derive(FromArgs, Default, Debug)]
+/// asusctl command-line options
 pub struct CliStart {
-    #[options(help_flag, help = "print help message")]
-    pub help: bool,
-    #[options(help = "show program version number")]
+    #[argh(switch, description = "show program version number")]
     pub version: bool,
-    #[options(help = "show supported functions of this laptop")]
+
+    #[argh(switch, description = "show supported functions of this laptop")]
     pub show_supported: bool,
-    #[options(meta = "", help = "<off, low, med, high>")]
+
+    #[argh(option, description = "keyboard brightness <off, low, med, high>")]
     pub kbd_bright: Option<LedBrightness>,
-    #[options(help = "Toggle to next keyboard brightness")]
+
+    #[argh(switch, description = "toggle to next keyboard brightness")]
     pub next_kbd_bright: bool,
-    #[options(help = "Toggle to previous keyboard brightness")]
+
+    #[argh(switch, description = "toggle to previous keyboard brightness")]
     pub prev_kbd_bright: bool,
-    #[options(meta = "", help = "Set your battery charge limit <20-100>")]
+
+    #[argh(option, description = "set your battery charge limit <20-100>")]
     pub chg_limit: Option<u8>,
-    #[options(help = "Toggle one-shot battery charge to 100%")]
+
+    #[argh(switch, description = "toggle one-shot battery charge to 100%")]
     pub one_shot_chg: bool,
-    #[options(command)]
+
+    #[argh(subcommand)]
     pub command: Option<CliCommand>,
 }
 
-#[derive(Options)]
+/// Top-level subcommands for asusctl
+#[derive(FromArgs, Debug)]
+#[argh(subcommand)]
 pub enum CliCommand {
-    #[options(help = "Set the keyboard lighting from built-in modes")]
     Aura(LedModeCommand),
-    #[options(help = "Set the LED power states")]
     AuraPowerOld(LedPowerCommand1),
-    #[options(help = "Set the LED power states")]
     AuraPower(LedPowerCommand2),
-    #[options(help = "Set or select platform_profile")]
     Profile(ProfileCommand),
-    #[options(help = "Set, select, or modify fan curves if supported")]
     FanCurve(FanCurveCommand),
-    #[options(help = "Set the graphics mode (obsoleted by supergfxctl)")]
     Graphics(GraphicsCommand),
-    #[options(name = "anime", help = "Manage AniMe Matrix")]
     Anime(AnimeCommand),
-    #[options(name = "slash", help = "Manage Slash Ledbar")]
     Slash(SlashCommand),
-    #[options(name = "scsi", help = "Manage SCSI external drive")]
     Scsi(ScsiCommand),
-    #[options(
-        help = "Change platform settings. This is a new interface exposed by the asus-armoury \
-                driver, some of the settings will be the same as the older platform interface"
-    )]
     Armoury(ArmouryCommand),
-    #[options(name = "backlight", help = "Set screen backlight levels")]
     Backlight(BacklightCommand),
 }
 
-#[derive(Debug, Clone, Options)]
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(subcommand, name = "profile", description = "profile management")]
 pub struct ProfileCommand {
-    #[options(help = "print help message")]
-    pub help: bool,
-
-    #[options(help = "toggle to next profile in list")]
+    #[argh(switch, description = "toggle to next profile in list")]
     pub next: bool,
 
-    #[options(help = "list available profiles")]
+    #[argh(switch, description = "list available profiles")]
     pub list: bool,
 
-    #[options(help = "get profile")]
+    #[argh(switch, description = "get profile")]
     pub profile_get: bool,
 
-    #[options(meta = "", help = "set the active profile")]
+    #[argh(option, description = "set the active profile")]
     pub profile_set: Option<PlatformProfile>,
 
-    #[options(short = "a", meta = "", help = "set the profile to use on AC power")]
+    #[argh(
+        option,
+        short = 'a',
+        description = "set the profile to use on AC power"
+    )]
     pub profile_set_ac: Option<PlatformProfile>,
 
-    #[options(
-        short = "b",
-        meta = "",
-        help = "set the profile to use on battery power"
+    #[argh(
+        option,
+        short = 'b',
+        description = "set the profile to use on battery power"
     )]
     pub profile_set_bat: Option<PlatformProfile>,
 }
 
-#[derive(Options)]
+#[derive(FromArgs, Debug, Default)]
+#[argh(subcommand, name = "aura", description = "led mode commands")]
 pub struct LedModeCommand {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(help = "switch to next aura mode")]
+    #[argh(switch, description = "switch to next aura mode")]
     pub next_mode: bool,
-    #[options(help = "switch to previous aura mode")]
+
+    #[argh(switch, description = "switch to previous aura mode")]
     pub prev_mode: bool,
-    #[options(command)]
+
+    #[argh(subcommand)]
     pub command: Option<SetAuraBuiltin>,
 }
 
-#[derive(Options)]
-pub struct GraphicsCommand {
-    #[options(help = "print help message")]
-    pub help: bool,
-}
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "graphics",
+    description = "graphics command (deprecated)"
+)]
+pub struct GraphicsCommand {}
 
-#[derive(Options, Debug)]
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "armoury",
+    description = "armoury / firmware attributes"
+)]
 pub struct ArmouryCommand {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(
-        free,
-        help = "append each value name followed by the value to set. `-1` sets to default"
+    #[argh(
+        positional,
+        description = "append each value name followed by the value to set. `-1` sets to default"
     )]
     pub free: Vec<String>,
 }
 
-#[derive(Options)]
+#[derive(FromArgs, Debug, Default)]
+#[argh(subcommand, name = "backlight", description = "backlight options")]
 pub struct BacklightCommand {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(meta = "", help = "Set screen brightness <0-100>")]
+    #[argh(option, description = "set screen brightness <0-100>")]
     pub screenpad_brightness: Option<i32>,
-    #[options(
-        meta = "",
-        help = "Set screenpad gamma brightness 0.5 - 2.2, 1.0 == linear"
+
+    #[argh(
+        option,
+        description = "set screenpad gamma brightness 0.5 - 2.2, 1.0 == linear"
     )]
     pub screenpad_gamma: Option<f32>,
-    #[options(
-        meta = "",
-        help = "Set screenpad brightness to sync with primary display"
+
+    #[argh(
+        option,
+        description = "set screenpad brightness to sync with primary display"
     )]
     pub sync_screenpad_brightness: Option<bool>,
 }

@@ -1,37 +1,34 @@
-use gumdrop::Options;
+use argh::FromArgs;
 use rog_slash::SlashMode;
 
-#[derive(Options)]
+#[derive(FromArgs, Debug)]
+#[argh(subcommand, name = "slash", description = "slash ledbar commands")]
 pub struct SlashCommand {
-    #[options(help = "print help message")]
-    pub help: bool,
-    #[options(help = "Enable the Slash Ledbar")]
+    #[argh(switch, description = "enable the Slash Ledbar")]
     pub enable: bool,
-    #[options(help = "Disable the Slash Ledbar")]
+    #[argh(switch, description = "disable the Slash Ledbar")]
     pub disable: bool,
-    #[options(short = "l", meta = "", help = "Set brightness value <0-255>")]
+    #[argh(option, short = 'l', description = "set brightness value <0-255>")]
     pub brightness: Option<u8>,
-    #[options(meta = "", help = "Set interval value <0-5>")]
+    #[argh(option, description = "set interval value <0-5>")]
     pub interval: Option<u8>,
-    #[options(meta = "", help = "Set SlashMode (so 'list' for all options)")]
+    #[argh(option, description = "set SlashMode (use 'list' for options)")]
     pub mode: Option<SlashMode>,
-    #[options(help = "list available animations")]
+    #[argh(switch, description = "list available animations")]
     pub list: bool,
 
-    #[options(short = "B", meta = "", help = "Show the animation on boot")]
+    #[argh(option, short = 'B', description = "show the animation on boot")]
     pub show_on_boot: Option<bool>,
-    #[options(short = "S", meta = "", help = "Show the animation on shutdown")]
+    #[argh(option, short = 'S', description = "show the animation on shutdown")]
     pub show_on_shutdown: Option<bool>,
-    #[options(short = "s", meta = "", help = "Show the animation on sleep")]
+    #[argh(option, short = 's', description = "show the animation on sleep")]
     pub show_on_sleep: Option<bool>,
-    #[options(short = "b", meta = "", help = "Show the animation on battery")]
+    #[argh(option, short = 'b', description = "show the animation on battery")]
     pub show_on_battery: Option<bool>,
-    // #[options(short = "L", meta = "", help = "Show the animation on lid closed")]
-    // pub show_on_lid_closed: Option<bool>,
-    #[options(
-        short = "w",
-        meta = "",
-        help = "Show the low-battery warning animation"
+    #[argh(
+        option,
+        short = 'w',
+        description = "show the low-battery warning animation"
     )]
     pub show_battery_warning: Option<bool>,
 }
