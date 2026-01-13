@@ -213,7 +213,10 @@ impl crate::Reloadable for AsusArmouryAttribute {
                 self.attr
                     .set_current_value(&AttrValue::Integer(*saved_value))
                     .map_err(|e| {
-                        error!("Could not set {} value: {e:?}", self.attr.name());
+                        error!(
+                            "Error restoring armoury setting {}: {e:?}",
+                            self.attr.name()
+                        );
                         self.attr.base_path_exists();
                         e
                     })?;
