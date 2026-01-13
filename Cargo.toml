@@ -44,7 +44,7 @@ smol = "^2.0"
 mio = "0.8.11"
 
 futures-util = "0.3.31"
-zbus = "5.5.0"
+zbus = "5.13.1"
 logind-zbus = { version = "5.2.0" } #, default-features = false, features = ["non_blocking"] }
 
 serde = { version = "^1.0", features = ["serde_derive"] }

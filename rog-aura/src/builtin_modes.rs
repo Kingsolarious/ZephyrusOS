@@ -359,6 +359,12 @@ impl From<AuraEffect> for AuraModeNum {
     }
 }
 
+#[cfg(feature = "dbus")]
+impl zbus::zvariant::Basic for AuraModeNum {
+    const SIGNATURE_CHAR: char = 'u';
+    const SIGNATURE_STR: &'static str = "u";
+}
+
 /// Base effects have no zoning, while multizone is 1-4
 #[cfg_attr(
     feature = "dbus",

@@ -177,6 +177,12 @@ pub enum AuraMode {
     DoubleFade = 14,
 }
 
+#[cfg(feature = "dbus")]
+impl zbus::zvariant::Basic for AuraMode {
+    const SIGNATURE_CHAR: char = 'u';
+    const SIGNATURE_STR: &'static str = "u";
+}
+
 impl AuraMode {
     pub fn list() -> [String; 15] {
         [
