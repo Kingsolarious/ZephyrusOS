@@ -205,7 +205,13 @@ impl crate::Reloadable for AsusArmouryAttribute {
                         self.attr.base_path_exists();
                         e
                     })?;
-                info!("Set {} to {:?}", self.attr.name(), tune);
+                info!(
+                    "Restored PPT armoury setting {} to {:?}",
+                    self.attr.name(),
+                    tune
+                );
+            } else {
+                info!("Ignored restoring PPT armoury setting {} as tuning group is disabled or no saved value", self.attr.name());
             }
         } else {
             // Handle non-PPT attributes (boolean and other settings)
@@ -224,6 +230,11 @@ impl crate::Reloadable for AsusArmouryAttribute {
                     "Restored armoury setting {} to {:?}",
                     self.attr.name(),
                     saved_value
+                );
+            } else {
+                info!(
+                    "No saved armoury setting for {}: skipping restore",
+                    self.attr.name()
                 );
             }
         }

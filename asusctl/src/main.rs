@@ -1192,7 +1192,7 @@ fn print_firmware_attr(attr: &AsusArmouryProxyBlocking) -> Result<(), Box<dyn st
 fn handle_armoury_command(cmd: &ArmouryCommand) -> Result<(), Box<dyn std::error::Error>> {
     {
         if cmd.free.is_empty() || (cmd.free.len() % 2 != 0) || cmd.help {
-            const USAGE: &str = "Usage: asusctl platform panel_overdrive 1 nv_dynamic_boost 5";
+            const USAGE: &str = "Usage: asusctl armoury panel_overdrive 1 nv_dynamic_boost 5";
             if cmd.free.len() % 2 != 0 {
                 println!(
                     "Incorrect number of args, each attribute label must be paired with a setting:"
