@@ -9,15 +9,11 @@ use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use futures_util::StreamExt;
 use log::{debug, error, info, warn};
-use notify_rust::{Hint, Notification, Timeout, Urgency};
-use rog_platform::platform::GpuMode;
+use notify_rust::{Hint, Notification, Timeout};
 use rog_platform::power::AsusPower;
 use serde::{Deserialize, Serialize};
-use supergfxctl::actions::UserActionRequired as GfxUserAction;
-use supergfxctl::pci_device::{GfxMode, GfxPower};
-use supergfxctl::zbus_proxy::DaemonProxy as SuperProxy;
+use supergfxctl::pci_device::GfxPower;
 use tokio::runtime::Runtime;
 use tokio::task::JoinHandle;
 
@@ -145,12 +141,8 @@ pub fn start_notifications(
         }
     });
 
-    let enabled_notifications_copy = config.clone();
-    let no_supergfx = move |e: &zbus::Error| {
-        error!("zbus signal: receive_notify_gfx_status: {e}");
-        warn!("Attempting to start plain dgpu status monitor");
-        start_dpu_status_mon(enabled_notifications_copy.clone());
-    };
+    info!("Attempting to start plain dgpu status monitor");
+    start_dpu_status_mon(config.clone());
 
     // GPU MUX Mode notif
     // TODO: need to get armoury attrs and iter to find
@@ -189,93 +181,7 @@ pub fn start_notifications(
     //     Ok::<(), zbus::Error>(())
     // });
 
-    let enabled_notifications_copy = config.clone();
-    // GPU Mode change/action notif
-    tokio::spawn(async move {
-        let conn = zbus::Connection::system().await.inspect_err(|e| {
-            no_supergfx(e);
-        })?;
-        let proxy = SuperProxy::builder(&conn).build().await.inspect_err(|e| {
-            no_supergfx(e);
-        })?;
-        let _ = proxy.mode().await.inspect_err(|e| {
-            no_supergfx(e);
-        })?;
-
-        let proxy_copy = proxy.clone();
-        let enabled_notifications_copy_action = enabled_notifications_copy.clone();
-        let mut p = proxy.receive_notify_action().await?;
-        tokio::spawn(async move {
-            info!("Started zbus signal thread: receive_notify_action");
-            while let Some(e) = p.next().await {
-                if let Ok(out) = e.args() {
-                    // Respect user notification settings for gpu actions
-                    if let Ok(cfg) = enabled_notifications_copy_action.lock() {
-                        if !cfg.notifications.enabled || !cfg.notifications.receive_notify_gfx {
-                            continue;
-                        }
-                    }
-
-                    let action = out.action();
-                    let mode = convert_gfx_mode(proxy.mode().await.unwrap_or_default());
-                    match action {
-                        supergfxctl::actions::UserActionRequired::Reboot => {
-                            do_mux_notification("Graphics mode change requires reboot", &mode)
-                        }
-                        _ => do_gfx_action_notif(<&str>::from(action), *action, mode),
-                    }
-                    .map_err(|e| {
-                        error!("zbus signal: do_gfx_action_notif: {e}");
-                        e
-                    })
-                    .ok();
-                }
-            }
-        });
-
-        let mut p = proxy_copy.receive_notify_gfx_status().await?;
-        tokio::spawn(async move {
-            info!("Started zbus signal thread: receive_notify_gfx_status");
-            let mut last_status = GfxPower::Unknown;
-            while let Some(e) = p.next().await {
-                if let Ok(out) = e.args() {
-                    let status = out.status;
-                    if status != GfxPower::Unknown && status != last_status {
-                        if let Ok(config) = enabled_notifications_copy.lock() {
-                            if !config.notifications.receive_notify_gfx_status
-                                || !config.notifications.enabled
-                            {
-                                continue;
-                            }
-                        }
-                        // Required check because status cycles through
-                        // active/unknown/suspended
-                        do_gpu_status_notif("dGPU status changed:", &status)
-                            .show_async()
-                            .await
-                            .unwrap()
-                            .on_close(|_| ());
-                    }
-                    last_status = status;
-                }
-            }
-        });
-        Ok::<(), zbus::Error>(())
-    });
-
     Ok(vec![blocking])
-}
-
-fn convert_gfx_mode(gfx: GfxMode) -> GpuMode {
-    match gfx {
-        GfxMode::Hybrid => GpuMode::Optimus,
-        GfxMode::Integrated => GpuMode::Integrated,
-        GfxMode::NvidiaNoModeset => GpuMode::Optimus,
-        GfxMode::Vfio => GpuMode::Vfio,
-        GfxMode::AsusEgpu => GpuMode::Egpu,
-        GfxMode::AsusMuxDgpu => GpuMode::Ultimate,
-        GfxMode::None => GpuMode::Error,
-    }
 }
 
 fn base_notification<T>(message: &str, data: &T) -> Notification
@@ -302,98 +208,4 @@ fn do_gpu_status_notif(message: &str, data: &GfxPower) -> Notification {
     };
     notif.icon(icon);
     notif
-}
-
-fn do_gfx_action_notif(message: &str, action: GfxUserAction, mode: GpuMode) -> Result<()> {
-    if matches!(action, GfxUserAction::Reboot) {
-        do_mux_notification("Graphics mode change requires reboot", &mode).ok();
-        return Ok(());
-    }
-
-    let mut notif = Notification::new();
-    notif
-        .appname(NOTIF_HEADER)
-        .summary(&format!("Changing to {mode}. {message}"))
-        //.hint(Hint::Resident(true))
-        .hint(Hint::Category("device".into()))
-        .urgency(Urgency::Critical)
-        // For user-action notifications keep them visible if they require interaction
-        // but for non-interactive actions we prefer they auto-hide like other notifs.
-        .timeout(Timeout::Milliseconds(6000))
-        .icon("dialog-warning")
-        .hint(Hint::Transient(true));
-
-    if matches!(action, GfxUserAction::Logout) {
-        notif.action("gfx-mode-session-action", "Logout");
-        let handle = notif.show()?;
-        if let Ok(desktop) = std::env::var("XDG_CURRENT_DESKTOP") {
-            if desktop.to_lowercase() == "gnome" {
-                handle.wait_for_action(|id| {
-                    if id == "gfx-mode-session-action" {
-                        let mut cmd = Command::new("gnome-session-quit");
-                        cmd.spawn().ok();
-                    } else if id == "__closed" {
-                        // TODO: cancel the switching
-                    }
-                });
-            } else if desktop.to_lowercase() == "kde" {
-                handle.wait_for_action(|id| {
-                    if id == "gfx-mode-session-action" {
-                        let mut cmd = Command::new("qdbus");
-                        cmd.args([
-                            "org.kde.ksmserver", "/KSMServer", "logout", "1", "0", "0",
-                        ]);
-                        cmd.spawn().ok();
-                    } else if id == "__closed" {
-                        // TODO: cancel the switching
-                    }
-                });
-            } else {
-                // todo: handle alternatives
-            }
-        }
-    } else {
-        notif.show()?;
-    }
-    Ok(())
-}
-
-/// Actual `GpuMode` unused as data is never correct until switched by reboot
-fn do_mux_notification(message: &str, m: &GpuMode) -> Result<()> {
-    let mut notif = base_notification(message, &m.to_string());
-    notif
-        .action("gfx-mode-session-action", "Reboot")
-        .urgency(Urgency::Critical)
-        .icon("system-reboot-symbolic")
-        .hint(Hint::Transient(true));
-    let handle = notif.show()?;
-
-    std::thread::spawn(|| {
-        if let Ok(desktop) = std::env::var("XDG_CURRENT_DESKTOP") {
-            if desktop.to_lowercase() == "gnome" {
-                handle.wait_for_action(|id| {
-                    if id == "gfx-mode-session-action" {
-                        let mut cmd = Command::new("gnome-session-quit");
-                        cmd.arg("--reboot");
-                        cmd.spawn().ok();
-                    } else if id == "__closed" {
-                        // TODO: cancel the switching
-                    }
-                });
-            } else if desktop.to_lowercase() == "kde" {
-                handle.wait_for_action(|id| {
-                    if id == "gfx-mode-session-action" {
-                        let mut cmd = Command::new("qdbus");
-                        cmd.args([
-                            "org.kde.ksmserver", "/KSMServer", "logout", "1", "1", "0",
-                        ]);
-                        cmd.spawn().ok();
-                    } else if id == "__closed" {
-                        // TODO: cancel the switching
-                    }
-                });
-            }
-        }
-    });
-    Ok(())
 }
