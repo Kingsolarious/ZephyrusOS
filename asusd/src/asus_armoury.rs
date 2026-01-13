@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use config_traits::StdConfig;
-use log::{debug, error, info};
+use log::{debug, error, info, warn};
 use rog_platform::asus_armoury::{AttrValue, Attribute, FirmwareAttribute, FirmwareAttributes};
 use rog_platform::platform::{PlatformProfile, RogPlatform};
 use rog_platform::power::AsusPower;
@@ -397,44 +397,44 @@ impl AsusArmouryAttribute {
                 self.attr
                     .set_current_value(&AttrValue::Integer(value))
                     .map_err(|e| {
-                        error!("Could not set value: {e:?}");
+                        error!(
+                            "Could not set value to PPT property {}: {e:?}",
+                            self.attr.name()
+                        );
                         e
                     })?;
+            } else {
+                warn!(
+                    "Tuning group is disabled: skipping setting value to PPT property {}",
+                    self.attr.name()
+                );
             }
         } else {
             self.attr
                 .set_current_value(&AttrValue::Integer(value))
                 .map_err(|e| {
-                    error!("Could not set value: {e:?}");
+                    error!(
+                        "Could not set value {value} to attribute {}: {e:?}",
+                        self.attr.name()
+                    );
                     e
                 })?;
 
-            let has_attr = self
-                .config
-                .lock()
-                .await
+            let mut settings = self.config.lock().await;
+            settings
                 .armoury_settings
-                .contains_key(&self.name());
-            if has_attr {
-                if let Some(setting) = self
-                    .config
-                    .lock()
-                    .await
-                    .armoury_settings
-                    .get_mut(&self.name())
-                {
-                    *setting = value
-                }
-            } else {
-                debug!("Adding config for {}", self.attr.name());
-                self.config
-                    .lock()
-                    .await
-                    .armoury_settings
-                    .insert(self.name(), value);
-                debug!("Set config for {} = {:?}", self.attr.name(), value);
-            }
+                .entry(self.name())
+                .and_modify(|setting| {
+                    debug!("Set config for {} = {value}", self.attr.name());
+                    *setting = value;
+                })
+                .or_insert_with(|| {
+                    debug!("Adding config for {} = {value}", self.attr.name());
+                    value
+                });
         }
+
+        // write config after setting value
         self.config.lock().await.write();
         Ok(())
     }
