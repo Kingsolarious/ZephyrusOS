@@ -567,6 +567,15 @@
         power_zones: [Keyboard, Lightbar, Logo, RearGlow],
     ),
     (
+        device_name: "G835L",
+        product_id: "",
+        layout_name: "g814ji-per-key",
+        basic_modes: [Static, Breathe, RainbowCycle, RainbowWave, Star, Rain, Highlight, Laser, Ripple, Pulse, Comet, Flash],
+        basic_zones: [],
+        advanced_type: PerKey,
+        power_zones: [Keyboard, Lightbar, Logo],
+    ),
+    (
         device_name: "GA401I",
         product_id: "",
         layout_name: "ga401q",
