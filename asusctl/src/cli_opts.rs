@@ -49,34 +49,63 @@ pub enum CliCommand {
     Info(InfoCommand),
 }
 
-#[derive(FromArgs, Debug, Clone, Default)]
+#[derive(FromArgs, Debug)]
 #[argh(subcommand, name = "profile", description = "profile management")]
 pub struct ProfileCommand {
-    #[argh(switch, description = "toggle to next profile in list")]
-    pub next: bool,
+    #[argh(subcommand)]
+    pub command: ProfileSubCommand,
+}
 
-    #[argh(switch, description = "list available profiles")]
-    pub list: bool,
+#[derive(FromArgs, Debug)]
+#[argh(subcommand)]
+pub enum ProfileSubCommand {
+    Next(ProfileNextCommand),
+    List(ProfileListCommand),
+    Get(ProfileGetCommand),
+    Set(ProfileSetCommand),
+}
 
-    #[argh(switch, description = "get profile")]
-    pub profile_get: bool,
+impl Default for ProfileSubCommand {
+    fn default() -> Self {
+        ProfileSubCommand::List(ProfileListCommand::default())
+    }
+}
 
-    #[argh(option, description = "set the active profile")]
-    pub profile_set: Option<PlatformProfile>,
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "next",
+    description = "toggle to next profile in list"
+)]
+pub struct ProfileNextCommand {}
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(subcommand, name = "list", description = "list available profiles")]
+pub struct ProfileListCommand {}
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(subcommand, name = "get", description = "get profile")]
+pub struct ProfileGetCommand {}
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(subcommand, name = "set", description = "set profile")]
+pub struct ProfileSetCommand {
+    #[argh(positional, description = "profile to set")]
+    pub profile: PlatformProfile,
 
     #[argh(
-        option,
+        switch,
         short = 'a',
         description = "set the profile to use on AC power"
     )]
-    pub profile_set_ac: Option<PlatformProfile>,
+    pub ac: bool,
 
     #[argh(
-        option,
+        switch,
         short = 'b',
         description = "set the profile to use on battery power"
     )]
-    pub profile_set_bat: Option<PlatformProfile>,
+    pub battery: bool,
 }
 
 #[derive(FromArgs, Debug, Default)]

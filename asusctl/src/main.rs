@@ -816,44 +816,37 @@ fn handle_throttle_profile(
         return Err(ProfileError::NotSupported.into());
     }
 
-    if !cmd.next
-        && !cmd.list
-        && cmd.profile_set.is_none()
-        && !cmd.profile_get
-        && cmd.profile_set_ac.is_none()
-        && cmd.profile_set_bat.is_none()
-    {
-        println!("Missing arg or command; run 'asusctl profile --help' for usage");
-        return Ok(());
-    }
-
     let proxy = PlatformProxyBlocking::new(conn)?;
     let current = proxy.platform_profile()?;
     let choices = proxy.platform_profile_choices()?;
 
-    if cmd.next {
-        proxy.set_platform_profile(PlatformProfile::next(current, &choices))?;
-    } else if let Some(profile) = cmd.profile_set {
-        proxy.set_platform_profile(profile)?;
-    } else if let Some(profile) = cmd.profile_set_ac {
-        proxy.set_platform_profile_on_ac(profile)?;
-    } else if let Some(profile) = cmd.profile_set_bat {
-        proxy.set_platform_profile_on_battery(profile)?;
-    }
-
-    if cmd.list {
-        for p in &choices {
-            println!("{:?}", p);
+    match &cmd.command {
+        crate::cli_opts::ProfileSubCommand::Next(_) => {
+            proxy.set_platform_profile(PlatformProfile::next(current, &choices))?;
         }
-    }
-
-    if cmd.profile_get {
-        println!("Active profile is {current:?}");
-        println!("Profile on AC is {:?}", proxy.platform_profile_on_ac()?);
-        println!(
-            "Profile on Battery is {:?}",
-            proxy.platform_profile_on_battery()?
-        );
+        crate::cli_opts::ProfileSubCommand::Set(s) => {
+            if !s.ac && !s.battery {
+                proxy.set_platform_profile(s.profile)?;
+            } else {
+                if s.ac {
+                    proxy.set_platform_profile_on_ac(s.profile)?;
+                }
+                if s.battery {
+                    proxy.set_platform_profile_on_battery(s.profile)?;
+                }
+            }
+        }
+        crate::cli_opts::ProfileSubCommand::List(_) => {
+            for p in &choices {
+                println!("{:?}", p);
+            }
+        }
+        crate::cli_opts::ProfileSubCommand::Get(_) => {
+            println!("Active profile: {current:?}");
+            println!("");
+            println!("AC profile {:?}", proxy.platform_profile_on_ac()?);
+            println!("Battery profile {:?}", proxy.platform_profile_on_battery()?);
+        }
     }
 
     Ok(())
