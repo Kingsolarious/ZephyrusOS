@@ -6,7 +6,7 @@
 - Added support for TUF keyboard powerstate control
 - Improved AniMe Matrix support thanks to @Seom1177 !
 - Fixed a bug with one-shot battery change, thanks @bitr8 !
-
+- Changed the CLI interface of asusctl to be less confusing
 
 ## [6.2.0]
 
