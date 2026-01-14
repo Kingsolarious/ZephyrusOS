@@ -90,7 +90,7 @@ pages:
     - rm -rf public
     - mkdir public
     - cp -R ci-target/doc/* public
-    - cp extra/index.html public
+    - if [ -f extra/index.html ]; then cp extra/index.html public; else echo "no extra/index.html to copy"; fi
   artifacts:
     paths:
       - public
