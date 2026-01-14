@@ -12,16 +12,6 @@ use crate::slash_cli::SlashCommand;
 pub struct CliStart {
     #[argh(switch, description = "show supported functions of this laptop")]
     pub show_supported: bool,
-
-    #[argh(option, description = "keyboard brightness <off, low, med, high>")]
-    pub kbd_bright: Option<LedBrightness>,
-
-    #[argh(switch, description = "toggle to next keyboard brightness")]
-    pub next_kbd_bright: bool,
-
-    #[argh(switch, description = "toggle to previous keyboard brightness")]
-    pub prev_kbd_bright: bool,
-
     #[argh(option, description = "set your battery charge limit <20-100>")]
     pub chg_limit: Option<u8>,
 
@@ -39,6 +29,7 @@ pub enum CliCommand {
     Aura(LedModeCommand),
     AuraPowerOld(LedPowerCommand1),
     AuraPower(LedPowerCommand2),
+    Brightness(BrightnessCommand),
     Profile(ProfileCommand),
     FanCurve(FanCurveCommand),
     Anime(AnimeCommand),
@@ -211,3 +202,60 @@ pub struct BacklightCommand {
     description = "show program version and system info"
 )]
 pub struct InfoCommand {}
+
+#[derive(FromArgs, Debug)]
+#[argh(subcommand, name = "leds", description = "keyboard brightness control")]
+pub struct BrightnessCommand {
+    #[argh(subcommand)]
+    pub command: BrightnessSubCommand,
+}
+
+#[derive(FromArgs, Debug)]
+#[argh(subcommand)]
+pub enum BrightnessSubCommand {
+    Set(BrightnessSetCommand),
+    Get(BrightnessGetCommand),
+    Next(BrightnessNextCommand),
+    Prev(BrightnessPrevCommand),
+}
+
+impl Default for BrightnessSubCommand {
+    fn default() -> Self {
+        BrightnessSubCommand::Get(BrightnessGetCommand::default())
+    }
+}
+
+#[derive(FromArgs, Debug)]
+#[argh(
+    subcommand,
+    name = "set",
+    description = "set keyboard brightness <off, low, med, high>"
+)]
+pub struct BrightnessSetCommand {
+    #[argh(positional, description = "brightness level: off, low, med, high")]
+    pub level: LedBrightness,
+}
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "get",
+    description = "get current keyboard brightness"
+)]
+pub struct BrightnessGetCommand {}
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "next",
+    description = "toggle to next keyboard brightness"
+)]
+pub struct BrightnessNextCommand {}
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "prev",
+    description = "toggle to previous keyboard brightness"
+)]
+pub struct BrightnessPrevCommand {}

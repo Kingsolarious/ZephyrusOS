@@ -190,6 +190,7 @@ fn do_parsed(
         Some(CliCommand::Aura(mode)) => handle_led_mode(mode)?,
         Some(CliCommand::AuraPowerOld(pow)) => handle_led_power1(pow)?,
         Some(CliCommand::AuraPower(pow)) => handle_led_power2(pow)?,
+        Some(CliCommand::Brightness(cmd)) => handle_brightness(cmd)?,
         Some(CliCommand::Profile(cmd)) => {
             handle_throttle_profile(&conn, supported_properties, cmd)?
         }
@@ -207,53 +208,9 @@ fn do_parsed(
             print_info();
         }
         None => {
-            if !parsed.show_supported
-                && parsed.kbd_bright.is_none()
-                && parsed.chg_limit.is_none()
-                && !parsed.next_kbd_bright
-                && !parsed.prev_kbd_bright
-                && !parsed.one_shot_chg
-            {
+            if !parsed.show_supported && parsed.chg_limit.is_none() && !parsed.one_shot_chg {
                 println!("No command given. Run 'asusctl --help' for usage and 'asusctl <command> --help' for subcommands.");
             }
-        }
-    }
-
-    if let Some(brightness) = &parsed.kbd_bright {
-        if let Ok(aura) = find_iface::<AuraProxyBlocking>("xyz.ljones.Aura") {
-            for aura in aura.iter() {
-                match brightness.level() {
-                    None => {
-                        let level = aura.brightness()?;
-                        println!("Current keyboard led brightness: {level:?}");
-                    }
-                    Some(level) => aura.set_brightness(rog_aura::LedBrightness::from(level))?,
-                }
-            }
-        } else {
-            println!("No aura interface found");
-        }
-    }
-
-    if parsed.next_kbd_bright {
-        if let Ok(aura) = find_iface::<AuraProxyBlocking>("xyz.ljones.Aura") {
-            for aura in aura.iter() {
-                let brightness = aura.brightness()?;
-                aura.set_brightness(brightness.next())?;
-            }
-        } else {
-            println!("No aura interface found");
-        }
-    }
-
-    if parsed.prev_kbd_bright {
-        if let Ok(aura) = find_iface::<AuraProxyBlocking>("xyz.ljones.Aura") {
-            for aura in aura.iter() {
-                let brightness = aura.brightness()?;
-                aura.set_brightness(brightness.prev())?;
-            }
-        } else {
-            println!("No aura interface found");
         }
     }
 
@@ -322,6 +279,48 @@ fn handle_backlight(cmd: &BacklightCommand) -> Result<(), Box<dyn std::error::Er
 
         if let Some(sync) = cmd.sync_screenpad_brightness {
             backlight.set_screenpad_sync_with_primary(sync)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn handle_brightness(cmd: &BrightnessCommand) -> Result<(), Box<dyn std::error::Error>> {
+    let Ok(aura_proxies) = find_iface::<AuraProxyBlocking>("xyz.ljones.Aura") else {
+        println!("No aura interface found");
+        return Ok(());
+    };
+
+    match &cmd.command {
+        BrightnessSubCommand::Set(s) => {
+            for aura in aura_proxies.iter() {
+                if let Some(level) = s.level.level() {
+                    aura.set_brightness(rog_aura::LedBrightness::from(level))?;
+                } else {
+                    let current = aura.brightness()?;
+                    println!("Current keyboard led brightness: {current:?}");
+                }
+            }
+        }
+        BrightnessSubCommand::Get(_) => {
+            for aura in aura_proxies.iter() {
+                let level = aura.brightness()?;
+                println!("Current keyboard led brightness: {level:?}");
+            }
+
+            return Ok(());
+        }
+        BrightnessSubCommand::Next(_) => {
+            for aura in aura_proxies.iter() {
+                let brightness = aura.brightness()?;
+                aura.set_brightness(brightness.next())?;
+            }
+        }
+        BrightnessSubCommand::Prev(_) => {
+            for aura in aura_proxies.iter() {
+                let brightness = aura.brightness()?;
+                aura.set_brightness(brightness.prev())?;
+            }
         }
     }
 
