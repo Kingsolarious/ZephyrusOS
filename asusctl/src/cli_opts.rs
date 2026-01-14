@@ -10,16 +10,8 @@ use crate::slash_cli::SlashCommand;
 #[derive(FromArgs, Default, Debug)]
 /// asusctl command-line options
 pub struct CliStart {
-    #[argh(switch, description = "show supported functions of this laptop")]
-    pub show_supported: bool,
-    #[argh(option, description = "set your battery charge limit <20-100>")]
-    pub chg_limit: Option<u8>,
-
-    #[argh(switch, description = "toggle one-shot battery charge to 100%")]
-    pub one_shot_chg: bool,
-
     #[argh(subcommand)]
-    pub command: Option<CliCommand>,
+    pub command: CliCommand,
 }
 
 /// Top-level subcommands for asusctl
@@ -37,7 +29,14 @@ pub enum CliCommand {
     Scsi(ScsiCommand),
     Armoury(ArmouryCommand),
     Backlight(BacklightCommand),
+    Battery(BatteryCommand),
     Info(InfoCommand),
+}
+
+impl Default for CliCommand {
+    fn default() -> Self {
+        CliCommand::Info(InfoCommand::default())
+    }
 }
 
 #[derive(FromArgs, Debug)]
@@ -195,13 +194,67 @@ pub struct BacklightCommand {
     pub sync_screenpad_brightness: Option<bool>,
 }
 
+#[derive(FromArgs, Debug)]
+#[argh(subcommand, name = "battery", description = "battery options")]
+pub struct BatteryCommand {
+    #[argh(subcommand)]
+    pub command: BatterySubCommand,
+}
+
+#[derive(FromArgs, Debug)]
+#[argh(subcommand)]
+pub enum BatterySubCommand {
+    Limit(BatteryLimitCommand),
+    OneShot(BatteryOneShotCommand),
+    Info(BatteryInfoCommand),
+}
+
+impl Default for BatterySubCommand {
+    fn default() -> Self {
+        BatterySubCommand::OneShot(BatteryOneShotCommand::default())
+    }
+}
+
+#[derive(FromArgs, Debug)]
+#[argh(
+    subcommand,
+    name = "limit",
+    description = "set battery charge limit <20-100>"
+)]
+pub struct BatteryLimitCommand {
+    #[argh(positional, description = "charge limit percentage 20-100")]
+    pub limit: u8,
+}
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "oneshot",
+    description = "one-shot full charge (optional percent)"
+)]
+pub struct BatteryOneShotCommand {
+    #[argh(positional, description = "optional target percent (defaults to 100)")]
+    pub percent: Option<u8>,
+}
+
+#[derive(FromArgs, Debug, Default)]
+#[argh(
+    subcommand,
+    name = "info",
+    description = "show current battery charge limit"
+)]
+pub struct BatteryInfoCommand {}
+
 #[derive(FromArgs, Debug, Default)]
 #[argh(
     subcommand,
     name = "info",
     description = "show program version and system info"
 )]
-pub struct InfoCommand {}
+pub struct InfoCommand {
+    #[argh(switch, description = "show supported functions of this laptop")]
+    pub show_supported: bool,
+}
 
 #[derive(FromArgs, Debug)]
 #[argh(subcommand, name = "leds", description = "keyboard brightness control")]

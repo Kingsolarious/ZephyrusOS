@@ -187,62 +187,62 @@ fn do_parsed(
     conn: Connection,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match &parsed.command {
-        Some(CliCommand::Aura(mode)) => handle_led_mode(mode)?,
-        Some(CliCommand::AuraPowerOld(pow)) => handle_led_power1(pow)?,
-        Some(CliCommand::AuraPower(pow)) => handle_led_power2(pow)?,
-        Some(CliCommand::Brightness(cmd)) => handle_brightness(cmd)?,
-        Some(CliCommand::Profile(cmd)) => {
-            handle_throttle_profile(&conn, supported_properties, cmd)?
-        }
-        Some(CliCommand::FanCurve(cmd)) => {
-            handle_fan_curve(&conn, cmd)?;
-        }
-        Some(CliCommand::Anime(cmd)) => handle_anime(cmd)?,
-        Some(CliCommand::Slash(cmd)) => handle_slash(cmd)?,
-        Some(CliCommand::Scsi(cmd)) => handle_scsi(cmd)?,
-        Some(CliCommand::Armoury(cmd)) => handle_armoury_command(cmd)?,
-        Some(CliCommand::Backlight(cmd)) => handle_backlight(cmd)?,
-        Some(CliCommand::Info(_)) => {
+        CliCommand::Aura(mode) => handle_led_mode(mode)?,
+        CliCommand::AuraPowerOld(pow) => handle_led_power1(pow)?,
+        CliCommand::AuraPower(pow) => handle_led_power2(pow)?,
+        CliCommand::Brightness(cmd) => handle_brightness(cmd)?,
+        CliCommand::Profile(cmd) => handle_throttle_profile(&conn, supported_properties, cmd)?,
+        CliCommand::FanCurve(cmd) => handle_fan_curve(&conn, cmd)?,
+        CliCommand::Anime(cmd) => handle_anime(cmd)?,
+        CliCommand::Slash(cmd) => handle_slash(cmd)?,
+        CliCommand::Scsi(cmd) => handle_scsi(cmd)?,
+        CliCommand::Armoury(cmd) => handle_armoury_command(cmd)?,
+        CliCommand::Backlight(cmd) => handle_backlight(cmd)?,
+        CliCommand::Battery(cmd) => match &cmd.command {
+            BatterySubCommand::Limit(l) => {
+                let proxy = PlatformProxyBlocking::new(&conn)?;
+                proxy.set_charge_control_end_threshold(l.limit)?;
+            }
+            BatterySubCommand::OneShot(o) => {
+                let proxy = PlatformProxyBlocking::new(&conn)?;
+                if let Some(p) = o.percent {
+                    proxy.set_charge_control_end_threshold(p)?;
+                }
+                proxy.one_shot_full_charge()?;
+            }
+            BatterySubCommand::Info(_) => {
+                let proxy = PlatformProxyBlocking::new(&conn)?;
+                let limit = proxy.charge_control_end_threshold()?;
+                println!("Current battery charge limit: {}%", limit);
+            }
+        },
+        CliCommand::Info(info_opt) => {
             println!("asusctl v{}", env!("CARGO_PKG_VERSION"));
             println!();
             print_info();
-        }
-        None => {
-            if !parsed.show_supported && parsed.chg_limit.is_none() && !parsed.one_shot_chg {
-                println!("No command given. Run 'asusctl --help' for usage and 'asusctl <command> --help' for subcommands.");
+            println!();
+
+            if info_opt.show_supported {
+                println!("Supported Core Functions:\n{:#?}", supported_interfaces);
+                println!(
+                    "Supported Platform Properties:\n{:#?}",
+                    supported_properties
+                );
+                if let Ok(aura) = find_iface::<AuraProxyBlocking>("xyz.ljones.Aura") {
+                    // TODO: multiple RGB check
+                    let bright = aura.first().unwrap().supported_brightness()?;
+                    let modes = aura.first().unwrap().supported_basic_modes()?;
+                    let zones = aura.first().unwrap().supported_basic_zones()?;
+                    let power = aura.first().unwrap().supported_power_zones()?;
+                    println!("Supported Keyboard Brightness:\n{:#?}", bright);
+                    println!("Supported Aura Modes:\n{:#?}", modes);
+                    println!("Supported Aura Zones:\n{:#?}", zones);
+                    println!("Supported Aura Power Zones:\n{:#?}", power);
+                } else {
+                    println!("No aura interface found");
+                }
             }
         }
-    }
-
-    if parsed.show_supported {
-        println!("Supported Core Functions:\n{:#?}", supported_interfaces);
-        println!(
-            "Supported Platform Properties:\n{:#?}",
-            supported_properties
-        );
-        if let Ok(aura) = find_iface::<AuraProxyBlocking>("xyz.ljones.Aura") {
-            // TODO: multiple RGB check
-            let bright = aura.first().unwrap().supported_brightness()?;
-            let modes = aura.first().unwrap().supported_basic_modes()?;
-            let zones = aura.first().unwrap().supported_basic_zones()?;
-            let power = aura.first().unwrap().supported_power_zones()?;
-            println!("Supported Keyboard Brightness:\n{:#?}", bright);
-            println!("Supported Aura Modes:\n{:#?}", modes);
-            println!("Supported Aura Zones:\n{:#?}", zones);
-            println!("Supported Aura Power Zones:\n{:#?}", power);
-        } else {
-            println!("No aura interface found");
-        }
-    }
-
-    if let Some(chg_limit) = parsed.chg_limit {
-        let proxy = PlatformProxyBlocking::new(&conn)?;
-        proxy.set_charge_control_end_threshold(chg_limit)?;
-    }
-
-    if parsed.one_shot_chg {
-        let proxy = PlatformProxyBlocking::new(&conn)?;
-        proxy.one_shot_full_charge()?;
     }
 
     Ok(())
