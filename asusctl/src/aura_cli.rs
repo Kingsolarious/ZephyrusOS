@@ -8,7 +8,7 @@ use rog_aura::{AuraEffect, AuraModeNum, AuraZone, Colour, Direction, Speed};
 #[argh(
     subcommand,
     name = "aura-power-old",
-    description = "aura power (old api)"
+    description = "aura power (old ROGs and TUF laptops)"
 )]
 pub struct LedPowerCommand1 {
     #[argh(
