@@ -198,50 +198,69 @@ fn do_parsed(
         CliCommand::Scsi(cmd) => handle_scsi(cmd)?,
         CliCommand::Armoury(cmd) => handle_armoury_command(cmd)?,
         CliCommand::Backlight(cmd) => handle_backlight(cmd)?,
-        CliCommand::Battery(cmd) => match &cmd.command {
-            BatterySubCommand::Limit(l) => {
-                let proxy = PlatformProxyBlocking::new(&conn)?;
-                proxy.set_charge_control_end_threshold(l.limit)?;
-            }
-            BatterySubCommand::OneShot(o) => {
-                let proxy = PlatformProxyBlocking::new(&conn)?;
-                if let Some(p) = o.percent {
-                    proxy.set_charge_control_end_threshold(p)?;
-                }
-                proxy.one_shot_full_charge()?;
-            }
-            BatterySubCommand::Info(_) => {
-                let proxy = PlatformProxyBlocking::new(&conn)?;
-                let limit = proxy.charge_control_end_threshold()?;
-                println!("Current battery charge limit: {}%", limit);
-            }
-        },
+        CliCommand::Battery(cmd) => handle_battery(cmd, &conn)?,
         CliCommand::Info(info_opt) => {
-            println!("asusctl v{}", env!("CARGO_PKG_VERSION"));
-            println!();
-            print_info();
-            println!();
+            handle_info(info_opt, supported_interfaces, supported_properties)?
+        }
+    }
 
-            if info_opt.show_supported {
-                println!("Supported Core Functions:\n{:#?}", supported_interfaces);
-                println!(
-                    "Supported Platform Properties:\n{:#?}",
-                    supported_properties
-                );
-                if let Ok(aura) = find_iface::<AuraProxyBlocking>("xyz.ljones.Aura") {
-                    // TODO: multiple RGB check
-                    let bright = aura.first().unwrap().supported_brightness()?;
-                    let modes = aura.first().unwrap().supported_basic_modes()?;
-                    let zones = aura.first().unwrap().supported_basic_zones()?;
-                    let power = aura.first().unwrap().supported_power_zones()?;
-                    println!("Supported Keyboard Brightness:\n{:#?}", bright);
-                    println!("Supported Aura Modes:\n{:#?}", modes);
-                    println!("Supported Aura Zones:\n{:#?}", zones);
-                    println!("Supported Aura Power Zones:\n{:#?}", power);
-                } else {
-                    println!("No aura interface found");
-                }
+    Ok(())
+}
+
+fn handle_battery(
+    cmd: &BatteryCommand,
+    conn: &Connection,
+) -> Result<(), Box<dyn std::error::Error>> {
+    match &cmd.command {
+        BatterySubCommand::Limit(l) => {
+            let proxy = PlatformProxyBlocking::new(conn)?;
+            proxy.set_charge_control_end_threshold(l.limit)?;
+        }
+        BatterySubCommand::OneShot(o) => {
+            let proxy = PlatformProxyBlocking::new(conn)?;
+            if let Some(p) = o.percent {
+                proxy.set_charge_control_end_threshold(p)?;
             }
+            proxy.one_shot_full_charge()?;
+        }
+        BatterySubCommand::Info(_) => {
+            let proxy = PlatformProxyBlocking::new(conn)?;
+            let limit = proxy.charge_control_end_threshold()?;
+            println!("Current battery charge limit: {}%", limit);
+        }
+    }
+
+    Ok(())
+}
+
+fn handle_info(
+    info_opt: &InfoCommand,
+    supported_interfaces: &[String],
+    supported_properties: &[Properties],
+) -> Result<(), Box<dyn std::error::Error>> {
+    println!("asusctl v{}", env!("CARGO_PKG_VERSION"));
+    println!();
+    print_info();
+    println!();
+
+    if info_opt.show_supported {
+        println!("Supported Core Functions:\n{:#?}", supported_interfaces);
+        println!(
+            "Supported Platform Properties:\n{:#?}",
+            supported_properties
+        );
+        if let Ok(aura) = find_iface::<AuraProxyBlocking>("xyz.ljones.Aura") {
+            // TODO: multiple RGB check
+            let bright = aura.first().unwrap().supported_brightness()?;
+            let modes = aura.first().unwrap().supported_basic_modes()?;
+            let zones = aura.first().unwrap().supported_basic_zones()?;
+            let power = aura.first().unwrap().supported_power_zones()?;
+            println!("Supported Keyboard Brightness:\n{:#?}", bright);
+            println!("Supported Aura Modes:\n{:#?}", modes);
+            println!("Supported Aura Zones:\n{:#?}", zones);
+            println!("Supported Aura Power Zones:\n{:#?}", power);
+        } else {
+            println!("No aura interface found");
         }
     }
 

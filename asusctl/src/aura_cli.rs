@@ -216,6 +216,7 @@ pub struct SingleSpeed {
 
     #[argh(
         option,
+        default = "AuraZone::None",
         description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
     )]
     pub zone: AuraZone,
@@ -237,6 +238,7 @@ pub struct SingleSpeedDirection {
 
     #[argh(
         option,
+        default = "AuraZone::None",
         description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
     )]
     pub zone: AuraZone,
@@ -250,11 +252,12 @@ pub struct SingleSpeedDirection {
     description = "static single-colour effect"
 )]
 pub struct SingleColour {
-    #[argh(option, description = "set the RGB value e.g. ff00ff")]
+    #[argh(option, short = 'c', description = "set the RGB value e.g. ff00ff")]
     pub colour: Colour,
 
     #[argh(
         option,
+        default = "AuraZone::None",
         description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
     )]
     pub zone: AuraZone,
@@ -268,7 +271,7 @@ pub struct SingleColour {
     description = "single-colour effect with speed"
 )]
 pub struct SingleColourSpeed {
-    #[argh(option, description = "set the RGB value e.g. ff00ff")]
+    #[argh(option, short = 'c', description = "set the RGB value e.g. ff00ff")]
     pub colour: Colour,
 
     #[argh(option, description = "set the speed: low, med, high")]
@@ -276,6 +279,7 @@ pub struct SingleColourSpeed {
 
     #[argh(
         option,
+        default = "AuraZone::None",
         description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
     )]
     pub zone: AuraZone,
@@ -300,6 +304,7 @@ pub struct TwoColourSpeed {
 
     #[argh(
         option,
+        default = "AuraZone::None",
         description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
     )]
     pub zone: AuraZone,
