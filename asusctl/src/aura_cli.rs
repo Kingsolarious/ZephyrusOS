@@ -1,3 +1,4 @@
+use std::fmt;
 use std::str::FromStr;
 
 use argh::FromArgs;
@@ -86,15 +87,16 @@ impl FromStr for LedBrightness {
     }
 }
 
-impl ToString for LedBrightness {
-    fn to_string(&self) -> String {
-        match self.level {
-            Some(0x00) => "off".to_owned(),
-            Some(0x01) => "low".to_owned(),
-            Some(0x02) => "med".to_owned(),
-            Some(0x03) => "high".to_owned(),
-            _ => "unknown".to_owned(),
-        }
+impl fmt::Display for LedBrightness {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self.level {
+            Some(0x00) => "off",
+            Some(0x01) => "low",
+            Some(0x02) => "med",
+            Some(0x03) => "high",
+            _ => "unknown",
+        };
+        write!(f, "{}", s)
     }
 }
 
