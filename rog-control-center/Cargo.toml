@@ -14,6 +14,7 @@ mocking = []
 x11 = ["slint/backend-winit-x11"]
 # Optional tokio debug feature does not require nightly; remove RUSTFLAGS note.
 tokio-debug = ["console-subscriber"]
+rog_ally = []
 
 [dependencies]
 console-subscriber = { version = "^0.4", optional = true }

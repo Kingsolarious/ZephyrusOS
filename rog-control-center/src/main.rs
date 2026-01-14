@@ -107,7 +107,6 @@ async fn main() -> Result<()> {
     let board_name = dmi.board_name;
     let prod_family = dmi.product_family;
     info!("Running on {board_name}, product: {prod_family}");
-    let is_rog_ally = board_name == "RC71L" || board_name == "RC72L" || prod_family == "ROG Ally";
 
     let args: Vec<String> = args().skip(1).collect();
 
@@ -138,6 +137,18 @@ async fn main() -> Result<()> {
         config.start_fullscreen = false;
     }
 
+    let is_rog_ally = {
+        #[cfg(feature = "rog_ally")]
+        {
+            board_name == "RC71L" || board_name == "RC72L" || prod_family == "ROG Ally"
+        }
+        #[cfg(not(feature = "rog_ally"))]
+        {
+            false
+        }
+    };
+
+    #[cfg(feature = "rog_ally")]
     if is_rog_ally {
         config.notifications.enabled = false;
         config.enable_tray_icon = false;
@@ -145,6 +156,7 @@ async fn main() -> Result<()> {
         config.startup_in_background = false;
         config.start_fullscreen = true;
     }
+
     config.write();
 
     let enable_tray_icon = config.enable_tray_icon;
@@ -203,76 +215,77 @@ async fn main() -> Result<()> {
                         }
                     })
                     .ok();
-            } else {
-                // save as a var, don't hold the lock the entire time or deadlocks happen
-                if let Ok(app_state) = app_state.lock() {
-                    state = *app_state;
+
+                continue;
+            }
+
+            // save as a var, don't hold the lock the entire time or deadlocks happen
+            if let Ok(app_state) = app_state.lock() {
+                state = *app_state;
+            }
+
+            // This sleep is required to give the event loop time to react
+            sleep(Duration::from_millis(300));
+            if state == AppState::MainWindowShouldOpen {
+                if let Ok(mut app_state) = app_state.lock() {
+                    *app_state = AppState::MainWindowOpen;
                 }
 
-                // This sleep is required to give the event loop time to react
-                sleep(Duration::from_millis(300));
-                if state == AppState::MainWindowShouldOpen {
-                    if let Ok(mut app_state) = app_state.lock() {
-                        *app_state = AppState::MainWindowOpen;
-                    }
+                let config_copy = config.clone();
+                let app_state_copy = app_state.clone();
+                slint::invoke_from_event_loop(move || {
+                    UI.with(|ui| {
+                        let app_state_copy = app_state_copy.clone();
+                        let mut ui = ui.borrow_mut();
+                        if let Some(ui) = ui.as_mut() {
+                            ui.window().show().unwrap();
+                            ui.window().on_close_requested(move || {
+                                if let Ok(mut app_state) = app_state_copy.lock() {
+                                    *app_state = AppState::MainWindowClosed;
+                                }
+                                slint::CloseRequestResponse::HideWindow
+                            });
+                        } else {
+                            let config_copy_2 = config_copy.clone();
+                            let newui = setup_window(config_copy);
+                            newui.window().on_close_requested(move || {
+                                if let Ok(mut app_state) = app_state_copy.lock() {
+                                    *app_state = AppState::MainWindowClosed;
+                                }
+                                slint::CloseRequestResponse::HideWindow
+                            });
 
-                    let config_copy = config.clone();
-                    let app_state_copy = app_state.clone();
-                    slint::invoke_from_event_loop(move || {
-                        UI.with(|ui| {
-                            let app_state_copy = app_state_copy.clone();
-                            let mut ui = ui.borrow_mut();
-                            if let Some(ui) = ui.as_mut() {
-                                ui.window().show().unwrap();
-                                ui.window().on_close_requested(move || {
-                                    if let Ok(mut app_state) = app_state_copy.lock() {
-                                        *app_state = AppState::MainWindowClosed;
+                            let ui_copy = newui.as_weak();
+                            newui
+                                .window()
+                                .set_rendering_notifier(move |s, _| {
+                                    if let slint::RenderingState::RenderingSetup = s {
+                                        let config = config_copy_2.clone();
+                                        ui_copy
+                                            .upgrade_in_event_loop(move |w| {
+                                                let fullscreen =
+                                                    config.lock().is_ok_and(|c| c.start_fullscreen);
+                                                if fullscreen && !w.window().is_fullscreen() {
+                                                    w.window().set_fullscreen(fullscreen);
+                                                }
+                                            })
+                                            .ok();
                                     }
-                                    slint::CloseRequestResponse::HideWindow
-                                });
-                            } else {
-                                let config_copy_2 = config_copy.clone();
-                                let newui = setup_window(config_copy);
-                                newui.window().on_close_requested(move || {
-                                    if let Ok(mut app_state) = app_state_copy.lock() {
-                                        *app_state = AppState::MainWindowClosed;
-                                    }
-                                    slint::CloseRequestResponse::HideWindow
-                                });
-
-                                let ui_copy = newui.as_weak();
-                                newui
-                                    .window()
-                                    .set_rendering_notifier(move |s, _| {
-                                        if let slint::RenderingState::RenderingSetup = s {
-                                            let config = config_copy_2.clone();
-                                            ui_copy
-                                                .upgrade_in_event_loop(move |w| {
-                                                    let fullscreen = config
-                                                        .lock()
-                                                        .is_ok_and(|c| c.start_fullscreen);
-                                                    if fullscreen && !w.window().is_fullscreen() {
-                                                        w.window().set_fullscreen(fullscreen);
-                                                    }
-                                                })
-                                                .ok();
-                                        }
-                                    })
-                                    .ok();
-                                ui.replace(newui);
-                            }
-                        });
-                    })
-                    .unwrap();
-                } else if state == AppState::QuitApp {
-                    slint::quit_event_loop().unwrap();
-                    exit(0);
-                } else if state != AppState::MainWindowOpen {
-                    if let Ok(config) = config.lock() {
-                        if !config.run_in_background {
-                            slint::quit_event_loop().unwrap();
-                            exit(0);
+                                })
+                                .ok();
+                            ui.replace(newui);
                         }
+                    });
+                })
+                .unwrap();
+            } else if state == AppState::QuitApp {
+                slint::quit_event_loop().unwrap();
+                exit(0);
+            } else if state != AppState::MainWindowOpen {
+                if let Ok(config) = config.lock() {
+                    if !config.run_in_background {
+                        slint::quit_event_loop().unwrap();
+                        exit(0);
                     }
                 }
             }
