@@ -13,9 +13,7 @@ Now includes a GUI, `rog-control-center`.
 
 Due to on-going driver work the minimum suggested kernel version is always **the latest*, as improvements and fixes are continuous.
 
-Support for some new features is not avilable unless you run a patched kernel with the work I am doing [in this github repo](https://github.com/flukejones/linux/tree/wip/ally-6.13). Use the linked branch, or `wip/ally-6.12`. Everything that is done here is upstreamed eventually (a long process).
-
-Z13 devices will need [these](https://lore.kernel.org/linux-input/20240416090402.31057-1-luke@ljones.dev/T/#t)
+Support for TDP is tied to the new asus-armoury driver: available mainline since linux 6.19: everything older is not supported.
 
 ## X11 support
 
@@ -180,3 +178,7 @@ Reference to any ASUS products, services, processes, or other information and/or
 The use of ROG and ASUS trademarks within this website and associated tools and libraries is only to provide a recognisable identifier to users to enable them to associate that these tools will work with ASUS ROG laptops.
 
 ---
+
+## AI Disaclaimer
+
+Portions of this code have been written by various AI tools and reviewed by the maintainer exaclty as with every other contribution.
