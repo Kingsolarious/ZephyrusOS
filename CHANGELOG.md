@@ -1,8 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [6.3.1]
 
 ### Changes
+- Removed a lighting mode that is unavailable in windows to G835L: thanks to @shevchenko0013 again!
+
 
 ## [6.3.0]
 
