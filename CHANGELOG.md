@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.3.2]
+
+### Changes
+- Improve the notification area, @shevchenko0013 strikes again!
+- Improve firmware attributes handling
+
 ## [6.3.1]
 
 ### Changes
