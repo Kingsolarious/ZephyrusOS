@@ -110,6 +110,33 @@ export component MainWindow inherits Window {
             if(side-bar.current-item == 5): PageAbout {
                 width: root.width - side-bar.width;
             }
+
+            if toast: Rectangle {
+                x: 0px;
+                y: root.height - self.height;
+                width: root.width - side-bar.width;
+                height: 40px;
+                opacity: 1.0;
+                background: Palette.selection-background;
+                clip: true;
+                TouchArea {
+                    height: 100%;
+                    width: 100%;
+                    clicked => {
+                        toast = false;
+                    }
+                }
+
+                Rectangle {
+                    height: 100%;
+                    width: 100%;
+                    background: Palette.control-background;
+                    Text {
+                        color: Palette.control-foreground;
+                        text: root.toast_text;
+                    }
+                }
+            }
         }
     }
 
@@ -133,31 +160,6 @@ export component MainWindow inherits Window {
         }
     }
 
-    if toast: Rectangle {
-        x: 0px;
-        y: 0px;
-        width: root.width;
-        height: 32px;
-        opacity: 1.0;
-        background: Colors.grey;
-        TouchArea {
-            height: 100%;
-            width: 100%;
-            clicked => {
-                toast = false;
-            }
-        }
-
-        Rectangle {
-            height: 100%;
-            width: 100%;
-            background: Palette.control-background;
-            Text {
-                color: Palette.control-foreground;
-                text: root.toast_text;
-            }
-        }
-    }
 
     // // TODO: or use Dialogue
     if show_notif: Rectangle {
@@ -190,7 +192,7 @@ export component MainWindow inherits Window {
         y: 0px;
         width: root.width;
         height: root.height;
-        
+
         //padding only has effect on layout elements
         //padding: 10px;
 
