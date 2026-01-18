@@ -6,6 +6,7 @@
 - Removed a lighting mode that is unavailable in windows to G835L: thanks to @shevchenko0013 again!
 - Added translations for Ukranian language, thanks @shevchenko0013!
 - Added LEDs definition for G615LR, thanks @btnrv
+- Fix improper usage of Quiet when only LowPower is available
 
 ## [6.3.0]
 
