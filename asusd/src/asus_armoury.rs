@@ -196,7 +196,7 @@ impl crate::Reloadable for AsusArmouryAttribute {
                     )
                 };
 
-                apply_value.map_or(AttrValue::None, |tune| AttrValue::Integer(tune))
+                apply_value.map_or(AttrValue::None, AttrValue::Integer)
             }
             FirmwareAttributeType::Gpu => {
                 info!("Reload called on GPU attribute {name}: doing nothing");
@@ -429,7 +429,8 @@ impl AsusArmouryAttribute {
         })?;
 
         // write config after setting value
-        Ok(self.config.lock().await.write())
+        self.config.lock().await.write();
+        Ok(())
     }
 }
 
