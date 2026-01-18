@@ -459,8 +459,18 @@ impl CtrlPlatform {
         #[zbus(signal_context)] ctxt: SignalEmitter<'_>,
         policy: PlatformProfile,
     ) -> Result<(), FdoErr> {
-        self.config.lock().await.platform_profile_on_battery = policy;
-        self.set_platform_profile(ctxt, policy).await?;
+        // If the requested profile isn't available on this platform, and it's
+        // `Quiet`, fall back to `LowPower` so we don't write an unavailable
+        // profile into the config file.
+        let mut chosen = policy;
+        if let Ok(choices) = self.platform.get_platform_profile_choices() {
+            if chosen == PlatformProfile::Quiet && !choices.contains(&PlatformProfile::Quiet) {
+                chosen = PlatformProfile::LowPower;
+            }
+        }
+
+        self.config.lock().await.platform_profile_on_battery = chosen;
+        self.set_platform_profile(ctxt, chosen).await?;
         self.config.lock().await.write();
         Ok(())
     }
@@ -488,8 +498,16 @@ impl CtrlPlatform {
         #[zbus(signal_context)] ctxt: SignalEmitter<'_>,
         policy: PlatformProfile,
     ) -> Result<(), FdoErr> {
-        self.config.lock().await.platform_profile_on_ac = policy;
-        self.set_platform_profile(ctxt, policy).await?;
+        // Mirror the same fallback behavior for AC profile changes.
+        let mut chosen = policy;
+        if let Ok(choices) = self.platform.get_platform_profile_choices() {
+            if chosen == PlatformProfile::Quiet && !choices.contains(&PlatformProfile::Quiet) {
+                chosen = PlatformProfile::LowPower;
+            }
+        }
+
+        self.config.lock().await.platform_profile_on_ac = chosen;
+        self.set_platform_profile(ctxt, chosen).await?;
         self.config.lock().await.write();
         Ok(())
     }
