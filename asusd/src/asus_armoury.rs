@@ -2,7 +2,9 @@ use std::sync::Arc;
 
 use config_traits::StdConfig;
 use log::{debug, error, info, warn};
-use rog_platform::asus_armoury::{AttrValue, Attribute, FirmwareAttribute, FirmwareAttributes};
+use rog_platform::asus_armoury::{
+    AttrValue, Attribute, FirmwareAttribute, FirmwareAttributeType, FirmwareAttributes,
+};
 use rog_platform::platform::{PlatformProfile, RogPlatform};
 use rog_platform::power::AsusPower;
 use serde::{Deserialize, Serialize};
@@ -168,82 +170,64 @@ impl ArmouryAttributeRegistry {
 impl crate::Reloadable for AsusArmouryAttribute {
     async fn reload(&mut self) -> Result<(), RogError> {
         info!("Reloading {}", self.attr.name());
-        let name: FirmwareAttribute = self.attr.name().into();
+        let attribute: FirmwareAttribute = self.attr.name().into();
+        let name = self.attr.name();
 
-        // Treat dGPU attributes the same as PPT attributes for power-profile
-        // behaviour so they follow AC/DC tuning groups.
-        if name.is_ppt() || name.is_dgpu() {
-            let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
-            let power_plugged = self
-                .power
-                .get_online()
-                .map_err(|e| {
-                    error!("Could not get power status: {e:?}");
-                    e
-                })
-                .unwrap_or_default()
-                == 1;
-
-            let apply_value = {
-                let config = self.config.lock().await;
-                config
-                    .select_tunings_ref(power_plugged, profile)
-                    .and_then(|tuning| {
-                        if tuning.enabled {
-                            tuning.group.get(&self.name()).copied()
-                        } else {
-                            None
-                        }
+        let config = self.config.lock().await;
+        let apply_value = match attribute.property_type() {
+            FirmwareAttributeType::Ppt => {
+                let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
+                let power_plugged = self
+                    .power
+                    .get_online()
+                    .map_err(|e| {
+                        error!("Could not get power status: {e:?}");
+                        e
                     })
-            };
+                    .unwrap_or_default()
+                    == 1;
 
-            if let Some(tune) = apply_value {
-                self.attr
-                    .set_current_value(&AttrValue::Integer(tune))
-                    .map_err(|e| {
-                        error!("Could not set {} value: {e:?}", self.attr.name());
-                        self.attr.base_path_exists();
-                        e
-                    })?;
-                info!(
-                    "Restored PPT armoury setting {} to {:?}",
-                    self.attr.name(),
-                    tune
-                );
-            } else {
-                info!("Ignored restoring PPT armoury setting {} as tuning group is disabled or no saved value", self.attr.name());
+                let apply_value = {
+                    config.select_tunings_ref(power_plugged, profile).and_then(
+                        |tuning| match tuning.enabled {
+                            true => tuning.group.get(&self.name()).copied(),
+                            false => None,
+                        },
+                    )
+                };
+
+                apply_value.map_or(AttrValue::None, |tune| AttrValue::Integer(tune))
             }
-        } else {
-            // Handle non-PPT attributes (boolean and other settings)
-            if let Some(saved_value) = self.config.lock().await.armoury_settings.get(&name) {
-                self.attr
-                    .set_current_value(&AttrValue::Integer(*saved_value))
-                    .map_err(|e| {
-                        error!(
-                            "Error restoring armoury setting {}: {e:?}",
-                            self.attr.name()
-                        );
-                        self.attr.base_path_exists();
-                        e
-                    })?;
-                info!(
-                    "Restored armoury setting {} to {:?}",
-                    self.attr.name(),
-                    saved_value
-                );
-            } else {
-                info!(
-                    "No saved armoury setting for {}: skipping restore",
-                    self.attr.name()
-                );
+            FirmwareAttributeType::Gpu => {
+                info!("Reload called on GPU attribute {name}: doing nothing");
+                AttrValue::None
             }
-        }
+            _ => {
+                info!("Reload called on firmware attribute {name}");
+                match config.armoury_settings.get(&attribute) {
+                    Some(saved_value) => AttrValue::Integer(*saved_value),
+                    None => AttrValue::None,
+                }
+            }
+        };
+
+        self.attr.set_current_value(&apply_value).map_err(|e| {
+            error!("Could not set {} value: {e:?}", self.attr.name());
+            self.attr.base_path_exists();
+            e
+        })?;
+
+        info!(
+            "Restored asus-armoury setting {} to {:?}",
+            self.attr.name(),
+            apply_value
+        );
 
         Ok(())
     }
 }
 
-/// If return is `-1` on a property then there is avilable value for that
+/// If return is `-1` on a property then there is available value for that
 /// property
 #[interface(name = "xyz.ljones.AsusArmoury")]
 impl AsusArmouryAttribute {
@@ -293,7 +277,7 @@ impl AsusArmouryAttribute {
 
     async fn restore_default(&self) -> fdo::Result<()> {
         self.attr.restore_default()?;
-        if self.name().is_ppt() || self.name().is_dgpu() {
+        if self.name().property_type() == FirmwareAttributeType::Ppt {
             let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
             let power_plugged = self
                 .power
@@ -352,7 +336,7 @@ impl AsusArmouryAttribute {
 
     #[zbus(property)]
     async fn current_value(&self) -> fdo::Result<i32> {
-        if self.name().is_ppt() || self.name().is_dgpu() {
+        if self.name().property_type() == FirmwareAttributeType::Ppt {
             let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
             let power_plugged = self
                 .power
@@ -387,70 +371,65 @@ impl AsusArmouryAttribute {
 
     #[zbus(property)]
     async fn set_current_value(&mut self, value: i32) -> fdo::Result<()> {
-        if self.name().is_ppt() || self.name().is_dgpu() {
-            let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
-            let power_plugged = self
-                .power
-                .get_online()
-                .map_err(|e| {
-                    error!("Could not get power status: {e:?}");
-                    e
-                })
-                .unwrap_or_default();
-
-            let mut config = self.config.lock().await;
-            let tuning = config.select_tunings(power_plugged == 1, profile);
-
-            if let Some(tune) = tuning.group.get_mut(&self.name()) {
-                *tune = value;
-            } else {
-                tuning.group.insert(self.name(), value);
-                debug!("Store tuning config for {} = {:?}", self.attr.name(), value);
-            }
-            if tuning.enabled {
-                self.attr
-                    .set_current_value(&AttrValue::Integer(value))
+        let name = self.attr.name();
+        let apply_value = match self.name().property_type() {
+            FirmwareAttributeType::Ppt => {
+                let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
+                let power_plugged = self
+                    .power
+                    .get_online()
                     .map_err(|e| {
-                        error!(
-                            "Could not set value to PPT property {}: {e:?}",
-                            self.attr.name()
-                        );
+                        error!("Could not get power status: {e:?}");
                         e
-                    })?;
-            } else {
-                warn!(
-                    "Tuning group is disabled: skipping setting value to PPT property {}",
-                    self.attr.name()
-                );
-            }
-        } else {
-            self.attr
-                .set_current_value(&AttrValue::Integer(value))
-                .map_err(|e| {
-                    error!(
-                        "Could not set value {value} to attribute {}: {e:?}",
-                        self.attr.name()
-                    );
-                    e
-                })?;
+                    })
+                    .unwrap_or_default();
 
-            let mut settings = self.config.lock().await;
-            settings
-                .armoury_settings
-                .entry(self.name())
-                .and_modify(|setting| {
-                    debug!("Set config for {} = {value}", self.attr.name());
-                    *setting = value;
-                })
-                .or_insert_with(|| {
-                    debug!("Adding config for {} = {value}", self.attr.name());
-                    value
-                });
-        }
+                let mut config = self.config.lock().await;
+                let tuning = config.select_tunings(power_plugged == 1, profile);
+
+                if let Some(tune) = tuning.group.get_mut(&self.name()) {
+                    *tune = value;
+                } else {
+                    tuning.group.insert(self.name(), value);
+                    debug!("Store tuning config for {name} = {:?}", value);
+                }
+
+                match tuning.enabled {
+                    true => {
+                        debug!("Tuning is enabled: setting value to PPT property {name} = {value}");
+                        AttrValue::Integer(value)
+                    }
+                    false => {
+                        warn!("Tuning is disabled: skipping setting value to PPT property {name}");
+                        AttrValue::None
+                    }
+                }
+            }
+            _ => {
+                let mut settings = self.config.lock().await;
+                settings
+                    .armoury_settings
+                    .entry(self.name())
+                    .and_modify(|setting| {
+                        debug!("Set config for {name} = {value}");
+                        *setting = value;
+                    })
+                    .or_insert_with(|| {
+                        debug!("Adding config for {name} = {value}");
+                        value
+                    });
+
+                AttrValue::Integer(value)
+            }
+        };
+
+        self.attr.set_current_value(&apply_value).map_err(|e| {
+            error!("Could not set value {value} to attribute {name}: {e:?}");
+            e
+        })?;
 
         // write config after setting value
-        self.config.lock().await.write();
-        Ok(())
+        Ok(self.config.lock().await.write())
     }
 }
 
@@ -515,7 +494,7 @@ pub async fn set_config_or_default(
 ) {
     for attr in attrs.attributes().iter() {
         let name: FirmwareAttribute = attr.name().into();
-        if name.is_ppt() || name.is_dgpu() {
+        if name.property_type() == FirmwareAttributeType::Ppt {
             let tuning = config.select_tunings(power_plugged, profile);
             if !tuning.enabled {
                 debug!("Tuning group is not enabled, skipping");

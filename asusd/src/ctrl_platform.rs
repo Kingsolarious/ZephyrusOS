@@ -4,7 +4,9 @@ use std::sync::Arc;
 
 use config_traits::StdConfig;
 use log::{debug, error, info, warn};
-use rog_platform::asus_armoury::{AttrValue, FirmwareAttribute, FirmwareAttributes};
+use rog_platform::asus_armoury::{
+    AttrValue, FirmwareAttribute, FirmwareAttributeType, FirmwareAttributes,
+};
 use rog_platform::cpu::{CPUControl, CPUGovernor, CPUEPP};
 use rog_platform::platform::{PlatformProfile, Properties, RogPlatform};
 use rog_platform::power::AsusPower;
@@ -617,7 +619,7 @@ impl CtrlPlatform {
 
             for attr in self.attributes.attributes() {
                 let name: FirmwareAttribute = attr.name().into();
-                if name.is_ppt() {
+                if name.property_type() == FirmwareAttributeType::Ppt {
                     // reset stored value
                     if let Some(tune) = self
                         .config

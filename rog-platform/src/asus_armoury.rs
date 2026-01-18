@@ -253,8 +253,19 @@ impl FirmwareAttributes {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum FirmwareAttributeType {
+    #[default]
+    Immediate,
+    TUFKeyboard,
+    Ppt,
+    Gpu,
+    Bios,
+}
+
 macro_rules! define_attribute_getters {
-    ($($attr:ident),*) => {
+    // Accept a list of attribute idents and an optional `types { .. }` block
+    ( $( $attr:ident ),* $(,)? $( ; types { $( $tattr:ident : $ptype:ident ),* $(,)? } )? ) => {
         impl FirmwareAttributes {
             $(
                 pub fn $attr(&self) -> Option<&Attribute> {
@@ -267,6 +278,17 @@ macro_rules! define_attribute_getters {
                     }
                 });
             )*
+        }
+
+        impl FirmwareAttribute {
+            pub fn property_type(&self) -> FirmwareAttributeType {
+                match <&str>::from(*self) {
+                    $(
+                        $( stringify!($tattr) => FirmwareAttributeType::$ptype, )*
+                    )?
+                    _ => FirmwareAttributeType::Immediate,
+                }
+            }
         }
     }
 }
@@ -299,6 +321,38 @@ define_attribute_getters!(
     gpu_mux_mode,
     mini_led_mode,
     screen_auto_brightness
+    ; types {
+        ppt_pl1_spl: Ppt,
+        ppt_pl2_sppt: Ppt,
+        ppt_apu_sppt: Ppt,
+        ppt_platform_sppt: Ppt,
+        ppt_fppt: Ppt,
+        nv_dynamic_boost: Ppt,
+        nv_temp_target: Ppt,
+        dgpu_base_tgp: Ppt,
+        dgpu_tgp: Ppt,
+
+        gpu_mux_mode: Gpu,
+        egpu_connected: Gpu,
+        egpu_enable: Gpu,
+        dgpu_disable: Gpu,
+
+        boot_sound: Bios,
+
+        mcu_powersave: Immediate,
+
+        screen_auto_brightness: Immediate,
+        mini_led_mode: Immediate,
+        panel_hd_mode: Immediate,
+        panel_od: Immediate,
+
+        kbd_leds_awake: TUFKeyboard,
+        kbd_leds_sleep: TUFKeyboard,
+        kbd_leds_boot: TUFKeyboard,
+        kbd_leds_shutdown: TUFKeyboard,
+
+        charge_mode: Immediate,
+    }
 );
 
 /// CamelCase names of the properties. Intended for use with DBUS
@@ -350,29 +404,6 @@ pub enum FirmwareAttribute {
     KbdLedsSleep = 28,
     KbdLedsBoot = 29,
     KbdLedsShutdown = 30,
-}
-
-impl FirmwareAttribute {
-    pub fn is_ppt(&self) -> bool {
-        matches!(
-            self,
-            FirmwareAttribute::PptPl1Spl
-                | FirmwareAttribute::PptPl2Sppt
-                | FirmwareAttribute::PptPl3Fppt
-                | FirmwareAttribute::PptFppt
-                | FirmwareAttribute::PptApuSppt
-                | FirmwareAttribute::PptPlatformSppt
-        )
-    }
-
-    pub fn is_dgpu(&self) -> bool {
-        matches!(
-            self,
-            FirmwareAttribute::NvDynamicBoost
-                | FirmwareAttribute::NvTempTarget
-                | FirmwareAttribute::DgpuTgp
-        )
-    }
 }
 
 impl From<&str> for FirmwareAttribute {
