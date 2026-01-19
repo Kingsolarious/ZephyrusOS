@@ -7,6 +7,7 @@ import { PageFans } from "pages/fans.slint";
 import { PageAnime, AnimePageData } from "pages/anime.slint";
 import { RogItem } from "widgets/common.slint";
 import { PageAura } from "pages/aura.slint";
+import { PageGPU } from "pages/gpu.slint";
 import { Node } from "widgets/graph.slint";
 export { Node }
 import { FanPageData, FanType, Profile } from "types/fan_types.slint";
@@ -24,7 +25,15 @@ export component MainWindow inherits Window {
     default-font-size: 14px;
     default-font-weight: 400;
     icon: @image-url("../data/rog-control-center.png");
-    in property <[bool]> sidebar_items_avilable: [true, true, true, true, true, true];
+    in property <[bool]> sidebar_items_avilable: [
+        true,
+        true,
+        true,
+        true,
+        true, // GPU Configuration
+        true, // App Settings
+        true, // About
+    ];
     private property <bool> show_notif;
     private property <bool> fade_cover;
     private property <bool> toast: false;
@@ -58,8 +67,9 @@ export component MainWindow inherits Window {
                     @tr("Menu2" => "Keyboard Aura"),
                     @tr("Menu3" => "AniMe Matrix"),
                     @tr("Menu4" => "Fan Curves"),
-                    @tr("Menu5" => "App Settings"),
-                    @tr("Menu6" => "About"),
+                    @tr("Menu5" => "GPU Configuration"),
+                    @tr("Menu6" => "App Settings"),
+                    @tr("Menu7" => "About"),
                 ];
                 available: root.sidebar_items_avilable;
             }
@@ -89,26 +99,34 @@ export component MainWindow inherits Window {
                 height: root.height + 12px;
             }
 
-            aura := PageAura {
+            /*if(side-bar.current-item == 1):*/ aura := PageAura {
                 width: root.width - side-bar.width;
                 visible: side-bar.current-item == 1;
             }
 
             if(side-bar.current-item == 2): PageAnime {
                 width: root.width - side-bar.width;
+                visible: side-bar.current-item == 2;
             }
 
-            fans := PageFans {
+            if(side-bar.current-item == 3): fans := PageFans {
                 width: root.width - side-bar.width;
                 visible: side-bar.current-item == 3;
             }
 
-            if(side-bar.current-item == 4): PageAppSettings {
+            if(side-bar.current-item == 4): PageGPU {
                 width: root.width - side-bar.width;
+                visible: side-bar.current-item == 4;
             }
 
-            if(side-bar.current-item == 5): PageAbout {
+            if(side-bar.current-item == 5): PageAppSettings {
                 width: root.width - side-bar.width;
+                visible: side-bar.current-item == 5;
+            }
+
+            if(side-bar.current-item == 6): PageAbout {
+                width: root.width - side-bar.width;
+                visible: side-bar.current-item == 6;
             }
 
             if toast: Rectangle {

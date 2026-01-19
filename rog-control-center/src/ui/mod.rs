@@ -102,8 +102,9 @@ pub fn setup_window(config: Arc<Mutex<Config>>) -> MainWindow {
             available.contains(&"xyz.ljones.Aura".to_string()),
             available.contains(&"xyz.ljones.Anime".to_string()),
             available.contains(&"xyz.ljones.FanCurves".to_string()),
-            true,
-            true,
+            true, // GPU Configuration
+            true, // App Settings
+            true, // About
         ]
         .into(),
     );
