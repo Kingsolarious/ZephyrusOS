@@ -96,7 +96,10 @@ impl AnimeType {
         let board_name = DMIID::new().unwrap_or_default().board_name.to_uppercase();
         if board_name.contains("GA401I") || board_name.contains("GA401Q") {
             AnimeType::GA401
-        } else if board_name.contains("GA402R") || board_name.contains("GA402X") {
+        } else if board_name.contains("GA402R")
+            || board_name.contains("GA402X")
+            || board_name.contains("GA402N")
+        {
             AnimeType::GA402
         } else if board_name.contains("GU604V") {
             AnimeType::GU604
