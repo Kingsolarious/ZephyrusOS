@@ -1,62 +1,77 @@
-import { AboutSlint, VerticalBox, HorizontalBox } from "std-widgets.slint";
+import {
+    AboutSlint,
+    VerticalBox,
+    HorizontalBox,
+    ScrollView,
+} from "std-widgets.slint";
 
 export component PageAbout inherits VerticalLayout {
     padding: 10px;
     spacing: 10px;
-    Text {
-        vertical-alignment: TextVerticalAlignment.center;
-        horizontal-alignment: TextHorizontalAlignment.center;
-        text: "A UI for asusctl made with slint";
-        font-size: 22px;
-    }
+    ScrollView {
 
-    HorizontalBox {
-        alignment: LayoutAlignment.center;
-        VerticalBox {
+        HorizontalBox {
             alignment: LayoutAlignment.center;
+            VerticalBox {
+                alignment: LayoutAlignment.center;
 
-            Text {
-                wrap: TextWrap.word-wrap;
-                text: "You need to use kernel version 6.19 to use this software";
-            }
+                Text {
+                    vertical-alignment: TextVerticalAlignment.center;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    text: "ROG Control Center";
+                    font-size: 22px;
+                }
 
-            Text {
-                vertical-alignment: TextVerticalAlignment.center;
-                horizontal-alignment: TextHorizontalAlignment.center;
-                text: "Todo:";
-                font-size: 22px;
-            }
+                Text {
+                    wrap: TextWrap.word-wrap;
+                    text: "\nA powerful graphical interface for managing ASUS ROG, TUF, and ProArt laptops on Linux. It acts as the official GUI for the asusctl toolset, allowing for seamless hardware tuning without the command line.";
+                }
 
-            Text {
-                text: "- [ ] Theme the widgets";
-            }
+                Text {
+                    font-weight: 900;
+                    text: "Key Features:";
+                }
 
-            Text {
-                text: "- [ ] Add a cpu/gpu temp/fan speed info bar";
-            }
+                Text {
+                    text: "      • Performance: Switch power profiles and customize fan curves.\n      • Aura Sync: Control keyboard backlighting and LED effects.\n      • Battery Health: Set charge limits to extend battery longevity.\n      • Display: Toggle Panel Overdrive and refresh rates.\n      • AniMe Matrix: Control AniMe Matrix displays.";
+                }
 
-            Text {
-                text: "- [ ] Include fan speeds, temps in a bottom bar";
-            }
+                Text {
+                    font-weight: 900;
+                    text: "Requirements:";
+                }
 
-            Text {
-                text: "- [ ] Slash control";
-            }
+                Text {
+                    text: "      • This software requires kernel version 6.19.";
+                }
 
-            Text {
-                text: "- [ ] Screenpad controls";
-            }
+                Text {
+                    font-weight: 900;
+                    text: "Work in progress:";
+                }
 
-            Text {
-                text: "- [ ] ROG Ally specific settings";
+                Text {
+                    text: "      • Theme the widgets\n      • Add a cpu/gpu temp/fan speed info bar\n      • Include fan speeds, temps in a bottom bar\n      • Slash control\n      • Screenpad controls\n      • ROG Ally specific settings";
+                }
+
+                Text {
+                    font-weight: 900;
+                    text: "License:";
+                }
+
+                Text {
+                    text: "      This project is open-source software licensed under the Mozilla Public License 2.0 (MPL-2.0).";
+                }
+
+                Text {
+                    font-weight: 900;
+                    text: "Links:";
+                }
+
+                Text {
+                    text: "      Source Code: https://gitlab.com/asus-linux/asusctl\n      Website: https://asus-linux.org/";
+                }
             }
         }
-    }
-
-    Text {
-        vertical-alignment: TextVerticalAlignment.center;
-        horizontal-alignment: TextHorizontalAlignment.center;
-        text: "Work in progress";
-        font-size: 22px;
     }
 }

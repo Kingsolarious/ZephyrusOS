@@ -152,21 +152,20 @@ export component PageSystem inherits Rectangle {
     property <bool> show_fade_cover: false;
     property <bool> show_throttle_advanced: false;
     clip: true;
-    //padding only has effect on layout elements
-    //padding: 8px;
+
     ScrollView {
         VerticalLayout {
-            padding: 10px;
-            spacing: 10px;
+            padding: 12px;
+            spacing: 8px;
             alignment: LayoutAlignment.start;
             Rectangle {
                 background: Palette.alternate-background;
-                border-color: Palette.accent-background;
-                border-width: 3px;
-                border-radius: 10px;
-                height: 40px;
+                border-color: Palette.border;
+                border-width: 1px;
+                border-radius: 2px;
+                height: 36px;
                 Text {
-                    font-size: 18px;
+                    font-size: 16px;
                     color: Palette.control-foreground;
                     horizontal-alignment: TextHorizontalAlignment.center;
                     text: @tr("Power settings");
@@ -212,11 +211,11 @@ export component PageSystem inherits Rectangle {
                     padding-left: 10px;
                     padding-right: 20px;
                     HorizontalLayout {
-                        width: 38%;
+                        width: 40%;
                         alignment: LayoutAlignment.space-between;
                         padding-right: 15px;
                         Text {
-                            font-size: 16px;
+                            font-size: 14px;
                             vertical-alignment: TextVerticalAlignment.center;
                             color: Palette.control-foreground;
                             text: @tr("Screenpad brightness");
@@ -240,7 +239,7 @@ export component PageSystem inherits Rectangle {
 
                     HorizontalLayout {
                     width: 20%;
-                    padding-left: 10px;
+                    padding-left: 14px;
                         alignment: LayoutAlignment.stretch;
                         Switch {
                             text: @tr("Sync with primary");
@@ -262,12 +261,12 @@ export component PageSystem inherits Rectangle {
                 alignment: LayoutAlignment.start;
                 Rectangle {
                     background: Palette.alternate-background;
-                    border-color: Palette.accent-background;
-                    border-width: 3px;
-                    border-radius: 10px;
+                    border-color: Palette.border;
+                    border-width: 1px;
+                    border-radius: 2px;
                     height: 40px;
                     Text {
-                        font-size: 18px;
+                        font-size: 16px;
                         color: Palette.control-foreground;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         text: @tr("Keyboard Power Management");
@@ -315,12 +314,12 @@ export component PageSystem inherits Rectangle {
 
             Rectangle {
                 background: Palette.alternate-background;
-                border-color: Palette.accent-background;
-                border-width: 3px;
-                border-radius: 10px;
-                height: 40px;
+                border-color: Palette.border;
+                border-width: 1px;
+                border-radius: 2px;
+                height: 36px;
                 Text {
-                    font-size: 18px;
+                    font-size: 16px;
                     color: Palette.control-foreground;
                     horizontal-alignment: TextHorizontalAlignment.center;
                     text: @tr("Armoury settings");
@@ -328,19 +327,21 @@ export component PageSystem inherits Rectangle {
             }
 
             if !SystemPageData.asus_armoury_loaded: Rectangle {
-                border-width: 3px;
-                border-color: red;
+                background: maroon;
+                // background: darkred;
                 max-height: 30px;
                 VerticalBox {
                     Text {
                         text: @tr("no_asus_armoury_driver_1" => "The asus-armoury driver is not loaded");
                         font-size: 16px;
+                        color: white;
                         horizontal-alignment: TextHorizontalAlignment.center;
                     }
 
                     Text {
                         text: @tr("no_asus_armoury_driver_2" => "For advanced features you will require a kernel with this driver added.");
                         font-size: 16px;
+                        color: white;
                         horizontal-alignment: TextHorizontalAlignment.center;
                     }
                 }
@@ -583,20 +584,22 @@ export component PageSystem inherits Rectangle {
     }
 
     if root.show_throttle_advanced: Rectangle {
+        background: Palette.background;
         width: 100%;
         height: 100%;
         opacity: 1;
         ScrollView {
             VerticalLayout {
-                padding: 50px;
-                padding-top: 5px;
-                padding-bottom: 100px;
+                alignment: start;
+                padding: 5px;
+                padding-top: 15px;
                 spacing: 10px;
                 GroupBox {
                     VerticalBox {
+                        alignment: start;
                         spacing: 10px;
                         Text {
-                            font-size: 18px;
+                            font-size: 16px;
                             horizontal-alignment: TextHorizontalAlignment.center;
                             vertical-alignment: TextVerticalAlignment.center;
                             text: @tr("Energy Performance Preference linked to Throttle Policy");
@@ -644,9 +647,10 @@ export component PageSystem inherits Rectangle {
 
                 GroupBox {
                     VerticalBox {
+                        alignment: start;
                         spacing: 10px;
                         Text {
-                            font-size: 18px;
+                            font-size: 16px;
                             horizontal-alignment: TextHorizontalAlignment.center;
                             vertical-alignment: TextVerticalAlignment.center;
                             text: @tr("Throttle Policy for power state");
@@ -701,8 +705,8 @@ export component PageSystem inherits Rectangle {
         Button {
             x: root.width - self.width - 6px;
             y: 6px;
-            text: "X";
-            height: 40px;
+            text: "✕";
+            height: 34px;
             clicked => {
                 root.show_throttle_advanced = false;
                 root.show_fade_cover = false;

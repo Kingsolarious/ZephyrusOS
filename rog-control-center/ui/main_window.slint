@@ -56,12 +56,13 @@ export component MainWindow inherits Window {
     }
     min-height: AppSize.height;
     min-width: AppSize.width;
-    background: Colors.black;
+    background: Palette.alternate-background;
+
     HorizontalLayout {
         padding: 0px;
         VerticalLayout {
+            padding: 0px;
             side-bar := SideBar {
-                title: @tr("ROG");
                 model: [
                     @tr("Menu1" => "System Control"),
                     @tr("Menu2" => "Keyboard Aura"),
@@ -74,20 +75,12 @@ export component MainWindow inherits Window {
                 available: root.sidebar_items_avilable;
             }
 
-            Rectangle {
-                max-height: 40px;
+            Button {
+                height: 40px;
                 width: side-bar.width;
-                background: Palette.control-background;
-                Text {
-                    vertical-alignment: center;
-                    horizontal-alignment: center;
-                    text: @tr("Quit App");
-                }
-
-                TouchArea {
-                    clicked => {
-                        root.exit-app();
-                    }
+                text: @tr("Quit App");
+                clicked() => {
+                    root.exit-app();
                 }
             }
         }
@@ -210,10 +203,6 @@ export component MainWindow inherits Window {
         y: 0px;
         width: root.width;
         height: root.height;
-
-        //padding only has effect on layout elements
-        //padding: 10px;
-
         background: Palette.background;
         border-color: Palette.border;
         border-width: 3px;

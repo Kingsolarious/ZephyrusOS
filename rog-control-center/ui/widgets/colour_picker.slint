@@ -1,7 +1,7 @@
 import { Palette, Slider, HorizontalBox, Button, LineEdit } from "std-widgets.slint";
 
 export component ColourSlider inherits VerticalLayout {
-    spacing: 10px;
+    spacing: 12px;
     in-out property <bool> enabled;
     property <string> hex: "#FF0000";
     in-out property <float> c1value <=> c1.value;
@@ -102,9 +102,9 @@ export component ColourSlider inherits VerticalLayout {
         hex = set_hex_from_colour(final_colour);
     }
     Rectangle {
-        height: 32px;
-        border-width: 2px;
-        border-radius: 7px;
+        height: 28px;
+        border-width: 1px;
+        border-radius: 3px;
         border-color: Palette.border;
         // 13 colours
         background: !root.enabled ? Palette.alternate-background : @linear-gradient(90deg, base_colours[0], base_colours[1], base_colours[2], base_colours[3], base_colours[4], base_colours[5], base_colours[6], base_colours[7], base_colours[8], base_colours[9], base_colours[10], base_colours[11], base_colours[12], base_colours[13], base_colours[14], base_colours[15], base_colours[16], base_colours[17], base_colours[18], base_colours[19], base_colours[20], base_colours[21], base_colours[22], base_colours[23], base_colours[24], base_colours[25], base_colours[26], base_colours[27], base_colours[28], base_colours[29], base_colours[30], base_colours[31], base_colours[32], base_colours[33], base_colours[34], base_colours[35]);
@@ -127,9 +127,9 @@ export component ColourSlider inherits VerticalLayout {
     }
 
     Rectangle {
-        height: 32px;
-        border-width: 2px;
-        border-radius: 7px;
+        height: 28px;
+        border-width: 1px;
+        border-radius: 3px;
         border-color: Palette.border;
         // 11 colours
             background: !root.enabled ? Palette.alternate-background : @linear-gradient(90deg, base_saturation[0], base_saturation[1], base_saturation[2], base_saturation[3], base_saturation[4], base_saturation[5], base_saturation[6], base_saturation[7], base_saturation[8], base_saturation[9], base_saturation[10]);
@@ -151,9 +151,9 @@ export component ColourSlider inherits VerticalLayout {
     }
 
     Rectangle {
-        height: 32px;
-        border-width: 2px;
-        border-radius: 7px;
+        height: 28px;
+        border-width: 1px;
+        border-radius: 3px;
         border-color: Palette.border;
         // 11 colours
         background: !root.enabled ? Palette.alternate-background : @linear-gradient(90deg, base_value[0], base_value[1], base_value[2], base_value[3], base_value[4], base_value[5], base_value[6], base_value[7], base_value[8], base_value[9], base_value[10]);
@@ -191,8 +191,8 @@ export component ColourSlider inherits VerticalLayout {
 
         Rectangle {
             width: self.height;
-            border-width: 2px;
-            border-radius: 7px;
+            border-width: 1px;
+            border-radius: 3px;
             border-color: Palette.border;
             background <=> root.colourbox;
         }
