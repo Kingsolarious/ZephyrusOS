@@ -1,12 +1,11 @@
 import { Palette, VerticalBox , StandardButton, Button, HorizontalBox, ComboBox, Switch, Slider} from "std-widgets.slint";
 
 export component RogItem inherits Rectangle {
-    background: Palette.control-background;
     border-color: Palette.border;
-    border-width: 3px;
-    border-radius: 10px;
-    min-height: 48px;
-    max-height: 56px;
+    border-width: 1px;
+    border-radius: 2px;
+    min-height: 44px;
+    max-height: 44px;
 }
 
 export component SystemSlider inherits RogItem {
@@ -30,14 +29,14 @@ export component SystemSlider inherits RogItem {
             HorizontalLayout {
                 spacing: 6px;
                 Text {
-                    font-size: 16px;
+                    font-size: 14px;
                     vertical-alignment: TextVerticalAlignment.center;
                     color: Palette.control-foreground;
                     text: root.text;
                 }
 
                 Text {
-                    font-size: 16px;
+                    font-size: 14px;
                     horizontal-alignment: TextHorizontalAlignment.right;
                     vertical-alignment: TextVerticalAlignment.center;
                     color: Palette.control-foreground;
@@ -47,7 +46,7 @@ export component SystemSlider inherits RogItem {
         }
 
         HorizontalBox {
-            padding-right: 20px;
+            padding-right: 10px;
             slider := Slider {
                 enabled: root.enabled;
                 maximum: root.maximum;
@@ -162,7 +161,7 @@ export component SystemToggle inherits RogItem {
             alignment: LayoutAlignment.start;
             padding-left: 10px;
             Text {
-                font-size: 16px;
+                font-size: 14px;
                 vertical-alignment: TextVerticalAlignment.center;
                 color: Palette.control-foreground;
                 text: root.text;
@@ -193,7 +192,7 @@ export component SystemToggleInt inherits RogItem {
             alignment: LayoutAlignment.start;
             padding-left: 10px;
             Text {
-                font-size: 16px;
+                font-size: 14px;
                 vertical-alignment: TextVerticalAlignment.center;
                 color: Palette.control-foreground;
                 text: root.text;
@@ -223,7 +222,7 @@ export component SystemToggleVert inherits RogItem {
         alignment: LayoutAlignment.space-around;
         padding-top: 8px;
         Text {
-            font-size: 16px;
+            font-size: 14px;
             vertical-alignment: TextVerticalAlignment.bottom;
             horizontal-alignment: TextHorizontalAlignment.center;
             color: Palette.control-foreground;
@@ -254,7 +253,7 @@ export component SystemDropdown inherits RogItem {
             alignment: LayoutAlignment.start;
             padding-left: 10px;
             Text {
-                font-size: 16px;
+                font-size: 14px;
                 vertical-alignment: TextVerticalAlignment.center;
                 color: Palette.control-foreground;
                 text: root.text;
@@ -291,11 +290,7 @@ export component PopupNotification {
             border-width: 2px;
             border-color: Palette.accent-background;
             background: Palette.background;
-            // TODO: drop shadows slow
-            // drop-shadow-offset-x: 7px;
-            // drop-shadow-offset-y: 7px;
-            // drop-shadow-color: black;
-            // drop-shadow-blur: 30px;
+
             VerticalLayout {
                 Dialog {
                     VerticalLayout {

@@ -1,102 +1,36 @@
-import { Palette, TabWidget, Button, CheckBox } from "std-widgets.slint";
+import { Palette, TabWidget, Button, CheckBox, ScrollView } from "std-widgets.slint";
 import { Graph, Node } from "../widgets/graph.slint";
-import { SystemToggle } from "../widgets/common.slint";
+import { SystemToggle, SystemDropdown } from "../widgets/common.slint";
 import { Profile, FanType, FanPageData } from "../types/fan_types.slint";
-import { Palette, HorizontalBox , VerticalBox, ScrollView, Slider, Button, Switch, ComboBox, GroupBox, StandardButton} from "std-widgets.slint";
 
 export global GPUPageData {
     // GPU mode and device state
     in-out property <int> gpu_mux_mode: 1; // 0 = Ultra/Discreet, 1 = Integrated/Optimus
     in-out property <int> dgpu_disabled: 0; // 1 == dGPU disabled
     in-out property <int> egpu_enabled: 0; // 1 == eGPU (XGMobile) enabled
+    in-out property <[string]> gpu_modes_choises: [@tr("Ultra"), @tr("Integrated")];
     callback cb_gpu_mux_mode(int);
     callback cb_dgpu_disabled(int);
     callback cb_egpu_enabled(int);
 }
 
 export component PageGPU inherits Rectangle {
-
     clip: true;
+
     ScrollView {
         VerticalLayout {
             padding: 10px;
             spacing: 10px;
-            alignment: LayoutAlignment.start;
-            Rectangle {
-                background: Palette.alternate-background;
-                border-color: Palette.accent-background;
-                border-width: 3px;
-                border-radius: 10px;
-                height: 40px;
-                Text {
-                    font-size: 18px;
-                    color: Palette.control-foreground;
-                    horizontal-alignment: TextHorizontalAlignment.center;
-                    text: @tr("GPU Configuration");
+            SystemDropdown {
+                text: @tr("GPU mode");
+                current_index <=> GPUPageData.gpu_mux_mode;
+                current_value: GPUPageData.gpu_modes_choises[GPUPageData.gpu_mux_mode];
+                model <=> GPUPageData.gpu_modes_choises;
+                selected => {
+                    GPUPageData.cb_gpu_mux_mode(0);
+                    GPUPageData.cb_gpu_mux_mode(1);
                 }
             }
         }
-
-        GroupBox {
-            HorizontalLayout {
-                spacing: 10px;
-
-                // Ultra (discreet) mode button - disabled if dGPU is marked disabled
-                Rectangle {
-                    width: 120px;
-                    height: 36px;
-                    border-radius: 6px;
-                    border-color: Palette.border;
-                    border-width: 2px;
-                    background: GPUPageData.gpu_mux_mode == 0 ? Palette.accent-background : Palette.control-background;
-                    opacity: GPUPageData.dgpu_disabled == 1 ? 0.5 : 1.0;
-
-                    Text {
-                        color: Palette.control-foreground;
-                        horizontal-alignment: TextHorizontalAlignment.center;
-                        vertical-alignment: TextVerticalAlignment.center;
-                        text: @tr("Ultra");
-                    }
-
-                    TouchArea {
-                        width: 100%;
-                        height: 100%;
-                        clicked => {
-                            if (GPUPageData.dgpu_disabled != 1 && GPUPageData.gpu_mux_mode != 0) {
-                                GPUPageData.cb_gpu_mux_mode(0);
-                            }
-                        }
-                    }
-                }
-
-                // Integrated (Optimus) mode button
-                Rectangle {
-                    width: 120px;
-                    height: 36px;
-                    border-radius: 6px;
-                    border-color: Palette.border;
-                    border-width: 2px;
-                    background: GPUPageData.gpu_mux_mode == 1 ? Palette.accent-background : Palette.control-background;
-
-                    Text {
-                        color: Palette.control-foreground;
-                        horizontal-alignment: TextHorizontalAlignment.center;
-                        vertical-alignment: TextVerticalAlignment.center;
-                        text: @tr("Integrated");
-                    }
-
-                    TouchArea {
-                        width: 100%;
-                        height: 100%;
-                        clicked => {
-                            if (GPUPageData.gpu_mux_mode != 1) {
-                                GPUPageData.cb_gpu_mux_mode(1);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
     }
 }

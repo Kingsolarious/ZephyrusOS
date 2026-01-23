@@ -17,6 +17,7 @@ export component PageAura inherits Rectangle {
         c2.final_colour = AuraPageData.led_mode_data.colour2;
         c2.external_colour_change();
     }
+
     ScrollView {
         VerticalLayout {
             padding: 10px;
@@ -53,6 +54,7 @@ export component PageAura inherits Rectangle {
                 min-height: 220px;
                 max-height: 400px;
                 HorizontalLayout {
+                    padding-top: 5px;
                     spacing: 10px;
                     VerticalBox {
                         Text {
@@ -113,8 +115,6 @@ export component PageAura inherits Rectangle {
                 min-height: 80px;
                 max-height: 90px;
                 RogItem {
-                    //padding only has effect on layout elements
-                    //padding: 0px;
                     VerticalBox {
                         Text {
                             text: @tr("Zone");
@@ -137,8 +137,6 @@ export component PageAura inherits Rectangle {
                 }
 
                 RogItem {
-                    //padding only has effect on layout elements
-                    //padding: 0px;
                     VerticalBox {
                         Text {
                             text: @tr("Direction");
@@ -160,8 +158,6 @@ export component PageAura inherits Rectangle {
                 }
 
                 RogItem {
-                    //padding only has effect on layout elements
-                    //padding: 0px;
                     VerticalBox {
                         Text {
                             text: @tr("Speed");
@@ -205,6 +201,7 @@ export component PageAura inherits Rectangle {
     }
 
     if root.show_aura_power && AuraPageData.device_type == AuraDevType.New: Rectangle {
+        background: Palette.background;
         width: 100%;
         height: 100%;
         opacity: 1;
@@ -244,8 +241,8 @@ export component PageAura inherits Rectangle {
             Button {
                 x: root.width - self.width - 6px;
                 y: 6px;
-                text: "X";
-                height: 40px;
+                text: "✕";
+                height: 36px;
                 clicked => {
                     root.show_aura_power = false;
                     root.show_fade_cover = false;
@@ -255,6 +252,7 @@ export component PageAura inherits Rectangle {
     }
 
     if root.show_aura_power && AuraPageData.device_type == AuraDevType.Old: Rectangle {
+        background: Palette.background;
         width: 100%;
         height: 100%;
         opacity: 1;
@@ -297,8 +295,8 @@ export component PageAura inherits Rectangle {
             Button {
                 x: root.width - self.width - 6px;
                 y: 6px;
-                text: "X";
-                height: 40px;
+                text: "✕";
+                height: 36px;
                 clicked => {
                     root.show_aura_power = false;
                     root.show_fade_cover = false;

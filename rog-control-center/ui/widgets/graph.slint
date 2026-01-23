@@ -191,10 +191,11 @@ export component Graph inherits Rectangle {
             tip := Rectangle {
                 background: Palette.control-foreground;
                 opacity: 0.3;
+                border-radius: 12px;
                 x: final_x_pos();
                 y: final_y_pos();
-                width: label.preferred-width;
-                height: label.preferred-height;
+                width: label.preferred-width + 14px;
+                height: label.preferred-height + 4px;
                 function x_pos() -> length {
                     scale_x_to_graph(n.x) - label.preferred-width - 8px
                 }
@@ -225,7 +226,7 @@ export component Graph inherits Rectangle {
                 //
                 label := Text {
                     color: Palette.accent-foreground;
-                    font-size: 16px;
+                    font-size: 14px;
                     text: "\{Math.floor(n.x / 1px)}c, \{fan_pct()}%";
                 }
             }

@@ -16,20 +16,28 @@ component FanTab inherits Rectangle {
     in-out property <[Node]> nodes;
 
     VerticalLayout {
+        padding: 5px;
         HorizontalLayout {
             if root.tab_enabled: Graph {
                 nodes <=> root.nodes;
             }
             if !root.tab_enabled: Rectangle {
                 Text {
-                    font-size: 24px;
+                    font-size: 16px;
                     text: @tr("This fan is not avilable on this machine");
                 }
             }
         }
 
+        Rectangle {
+            background: Palette.border;
+            height: 1px;
+        }
+
         HorizontalLayout {
             alignment: LayoutAlignment.end;
+            spacing: 10px;
+            padding: 10px;
             CheckBox {
                 text: @tr("Enabled");
                 checked <=> root.enabled;
