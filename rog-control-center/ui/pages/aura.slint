@@ -42,10 +42,14 @@ export component PageAura inherits Rectangle {
                     current_value: AuraPageData.available_mode_names[self.current-index];
                     model <=> AuraPageData.available_mode_names;
                     selected => {
-                        AuraPageData.led_mode_data.mode = AuraPageData.led_mode;
-                        AuraPageData.led_mode_data.mode = AuraPageData.current_available_mode;
-                        self.current_value = AuraPageData.available_mode_names[self.current-index];
-                        AuraPageData.cb_led_mode(AuraPageData.current_available_mode);
+                        AuraPageData.apply_effect({
+                            mode: AuraPageData.supported_basic_modes[self.current-index],
+                            zone: AuraPageData.led_mode_data.zone,
+                            colour1: AuraPageData.led_mode_data.colour1,
+                            colour2: AuraPageData.led_mode_data.colour2,
+                            speed: AuraPageData.led_mode_data.speed,
+                            direction: AuraPageData.led_mode_data.direction,
+                        });
                     }
                 }
             }
@@ -62,47 +66,44 @@ export component PageAura inherits Rectangle {
                             vertical-alignment: TextVerticalAlignment.center;
                             horizontal-alignment: TextHorizontalAlignment.center;
                         }
-
                         HorizontalBox {
                             c1 := ColourSlider {
-                                enabled: AuraPageData.led_mode == 0 || AuraPageData.led_mode == 1 || AuraPageData.led_mode == 4 || AuraPageData.led_mode == 6 || AuraPageData.led_mode == 7 || AuraPageData.led_mode == 8 || AuraPageData.led_mode == 10 || AuraPageData.led_mode == 11 || AuraPageData.led_mode == 12;
+                                enabled: AuraPageData.colour1_enabled;
                                 final_colour <=> AuraPageData.color1;
                                 colourbox <=> AuraPageData.colorbox1;
-                                set_hex_from_colour(c1) => {
-                                    return AuraPageData.cb_hex_from_colour(c1);
-                                }
-                                hex_to_colour(s) => {
-                                    return AuraPageData.cb_hex_to_colour(s);
-                                }
+                                set_hex_from_colour(c) => { return AuraPageData.cb_hex_from_colour(c); }
+                                hex_to_colour(s) => { return AuraPageData.cb_hex_to_colour(s); }
                                 released => {
-                                    AuraPageData.led_mode_data.colour1 = AuraPageData.color1;
-                                    AuraPageData.cb_led_mode_data(AuraPageData.led_mode_data);
+                                    AuraPageData.apply_effect({
+                                        mode: AuraPageData.led_mode_data.mode,
+                                        zone: AuraPageData.led_mode_data.zone,
+                                        colour1: AuraPageData.color1,
+                                        colour2: AuraPageData.led_mode_data.colour2,
+                                        speed: AuraPageData.led_mode_data.speed,
+                                        direction: AuraPageData.led_mode_data.direction,
+                                    });
                                 }
                             }
                         }
                     }
-
                     VerticalBox {
-                        Text {
-                            text: @tr("Colour 2");
-                            vertical-alignment: TextVerticalAlignment.center;
-                            horizontal-alignment: TextHorizontalAlignment.center;
-                        }
-
+                        Text { text: @tr("Colour 2"); vertical-alignment: TextVerticalAlignment.center; horizontal-alignment: TextHorizontalAlignment.center; }
                         HorizontalBox {
                             c2 := ColourSlider {
-                                enabled: AuraPageData.led_mode == 1 || AuraPageData.led_mode == 4;
+                                enabled: AuraPageData.colour2_enabled;
                                 final_colour <=> AuraPageData.color2;
                                 colourbox <=> AuraPageData.colorbox2;
-                                set_hex_from_colour(c1) => {
-                                    return AuraPageData.cb_hex_from_colour(c1);
-                                }
-                                hex_to_colour(s) => {
-                                    return AuraPageData.cb_hex_to_colour(s);
-                                }
+                                set_hex_from_colour(c) => { return AuraPageData.cb_hex_from_colour(c); }
+                                hex_to_colour(s) => { return AuraPageData.cb_hex_to_colour(s); }
                                 released => {
-                                    AuraPageData.led_mode_data.colour2 = AuraPageData.color2;
-                                    AuraPageData.cb_led_mode_data(AuraPageData.led_mode_data);
+                                    AuraPageData.apply_effect({
+                                        mode: AuraPageData.led_mode_data.mode,
+                                        zone: AuraPageData.led_mode_data.zone,
+                                        colour1: AuraPageData.led_mode_data.colour1,
+                                        colour2: AuraPageData.color2,
+                                        speed: AuraPageData.led_mode_data.speed,
+                                        direction: AuraPageData.led_mode_data.direction,
+                                    });
                                 }
                             }
                         }
@@ -116,63 +117,63 @@ export component PageAura inherits Rectangle {
                 max-height: 90px;
                 RogItem {
                     VerticalBox {
-                        Text {
-                            text: @tr("Zone");
-                            vertical-alignment: TextVerticalAlignment.center;
-                            horizontal-alignment: TextHorizontalAlignment.center;
-                        }
-
+                        Text { text: @tr("Zone"); vertical-alignment: TextVerticalAlignment.center; horizontal-alignment: TextHorizontalAlignment.center; }
                         ComboBox {
-                            // enabled: AuraPageData.led_mode == ;
-                        enabled: false;
+                            enabled: false;
                             current_index <=> AuraPageData.zone;
                             current_value: AuraPageData.zone_names[self.current-index];
                             model <=> AuraPageData.zone_names;
                             selected => {
-                                AuraPageData.led_mode_data.zone = self.current-index;
-                                AuraPageData.cb_led_mode_data(AuraPageData.led_mode_data);
+                                AuraPageData.apply_effect({
+                                    mode: AuraPageData.led_mode_data.mode,
+                                    zone: self.current-index,
+                                    colour1: AuraPageData.led_mode_data.colour1,
+                                    colour2: AuraPageData.led_mode_data.colour2,
+                                    speed: AuraPageData.led_mode_data.speed,
+                                    direction: AuraPageData.led_mode_data.direction,
+                                });
                             }
                         }
                     }
                 }
-
                 RogItem {
                     VerticalBox {
-                        Text {
-                            text: @tr("Direction");
-                            vertical-alignment: TextVerticalAlignment.center;
-                            horizontal-alignment: TextHorizontalAlignment.center;
-                        }
-
+                        Text { text: @tr("Direction"); vertical-alignment: TextVerticalAlignment.center; horizontal-alignment: TextHorizontalAlignment.center; }
                         ComboBox {
-                            enabled: AuraPageData.led_mode == 3;
+                            enabled: AuraPageData.direction_enabled;
                             current_index <=> AuraPageData.direction;
                             current_value: AuraPageData.direction_names[self.current-index];
                             model <=> AuraPageData.direction_names;
                             selected => {
-                                AuraPageData.led_mode_data.direction = self.current-index;
-                                AuraPageData.cb_led_mode_data(AuraPageData.led_mode_data);
+                                AuraPageData.apply_effect({
+                                    mode: AuraPageData.led_mode_data.mode,
+                                    zone: AuraPageData.led_mode_data.zone,
+                                    colour1: AuraPageData.led_mode_data.colour1,
+                                    colour2: AuraPageData.led_mode_data.colour2,
+                                    speed: AuraPageData.led_mode_data.speed,
+                                    direction: self.current-index,
+                                });
                             }
                         }
                     }
                 }
-
                 RogItem {
                     VerticalBox {
-                        Text {
-                            text: @tr("Speed");
-                            vertical-alignment: TextVerticalAlignment.center;
-                            horizontal-alignment: TextHorizontalAlignment.center;
-                        }
-
+                        Text { text: @tr("Speed"); vertical-alignment: TextVerticalAlignment.center; horizontal-alignment: TextHorizontalAlignment.center; }
                         ComboBox {
-                            enabled: AuraPageData.led_mode == 1 || AuraPageData.led_mode == 2 || AuraPageData.led_mode == 3 || AuraPageData.led_mode == 4 || AuraPageData.led_mode == 5 || AuraPageData.led_mode == 6 || AuraPageData.led_mode == 7 || AuraPageData.led_mode == 8;
+                            enabled: AuraPageData.speed_enabled;
                             current_index <=> AuraPageData.speed;
                             current_value: AuraPageData.speed_names[self.current-index];
                             model <=> AuraPageData.speed_names;
                             selected => {
-                                AuraPageData.led_mode_data.speed = self.current-index;
-                                AuraPageData.cb_led_mode_data(AuraPageData.led_mode_data);
+                                AuraPageData.apply_effect({
+                                    mode: AuraPageData.led_mode_data.mode,
+                                    zone: AuraPageData.led_mode_data.zone,
+                                    colour1: AuraPageData.led_mode_data.colour1,
+                                    colour2: AuraPageData.led_mode_data.colour2,
+                                    speed: self.current-index,
+                                    direction: AuraPageData.led_mode_data.direction,
+                                });
                             }
                         }
                     }

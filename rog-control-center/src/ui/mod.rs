@@ -82,7 +82,10 @@ pub fn show_toast(
     };
 }
 
-pub fn setup_window(config: Arc<Mutex<Config>>) -> MainWindow {
+pub fn setup_window(
+    config: Arc<Mutex<Config>>,
+    prefetched_supported: std::sync::Arc<Option<Vec<i32>>>,
+) -> MainWindow {
     slint::set_xdg_app_id("rog-control-center")
         .map_err(|e| warn!("Couldn't set application ID: {e:?}"))
         .ok();
@@ -119,7 +122,7 @@ pub fn setup_window(config: Arc<Mutex<Config>>) -> MainWindow {
         setup_system_page_callbacks(&ui, config.clone());
     }
     if available.contains(&"xyz.ljones.Aura".to_string()) {
-        setup_aura_page(&ui, config.clone());
+        setup_aura_page(&ui, config.clone(), prefetched_supported.as_ref().clone());
     }
     if available.contains(&"xyz.ljones.Anime".to_string()) {
         setup_anime_page(&ui, config.clone());
