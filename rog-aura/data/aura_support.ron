@@ -125,7 +125,7 @@
         advanced_type: r#None,
         power_zones: [Keyboard],
     ),
-    ( 
+    (
         device_name: "FX607V",
         product_id: "",
         layout_name: "fa506i",
@@ -351,13 +351,13 @@
         power_zones: [Keyboard, Lightbar, Logo, RearGlow],
     ),
     (
-            device_name: "G635L",
-            product_id: "",
-            layout_name: "g635l-per-key",
-            basic_modes: [Static, Breathe, RainbowCycle, RainbowWave, Star, Rain, Highlight, Laser, Ripple, Pulse, Comet, Flash],
-            basic_zones: [],
-            advanced_type: PerKey,
-            power_zones: [Keyboard, Lightbar, Logo],
+        device_name: "G635L",
+        product_id: "",
+        layout_name: "g635l-per-key",
+        basic_modes: [Static, Breathe, RainbowCycle, RainbowWave, Star, Rain, Highlight, Laser, Ripple, Pulse, Comet, Flash],
+        basic_zones: [],
+        advanced_type: PerKey,
+        power_zones: [Keyboard, Lightbar, Logo],
     ),
     (
         device_name: "G712LI",
@@ -579,7 +579,7 @@
         device_name: "G835L",
         product_id: "",
         layout_name: "g814ji-per-key",
-        basic_modes: [Static, Breathe, RainbowCycle, RainbowWave, Star, Rain, Highlight, Laser, Ripple, Comet, Flash],
+        basic_modes: [Static, Breathe, RainbowCycle, RainbowWave, Star, Rain, Highlight, Laser, Ripple, Pulse, Comet, Flash],
         basic_zones: [],
         advanced_type: PerKey,
         power_zones: [Keyboard, Lightbar, Logo],
