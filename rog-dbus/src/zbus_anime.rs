@@ -5,7 +5,7 @@ use zbus::proxy;
 #[proxy(
     interface = "xyz.ljones.Anime",
     default_service = "xyz.ljones.Asusd",
-    default_path = "/xyz/ljones"
+    default_path = "/xyz/ljones/aura/anime"
 )]
 pub trait Anime {
     /// DeviceState method

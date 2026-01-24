@@ -103,8 +103,10 @@ impl AnimeType {
             AnimeType::GA402
         } else if board_name.contains("GU604V") {
             AnimeType::GU604
-        } else if board_name.contains("G635L") || board_name.contains("G635L") {
+        } else if board_name.contains("G635L") {
             AnimeType::G635L
+        } else if board_name.contains("G835L") {
+            AnimeType::G835L
         } else {
             AnimeType::Unsupported
         }
@@ -114,7 +116,9 @@ impl AnimeType {
     pub fn width(&self) -> usize {
         match self {
             AnimeType::GU604 => 70,
-            AnimeType::G835L => 74,
+            // TODO: Find G635L W*H
+            AnimeType::G635L => 68,
+            AnimeType::G835L => 68,
             _ => 74,
         }
     }
@@ -124,7 +128,8 @@ impl AnimeType {
         match self {
             AnimeType::GA401 => 36,
             AnimeType::GU604 => 43,
-            AnimeType::G835L => 39,
+            AnimeType::G635L => 34,
+            AnimeType::G835L => 34,
             _ => 39,
         }
     }
@@ -133,8 +138,9 @@ impl AnimeType {
     pub fn data_length(&self) -> usize {
         match self {
             AnimeType::GA401 => PANE_LEN * 2,
-            AnimeType::GU604 => PANE_LEN * 3,
-            AnimeType::G835L => PANE_LEN * 3,
+            // G835L has 810 LEDs: 210 (triangle) + 600 (staggered rectangle)
+            AnimeType::G635L => 810, // TODO: This is provisional until we have a G635L to test on
+            AnimeType::G835L => 810,
             _ => PANE_LEN * 3,
         }
     }
@@ -198,29 +204,35 @@ impl TryFrom<AnimeDataBuffer> for AnimePacketType {
         }
 
         let mut buffers = match anime.anime {
-            AnimeType::GA401 => vec![[0; 640]; 2],
-            AnimeType::GA402
-            | AnimeType::GU604
-            | AnimeType::G635L
-            | AnimeType::G835L
-            | AnimeType::Unsupported => {
+            AnimeType::GA401 | AnimeType::G635L | AnimeType::G835L => vec![[0; 640]; 2],
+            AnimeType::GA402 | AnimeType::GU604 | AnimeType::Unsupported => {
                 vec![[0; 640]; 3]
             }
         };
 
-        for (idx, chunk) in anime.data.as_slice().chunks(PANE_LEN).enumerate() {
-            buffers[idx][BLOCK_START..BLOCK_END].copy_from_slice(chunk);
+        // G835L has different packing: 627 bytes in pane 1, 183 bytes in pane 2
+        if anime.anime == AnimeType::G835L || anime.anime == AnimeType::G635L {
+            let data = anime.data.as_slice();
+            // Pane 1: first 627 bytes
+            let pane1_len = PANE_LEN.min(data.len());
+            buffers[0][BLOCK_START..BLOCK_START + pane1_len].copy_from_slice(&data[..pane1_len]);
+            // Pane 2: remaining bytes (183)
+            if data.len() > PANE_LEN {
+                let pane2_len = data.len() - PANE_LEN;
+                buffers[1][BLOCK_START..BLOCK_START + pane2_len].copy_from_slice(&data[PANE_LEN..]);
+            }
+        } else {
+            for (idx, chunk) in anime.data.as_slice().chunks(PANE_LEN).enumerate() {
+                buffers[idx][BLOCK_START..BLOCK_START + chunk.len()].copy_from_slice(chunk);
+            }
         }
+
         buffers[0][..7].copy_from_slice(&USB_PREFIX1);
         buffers[1][..7].copy_from_slice(&USB_PREFIX2);
 
         if matches!(
             anime.anime,
-            AnimeType::GA402
-                | AnimeType::GU604
-                | AnimeType::G635L
-                | AnimeType::G835L
-                | AnimeType::Unsupported
+            AnimeType::GA402 | AnimeType::GU604 | AnimeType::Unsupported
         ) {
             buffers[2][..7].copy_from_slice(&USB_PREFIX3);
         }

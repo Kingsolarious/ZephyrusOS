@@ -137,8 +137,8 @@ impl AnimeImage {
     fn scale_y(anime_type: AnimeType) -> f32 {
         match anime_type {
             AnimeType::GA401 => 0.3,
-            AnimeType::GU604 => 0.28,
-            _ => 0.283,
+            AnimeType::GA402 => 0.283,
+            _ => 0.28,
         }
     }
 
@@ -149,6 +149,7 @@ impl AnimeImage {
     /// square grid, so `first_x` is the x position on that grid where the
     /// LED is actually positioned in relation to the Y.
     ///
+    /// For GA401/GA402/GU604 (shrinking pattern - diagonal cuts in from left):
     /// ```text
     /// +------------+
     /// |            |
@@ -162,6 +163,19 @@ impl AnimeImage {
     ///    ^   ------+
     ///  first_x
     /// ```
+    ///
+    /// For G835L/G635L (inverted pattern - triangle grows then rectangle shifts):
+    /// ```text
+    /// ●              <- Row 0: first_x = 0, width = 1
+    ///  ●             <- Row 1: first_x = 0 (stagger), width = 1
+    /// ● ●            <- Row 2: first_x = 0, width = 2
+    ///  ● ●           <- Row 3: first_x = 0 (stagger), width = 2
+    /// ...            <- Triangle continues, first_x = 0 for rows 0-27
+    ///       ● ● ● ● ● ● ● ● ● ● ● ● ● ● ●  <- Row 28+: first_x grows
+    ///        ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● <- Rectangle shifts right
+    /// ```
+    /// Triangle (rows 0-27): first_x = 0 (no cumulative shift)
+    /// Rectangle (rows 28-67): first_x = (y - 28) / 2 (shifts right)
     fn first_x(anime_type: AnimeType, y: u32) -> u32 {
         match anime_type {
             AnimeType::GA401 => {
@@ -178,6 +192,16 @@ impl AnimeImage {
                 }
                 // and then their offset grows by one every two rows
                 (y - 9) / 2
+            }
+            AnimeType::G635L | AnimeType::G835L => {
+                // G835L/G635L have inverted geometry - triangle at top-left, rectangle shifts right
+                // Triangle (rows 0-27): no cumulative shift, just alternating stagger
+                // Rectangle (rows 28-67): shifts right by ~0.5px per row
+                if y < 28 {
+                    0
+                } else {
+                    (y - 28) / 2
+                }
             }
             _ => {
                 // first 11 rows start at zero
@@ -221,6 +245,16 @@ impl AnimeImage {
                 }
                 38 - Self::first_x(anime_type, y) + y % 2
             }
+            AnimeType::G635L | AnimeType::G835L => {
+                // G835L/G635L rows GROW then stay constant (inverted from other devices)
+                // Triangle (rows 0-27): pairs of rows with same length, 1→14
+                // Rectangle (rows 28-67): constant 15 LEDs
+                if y < 28 {
+                    y / 2 + 1
+                } else {
+                    15
+                }
+            }
             _ => {
                 if y <= 11 {
                     return 34;
@@ -235,8 +269,9 @@ impl AnimeImage {
         match anime_type {
             // 33.0 = Longest row LED count (physical) plus half-pixel offset
             AnimeType::GA401 => (33.0 + 0.5) * Self::scale_x(anime_type),
-
             AnimeType::GU604 => (38.0 + 0.5) * Self::scale_x(anime_type),
+            AnimeType::G635L => (33.0 + 0.5) * Self::scale_x(anime_type),
+            AnimeType::G835L => (33.0 + 0.5) * Self::scale_x(anime_type),
             _ => (35.0 + 0.5) * Self::scale_x(anime_type),
         }
     }
@@ -246,6 +281,8 @@ impl AnimeImage {
         match anime_type {
             AnimeType::GA401 => 55,
             AnimeType::GU604 => 62,
+            AnimeType::G635L => 68,
+            AnimeType::G835L => 68,
             _ => 61,
         }
     }
@@ -256,6 +293,8 @@ impl AnimeImage {
             // 54.0 = End column LED count (physical) plus one dead pixel
             AnimeType::GA401 => (54.0 + 1.0) * Self::scale_y(anime_type),
             AnimeType::GU604 => 62.0 * Self::scale_y(anime_type),
+            AnimeType::G635L => 68.0 * Self::scale_y(anime_type),
+            AnimeType::G835L => 68.0 * Self::scale_y(anime_type),
             // GA402 may not have dead pixels and require only the physical LED count
             _ => 61.0 * Self::scale_y(anime_type),
         }
@@ -269,8 +308,8 @@ impl AnimeImage {
                 1 | 3 => 35, // Some rows are padded
                 _ => 36 - y / 2,
             },
-            AnimeType::GU604 => AnimeImage::width(anime_type, y),
-            // GA402 does not have padding, equivalent to width
+
+            // Other devices don't have dead pixels
             _ => AnimeImage::width(anime_type, y),
         }
     }
@@ -405,11 +444,33 @@ impl AnimeImage {
         let transform =
             Mat3::from_scale_angle_translation(self.scale, self.angle, self.translation);
 
-        let pos_in_leds = Mat3::from_translation(Vec2::new(20.0, 20.0));
+        let pos_in_leds = Mat3::from_translation(self.led_center());
         // Get LED-to-image coords
         let led_from_px = pos_in_leds * led_from_cm * transform * cm_from_px * center;
 
         led_from_px.inverse()
+    }
+
+    fn led_center(&self) -> Vec2 {
+        if !matches!(self.anime_type, AnimeType::G635L | AnimeType::G835L) {
+            return Vec2::new(20.0, 20.0);
+        }
+
+        let mut min = Vec2::splat(f32::INFINITY);
+        let mut max = Vec2::splat(f32::NEG_INFINITY);
+        for led in self.led_pos.iter().flatten() {
+            let pos = Vec2::new(led.x(), led.y());
+            min = min.min(pos);
+            max = max.max(pos);
+        }
+
+        if min.x.is_finite() {
+            let mut center = (min + max) * 0.5;
+            center.y += 1.0;
+            center
+        } else {
+            Vec2::new(20.0, 20.0)
+        }
     }
 
     /// Generate the base image from inputs. The result can be displayed as is
