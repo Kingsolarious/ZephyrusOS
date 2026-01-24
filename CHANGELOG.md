@@ -5,6 +5,7 @@
 ### Changes
 - Improve the notification area, @shevchenko0013 strikes again!
 - Improve firmware attributes handling
+- Very good looking UI restyling from @shevchenko0013
 
 ## [6.3.1]
 
