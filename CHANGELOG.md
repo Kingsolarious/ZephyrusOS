@@ -6,6 +6,7 @@
 - Improve the notification area, @shevchenko0013 strikes again!
 - Improve firmware attributes handling
 - Very good looking UI restyling from @shevchenko0013
+- Added support for GA402NV matrix: thanks @Ghoul4500
 
 ## [6.3.1]
 
