@@ -43,6 +43,13 @@ export component MainWindow inherits Window {
         toast = text != "";
         toast_text = text;
     }
+    callback clear_toast_if_matches(string);
+    clear_toast_if_matches(text) => {
+        if (toast && toast_text == text) {
+            toast = false;
+            toast_text = "";
+        }
+    }
     callback exit-app();
     callback show_notification(bool);
     show_notification(yes) => {

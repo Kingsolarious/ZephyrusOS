@@ -3,7 +3,11 @@ pub mod setup_aura;
 pub mod setup_fans;
 pub mod setup_system;
 
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
+
+static TOAST_SEQ: AtomicU64 = AtomicU64::new(0);
 
 use config_traits::StdConfig;
 use log::warn;
@@ -70,15 +74,45 @@ pub fn show_toast(
     handle: Weak<MainWindow>,
     result: zbus::Result<()>,
 ) {
+    // bump sequence so that any previously spawned timers won't clear newer toasts
+    let seq = TOAST_SEQ.fetch_add(1, Ordering::SeqCst) + 1;
     match result {
         Ok(_) => {
-            slint::invoke_from_event_loop(move || handle.unwrap().invoke_show_toast(success)).ok()
+            let delayed_handle = handle.clone();
+            let delayed_text = success.clone();
+            slint::invoke_from_event_loop(move || handle.unwrap().invoke_show_toast(success)).ok();
+            tokio::spawn(async move {
+                tokio::time::sleep(Duration::from_secs(5)).await;
+                if TOAST_SEQ.load(Ordering::SeqCst) == seq {
+                    slint::invoke_from_event_loop(move || {
+                        delayed_handle
+                            .unwrap()
+                            .invoke_clear_toast_if_matches(delayed_text)
+                    })
+                    .ok();
+                }
+            });
         }
-        Err(e) => slint::invoke_from_event_loop(move || {
-            log::warn!("{fail}: {e}");
-            handle.unwrap().invoke_show_toast(fail)
-        })
-        .ok(),
+        Err(e) => {
+            let delayed_handle = handle.clone();
+            let delayed_text = fail.clone();
+            slint::invoke_from_event_loop(move || {
+                log::warn!("{fail}: {e}");
+                handle.unwrap().invoke_show_toast(fail)
+            })
+            .ok();
+            tokio::spawn(async move {
+                tokio::time::sleep(Duration::from_secs(5)).await;
+                if TOAST_SEQ.load(Ordering::SeqCst) == seq {
+                    slint::invoke_from_event_loop(move || {
+                        delayed_handle
+                            .unwrap()
+                            .invoke_clear_toast_if_matches(delayed_text)
+                    })
+                    .ok();
+                }
+            });
+        }
     };
 }
 
