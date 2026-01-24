@@ -7,6 +7,8 @@
 - Improve firmware attributes handling
 - Very good looking UI restyling from @shevchenko0013
 - Added support for GA402NV matrix: thanks @Ghoul4500
+- Fixed aura CLI interface
+- Fixed LEDs handling in rogcc
 
 ## [6.3.1]
 
