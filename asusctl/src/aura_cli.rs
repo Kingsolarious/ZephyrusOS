@@ -312,6 +312,133 @@ pub struct TwoColourSpeed {
     pub zone: AuraZone,
 }
 
+/// Two-colour star effect (separate subcommand name)
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(subcommand, name = "stars", description = "two-colour star effect")]
+pub struct StarsTwoColour {
+    #[argh(option, description = "set the first RGB value e.g. ff00ff")]
+    pub colour: Colour,
+
+    #[argh(option, description = "set the second RGB value e.g. ff00ff")]
+    pub colour2: Colour,
+
+    #[argh(option, description = "set the speed: low, med, high")]
+    pub speed: Speed,
+
+    #[argh(
+        option,
+        default = "AuraZone::None",
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
+    )]
+    pub zone: AuraZone,
+}
+
+/// Rain effect (single-speed, separate subcommand name)
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "rain",
+    description = "single speed-based rain effect"
+)]
+pub struct RainSingleSpeed {
+    #[argh(option, description = "set the speed: low, med, high")]
+    pub speed: Speed,
+
+    #[argh(
+        option,
+        default = "AuraZone::None",
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
+    )]
+    pub zone: AuraZone,
+}
+
+/// Laser (single-colour with speed) separate subcommand
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "laser",
+    description = "single-colour effect with speed"
+)]
+pub struct LaserSingleColourSpeed {
+    #[argh(option, short = 'c', description = "set the RGB value e.g. ff00ff")]
+    pub colour: Colour,
+
+    #[argh(option, description = "set the speed: low, med, high")]
+    pub speed: Speed,
+
+    #[argh(
+        option,
+        default = "AuraZone::None",
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
+    )]
+    pub zone: AuraZone,
+}
+
+/// Ripple (single-colour with speed) separate subcommand
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(
+    subcommand,
+    name = "ripple",
+    description = "single-colour effect with speed"
+)]
+pub struct RippleSingleColourSpeed {
+    #[argh(option, short = 'c', description = "set the RGB value e.g. ff00ff")]
+    pub colour: Colour,
+
+    #[argh(option, description = "set the speed: low, med, high")]
+    pub speed: Speed,
+
+    #[argh(
+        option,
+        default = "AuraZone::None",
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
+    )]
+    pub zone: AuraZone,
+}
+
+/// Pulse / Comet / Flash variants (single-colour) separate subcommands
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(subcommand, name = "pulse", description = "single-colour pulse effect")]
+pub struct PulseSingleColour {
+    #[argh(option, short = 'c', description = "set the RGB value e.g. ff00ff")]
+    pub colour: Colour,
+
+    #[argh(
+        option,
+        default = "AuraZone::None",
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
+    )]
+    pub zone: AuraZone,
+}
+
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(subcommand, name = "comet", description = "single-colour comet effect")]
+pub struct CometSingleColour {
+    #[argh(option, short = 'c', description = "set the RGB value e.g. ff00ff")]
+    pub colour: Colour,
+
+    #[argh(
+        option,
+        default = "AuraZone::None",
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
+    )]
+    pub zone: AuraZone,
+}
+
+#[derive(FromArgs, Debug, Clone, Default)]
+#[argh(subcommand, name = "flash", description = "single-colour flash effect")]
+pub struct FlashSingleColour {
+    #[argh(option, short = 'c', description = "set the RGB value e.g. ff00ff")]
+    pub colour: Colour,
+
+    #[argh(
+        option,
+        default = "AuraZone::None",
+        description = "set the zone for this effect e.g. 0, 1, one, logo, lightbar-left"
+    )]
+    pub zone: AuraZone,
+}
+
 /// Multi-zone colour settings
 #[derive(FromArgs, Debug, Clone, Default)]
 #[allow(dead_code)]
@@ -359,14 +486,14 @@ pub enum SetAuraBuiltin {
     Breathe(TwoColourSpeed),           // 1
     RainbowCycle(SingleSpeed),         // 2
     RainbowWave(SingleSpeedDirection), // 3
-    Stars(TwoColourSpeed),             // 4
-    Rain(SingleSpeed),                 // 5
+    Stars(StarsTwoColour),             // 4
+    Rain(RainSingleSpeed),             // 5
     Highlight(SingleColourSpeed),      // 6
-    Laser(SingleColourSpeed),          // 7
-    Ripple(SingleColourSpeed),         // 8
-    Pulse(SingleColour),               // 10
-    Comet(SingleColour),               // 11
-    Flash(SingleColour),               // 12
+    Laser(LaserSingleColourSpeed),     // 7
+    Ripple(RippleSingleColourSpeed),   // 8
+    Pulse(PulseSingleColour),          // 10
+    Comet(CometSingleColour),          // 11
+    Flash(FlashSingleColour),          // 12
 }
 
 impl Default for SetAuraBuiltin {
@@ -422,6 +549,79 @@ impl From<&SingleSpeedDirection> for AuraEffect {
         Self {
             speed: aura.speed,
             direction: aura.direction,
+            zone: aura.zone,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&StarsTwoColour> for AuraEffect {
+    fn from(aura: &StarsTwoColour) -> Self {
+        Self {
+            colour1: aura.colour,
+            colour2: aura.colour2,
+            zone: aura.zone,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&RainSingleSpeed> for AuraEffect {
+    fn from(aura: &RainSingleSpeed) -> Self {
+        Self {
+            speed: aura.speed,
+            zone: aura.zone,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&LaserSingleColourSpeed> for AuraEffect {
+    fn from(aura: &LaserSingleColourSpeed) -> Self {
+        Self {
+            colour1: aura.colour,
+            speed: aura.speed,
+            zone: aura.zone,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&RippleSingleColourSpeed> for AuraEffect {
+    fn from(aura: &RippleSingleColourSpeed) -> Self {
+        Self {
+            colour1: aura.colour,
+            speed: aura.speed,
+            zone: aura.zone,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&PulseSingleColour> for AuraEffect {
+    fn from(aura: &PulseSingleColour) -> Self {
+        Self {
+            colour1: aura.colour,
+            zone: aura.zone,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&CometSingleColour> for AuraEffect {
+    fn from(aura: &CometSingleColour) -> Self {
+        Self {
+            colour1: aura.colour,
+            zone: aura.zone,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&FlashSingleColour> for AuraEffect {
+    fn from(aura: &FlashSingleColour) -> Self {
+        Self {
+            colour1: aura.colour,
             zone: aura.zone,
             ..Default::default()
         }
