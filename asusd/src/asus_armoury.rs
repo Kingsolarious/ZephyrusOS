@@ -211,17 +211,24 @@ impl crate::Reloadable for AsusArmouryAttribute {
             }
         };
 
-        self.attr.set_current_value(&apply_value).map_err(|e| {
-            error!("Could not set {} value: {e:?}", self.attr.name());
-            self.attr.base_path_exists();
-            e
-        })?;
+        match apply_value {
+            AttrValue::None => {
+                info!(
+                    "No saved value for attribute {}: skipping.",
+                    self.attr.name()
+                );
+            }
+            _ => {
+                info!("Applying value {apply_value:?} to attribute {name}");
+                self.attr.set_current_value(&apply_value).map_err(|e| {
+                    error!("Could not set {name} value: {e:?}");
+                    self.attr.base_path_exists();
+                    e
+                })?;
 
-        info!(
-            "Restored asus-armoury setting {} to {:?}",
-            self.attr.name(),
-            apply_value
-        );
+                info!("Restored asus-armoury setting {name} to {apply_value:?}");
+            }
+        }
 
         Ok(())
     }
