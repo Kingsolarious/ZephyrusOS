@@ -2,7 +2,6 @@ use std::env;
 use std::error::Error;
 use std::str::FromStr;
 
-use log::error;
 use rog_anime::usb::{PROD_ID, VENDOR_ID};
 use rog_anime::{AnimeType, USB_PREFIX2};
 use sdl2::event::Event;
@@ -20,6 +19,7 @@ pub struct VirtAnimeMatrix {
     animatrix: AniMatrix,
 }
 
+// TODO: This isn't working
 impl VirtAnimeMatrix {
     pub fn new(model: AnimeType) -> Self {
         VirtAnimeMatrix {
@@ -86,8 +86,12 @@ impl VirtAnimeMatrix {
                 ]
                 .to_vec(),
             })
-            .map_err(|err| error!("Could not create virtual device: {:?}", err))
-            .expect("Could not create virtual device"),
+            .unwrap_or_else(|err| {
+                panic!(
+                    "Could not create virtual device: {err:?}. \
+                    Try loading the uhid module and ensure you have the necessary permissions."
+                )
+            }),
         }
     }
 
@@ -114,7 +118,7 @@ impl VirtAnimeMatrix {
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
     if args.len() <= 1 {
-        println!("Must supply arg, one of <GA401, GA402, GU604>");
+        println!("Must supply arg, one of <GA401, GA402, GU604, G835L>");
         return Ok(());
     }
     let anime_type = AnimeType::from_str(&args[1])?;

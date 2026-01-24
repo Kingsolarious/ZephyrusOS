@@ -125,7 +125,7 @@ pub struct AnimeGif {
     pub bright: f32,
     #[argh(
         option,
-        default = "1",
+        default = "0",
         description = "how many loops to play - 0 is infinite"
     )]
     pub loops: u32,
@@ -144,7 +144,7 @@ pub struct AnimeGifDiagonal {
     pub bright: f32,
     #[argh(
         option,
-        default = "1",
+        default = "0",
         description = "how many loops to play - 0 is infinite"
     )]
     pub loops: u32,

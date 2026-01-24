@@ -1,9 +1,13 @@
 use rog_anime::AnimeType;
 
+use self::map_g635l::G635L;
+use self::map_g835l::G835L;
 use self::map_ga401::GA401;
 use self::map_ga402::GA402;
 use self::map_gu604::GU604;
 
+mod map_g635l;
+mod map_g835l;
 mod map_ga401;
 mod map_ga402;
 mod map_gu604;
@@ -38,30 +42,18 @@ pub struct AniMatrix {
 
 impl AniMatrix {
     pub fn new(model: AnimeType) -> Self {
-        let led_shape = match model {
-            AnimeType::GA401 => LedShape {
-                vertical: 2,
-                horizontal: 5,
-            },
-            AnimeType::GA402 | AnimeType::G635L | AnimeType::G835L | AnimeType::Unsupported => {
-                LedShape {
-                    vertical: 2,
-                    horizontal: 5,
-                }
-            }
-            AnimeType::GU604 => LedShape {
-                vertical: 2,
-                horizontal: 5,
-            },
+        let led_shape = LedShape {
+            vertical: 2,
+            horizontal: 5,
         };
 
         // Do a hard mapping of each (derived from wireshardk captures)
         let rows = match model {
             AnimeType::GA401 => GA401.to_vec(),
-            AnimeType::GA402 | AnimeType::G635L | AnimeType::G835L | AnimeType::Unsupported => {
-                GA402.to_vec()
-            }
+            AnimeType::GA402 | AnimeType::Unsupported => GA402.to_vec(),
             AnimeType::GU604 => GU604.to_vec(),
+            AnimeType::G635L => G635L.to_vec(),
+            AnimeType::G835L => G835L.to_vec(),
         };
 
         Self { rows, led_shape }

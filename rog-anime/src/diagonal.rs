@@ -146,6 +146,8 @@ impl AnimeDiagonal {
         match anime_type {
             AnimeType::GA401 => self.to_ga401_packets(),
             AnimeType::GU604 => self.to_gu604_packets(),
+            AnimeType::G635L => self.to_g835l_packets(), // TODO: Verify with G635L model
+            AnimeType::G835L => self.to_g835l_packets(),
             _ => self.to_ga402_packets(),
         }
     }
@@ -380,5 +382,81 @@ impl AnimeDiagonal {
         copy_slice(b, a, 58, 0, &mut start_index, 12);
 
         AnimeDataBuffer::from_vec(crate::AnimeType::GA402, buf)
+    }
+
+    /// G835L diagonal packing - inverted geometry (rows grow then constant)
+    /// Triangle (rows 0-27): pairs grow from 1→14 LEDs
+    /// Rectangle (rows 28-67): constant 15 LEDs
+    ///
+    /// Diagonal PNG layout for G835L:
+    /// - Image height = 34 (row pairs)
+    /// - Image width  = 68 (half-step X grid)
+    /// - Even/odd rows are interleaved in X (staggered by 0.5 LED = 1 px)
+    fn to_g835l_packets(&self) -> Result<AnimeDataBuffer> {
+        use log::debug;
+
+        let mut buf = vec![0u8; AnimeType::G835L.data_length()];
+        let mut buf_idx = 0usize;
+
+        debug!(
+            "G835L packing: image dimensions {}x{}, buffer size {}",
+            self.1.first().map(|r| r.len()).unwrap_or(0),
+            self.1.len(),
+            buf.len()
+        );
+
+        // Helper: get row length for G835L
+        fn row_length(row: usize) -> usize {
+            if row < 28 {
+                row / 2 + 1
+            } else {
+                15
+            }
+        }
+
+        // Helper: starting X (in LED units) for the row
+        fn first_x(row: usize) -> usize {
+            if row < 28 {
+                0
+            } else {
+                (row - 28) / 2
+            }
+        }
+
+        // Process all 68 rows
+        for row in 0..68 {
+            let len = row_length(row);
+            let img_y = row / 2;
+            let base_x = first_x(row);
+            let stagger = row % 2;
+
+            for i in 0..len {
+                // Half-step X grid: even rows on even pixels, odd rows on odd pixels.
+                let img_x = (base_x + i) * 2 + stagger;
+
+                // Read from image, clamp to bounds
+                let val = if img_y < self.1.len() && img_x < self.1[img_y].len() {
+                    self.1[img_y][img_x]
+                } else {
+                    0
+                };
+
+                // Log first LED of each row for debugging
+                if i == 0 {
+                    debug!(
+                        "Row {}: len={}, first LED at img[{}][{}] = {}",
+                        row, len, img_y, img_x, val
+                    );
+                }
+
+                if buf_idx < buf.len() {
+                    buf[buf_idx] = val;
+                }
+                buf_idx += 1;
+            }
+        }
+
+        debug!("G835L packing complete: {} bytes written", buf_idx);
+        AnimeDataBuffer::from_vec(AnimeType::G835L, buf)
     }
 }
