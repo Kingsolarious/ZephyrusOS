@@ -33,7 +33,6 @@ pub struct AuraConfig {
 }
 
 impl StdConfig for AuraConfig {
-    /// Detect the keyboard type and load from default DB if data available
     fn new() -> Self {
         panic!("This should not be used");
     }

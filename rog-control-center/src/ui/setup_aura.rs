@@ -83,15 +83,6 @@ pub fn setup_aura_page(
         set_ui_props_async!(handle, aura, AuraPageData, led_power);
         set_ui_props_async!(handle, aura, AuraPageData, device_type);
 
-        if let Ok(data) = aura.led_mode_data().await {
-            let d = data.into();
-            handle
-                .upgrade_in_event_loop(move |h| {
-                    h.global::<AuraPageData>().invoke_update_led_mode_data(d);
-                })
-                .ok();
-        }
-
         let modes_vec: Vec<i32> = match prefetched_supported {
             Some(p) => p,
             None => aura
@@ -101,11 +92,15 @@ pub fn setup_aura_page(
                 .map(|m| m.iter().map(|n| (*n).into()).collect())
                 .unwrap_or_default(),
         };
-        let current_mode: Option<i32> = aura.led_mode().await.ok().map(|m| m.into());
 
+        // Restore saved mode, colours, zone, speed, direction from asusd (persisted to disk).
+        // Use effect.mode as single source — avoid led_mode() which can fail (try_lock).
+        let restore = aura.led_mode_data().await.ok();
+        let raw_mode: Option<i32> = restore.as_ref().map(|d| d.mode.into());
+        let d_slint = restore.map(|d| d.into());
         handle
-            .upgrade_in_event_loop(move |handle| {
-                let names = handle.global::<AuraPageData>().get_mode_names();
+            .upgrade_in_event_loop(move |h| {
+                let names = h.global::<AuraPageData>().get_mode_names();
                 let mut raws = Vec::new();
                 let mut mode_names = Vec::new();
                 for (i, name) in names.iter().enumerate() {
@@ -115,17 +110,17 @@ pub fn setup_aura_page(
                         mode_names.push(name.clone());
                     }
                 }
-                handle
-                    .global::<AuraPageData>()
+                h.global::<AuraPageData>()
                     .set_supported_basic_modes(raws.as_slice().into());
-                handle
-                    .global::<AuraPageData>()
+                h.global::<AuraPageData>()
                     .set_available_mode_names(mode_names.as_slice().into());
-                if let Some(cm) = current_mode {
-                    let idx = raws.iter().position(|&r| r == cm).unwrap_or(0) as i32;
-                    handle
-                        .global::<AuraPageData>()
-                        .set_current_available_mode(idx);
+                if let Some(d) = d_slint {
+                    h.global::<AuraPageData>().invoke_update_led_mode_data(d);
+                    if let Some(cm) = raw_mode {
+                        let idx = raws.iter().position(|&r| r == cm).unwrap_or(0) as i32;
+                        h.global::<AuraPageData>().set_current_available_mode(idx);
+                    }
+                    h.invoke_external_colour_change();
                 }
             })
             .map_err(|e| error!("{e}"))

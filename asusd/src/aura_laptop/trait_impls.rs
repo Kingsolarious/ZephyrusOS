@@ -182,7 +182,6 @@ impl AuraZbus {
         self.0.set_brightness(config.brightness.into()).await?;
         config.set_builtin(effect);
         config.write();
-
         Ok(())
     }
 
@@ -208,9 +207,10 @@ impl AuraZbus {
         let mut config = self.0.config.lock().await;
         for opt in options.states {
             let zone = opt.zone;
-            for config in config.enabled.states.iter_mut() {
-                if config.zone == zone {
-                    *config = opt;
+            for state in config.enabled.states.iter_mut() {
+                if state.zone == zone {
+                    *state = opt;
+                    break;
                 }
             }
         }

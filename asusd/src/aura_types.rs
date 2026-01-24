@@ -196,6 +196,7 @@ impl DeviceHandle {
                 Some(Arc::new(Mutex::new(k)))
             });
 
+        // Load saved mode, colours, brightness, power from disk; apply on reload
         let mut config = AuraConfig::load_and_update_config(prod_id);
         config.led_type = aura_type;
         let aura = Aura {
