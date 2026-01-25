@@ -1,6 +1,7 @@
 pub mod setup_anime;
 pub mod setup_aura;
 pub mod setup_fans;
+pub mod setup_gpu;
 pub mod setup_system;
 
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -162,8 +163,11 @@ pub fn setup_window(
         setup_anime_page(&ui, config.clone());
     }
     if available.contains(&"xyz.ljones.FanCurves".to_string()) {
-        setup_fan_curve_page(&ui, config);
+        setup_fan_curve_page(&ui, config.clone());
     }
+
+    // Populate GPU page choices and callbacks
+    setup_gpu::setup_gpu_page(&ui);
 
     ui
 }

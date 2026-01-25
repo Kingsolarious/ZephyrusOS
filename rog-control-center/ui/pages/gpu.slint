@@ -8,10 +8,9 @@ export global GPUPageData {
     in-out property <int> gpu_mux_mode: 1; // 0 = Ultra/Discreet, 1 = Integrated/Optimus
     in-out property <int> dgpu_disabled: 0; // 1 == dGPU disabled
     in-out property <int> egpu_enabled: 0; // 1 == eGPU (XGMobile) enabled
-    in-out property <[string]> gpu_modes_choises: [@tr("Ultra"), @tr("Integrated")];
-    callback cb_gpu_mux_mode(int);
-    callback cb_dgpu_disabled(int);
-    callback cb_egpu_enabled(int);
+    in-out property <[string]> gpu_modes_choises: [@tr("Integrated"), @tr("Hybrid")];
+    in-out property <bool> gpu_mux_available: false;
+    callback cb_set_gpu_mode(int);
 }
 
 export component PageGPU inherits Rectangle {
@@ -21,14 +20,29 @@ export component PageGPU inherits Rectangle {
         VerticalLayout {
             padding: 10px;
             spacing: 10px;
-            SystemDropdown {
-                text: @tr("GPU mode");
-                current_index <=> GPUPageData.gpu_mux_mode;
-                current_value: GPUPageData.gpu_modes_choises[GPUPageData.gpu_mux_mode];
-                model <=> GPUPageData.gpu_modes_choises;
-                selected => {
-                    GPUPageData.cb_gpu_mux_mode(0);
-                    GPUPageData.cb_gpu_mux_mode(1);
+
+            HorizontalLayout {
+                padding-right: 10px;
+                padding-left: 10px;
+                alignment: LayoutAlignment.space-between;
+                Rectangle {
+                    height: 32px;
+                    Text {
+                        font-size: 16px;
+                        text: @tr("Note: Changes take effect after a reboot. The dropdown always shows the current mode.");
+                    }
+                }
+            }
+
+            HorizontalLayout {
+                SystemDropdown {
+                    text: @tr("GPU mode");
+                    model <=> GPUPageData.gpu_modes_choises;
+                    current_index <=> GPUPageData.gpu_mux_mode;
+                    current_value: GPUPageData.gpu_modes_choises[GPUPageData.gpu_mux_mode];
+                    selected => {
+                        GPUPageData.cb_set_gpu_mode(GPUPageData.gpu_mux_mode)
+                    }
                 }
             }
         }
