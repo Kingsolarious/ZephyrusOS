@@ -186,9 +186,11 @@ fn do_parsed(
     conn: Connection,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match &parsed.command {
-        CliCommand::Aura(mode) => handle_led_mode(mode)?,
-        CliCommand::AuraPowerOld(pow) => handle_led_power1(pow)?,
-        CliCommand::AuraPower(pow) => handle_led_power2(pow)?,
+        CliCommand::Aura(a) => match &a.command {
+            crate::cli_opts::AuraSubCommand::Effect(mode) => handle_led_mode(mode)?,
+            crate::cli_opts::AuraSubCommand::PowerTuf(pow) => handle_led_power1(pow)?,
+            crate::cli_opts::AuraSubCommand::Power(pow) => handle_led_power2(pow)?,
+        },
         CliCommand::Brightness(cmd) => handle_brightness(cmd)?,
         CliCommand::Profile(cmd) => handle_throttle_profile(&conn, supported_properties, cmd)?,
         CliCommand::FanCurve(cmd) => handle_fan_curve(&conn, cmd)?,
@@ -720,7 +722,7 @@ fn handle_led_power1(power: &LedPowerCommand1) -> Result<(), Box<dyn std::error:
             && !power.keyboard
             && !power.lightbar
         {
-            println!("Missing arg or command; run 'asusctl aura-power-old --help' for usage");
+            println!("Missing arg or command; run 'asusctl aura power-tuf --help' for usage");
             return Ok(());
         }
 
@@ -773,7 +775,7 @@ fn handle_led_power2(power: &LedPowerCommand2) -> Result<(), Box<dyn std::error:
         }
 
         if power.command.is_none() {
-            println!("Missing arg or command; run 'asusctl aura-power --help' for usage");
+            println!("Missing arg or command; run 'asusctl aura power --help' for usage");
             println!("Commands available");
             return Ok(());
         }

@@ -18,9 +18,7 @@ pub struct CliStart {
 #[derive(FromArgs, Debug)]
 #[argh(subcommand)]
 pub enum CliCommand {
-    Aura(LedModeCommand),
-    AuraPowerOld(LedPowerCommand1),
-    AuraPower(LedPowerCommand2),
+    Aura(AuraCommand),
     Brightness(BrightnessCommand),
     Profile(ProfileCommand),
     FanCurve(FanCurveCommand),
@@ -99,7 +97,7 @@ pub struct ProfileSetCommand {
 }
 
 #[derive(FromArgs, Debug, Default)]
-#[argh(subcommand, name = "aura", description = "led mode commands")]
+#[argh(subcommand, name = "effect", description = "led mode commands")]
 pub struct LedModeCommand {
     #[argh(switch, description = "switch to next aura mode")]
     pub next_mode: bool,
@@ -109,6 +107,21 @@ pub struct LedModeCommand {
 
     #[argh(subcommand)]
     pub command: Option<SetAuraBuiltin>,
+}
+
+#[derive(FromArgs, Debug)]
+#[argh(subcommand, name = "aura", description = "aura device commands")]
+pub struct AuraCommand {
+    #[argh(subcommand)]
+    pub command: AuraSubCommand,
+}
+
+#[derive(FromArgs, Debug)]
+#[argh(subcommand)]
+pub enum AuraSubCommand {
+    Power(LedPowerCommand2),
+    PowerTuf(LedPowerCommand1),
+    Effect(LedModeCommand),
 }
 
 #[derive(FromArgs, Debug, Default)]

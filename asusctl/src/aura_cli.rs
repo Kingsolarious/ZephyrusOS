@@ -8,7 +8,7 @@ use rog_aura::{AuraEffect, AuraModeNum, AuraZone, Colour, Direction, Speed};
 #[derive(FromArgs, Debug, Clone)]
 #[argh(
     subcommand,
-    name = "aura-power-old",
+    name = "power-tuf",
     description = "aura power (old ROGs and TUF laptops)"
 )]
 pub struct LedPowerCommand1 {
@@ -38,7 +38,7 @@ pub struct LedPowerCommand1 {
 }
 
 #[derive(FromArgs, Debug, Clone)]
-#[argh(subcommand, name = "aura-power", description = "aura power")]
+#[argh(subcommand, name = "power", description = "aura power")]
 pub struct LedPowerCommand2 {
     #[argh(subcommand)]
     pub command: Option<SetAuraZoneEnabled>,
