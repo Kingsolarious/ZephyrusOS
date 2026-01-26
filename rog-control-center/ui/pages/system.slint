@@ -634,7 +634,7 @@ export component PageSystem inherits Rectangle {
                         }
 
                         SystemDropdown {
-                            text: @tr("EPP for Quiet Policy");
+                            text: @tr("EPP for ") + SystemPageData.platform_profile_choices[2] + @tr(" Policy");
                             current_index <=> SystemPageData.profile_quiet_epp;
                             current_value: SystemPageData.energy_performance_choices[SystemPageData.profile_quiet_epp];
                             model <=> SystemPageData.energy_performance_choices;
