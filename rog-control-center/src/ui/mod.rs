@@ -120,6 +120,7 @@ pub fn show_toast(
 pub fn setup_window(
     config: Arc<Mutex<Config>>,
     prefetched_supported: std::sync::Arc<Option<Vec<i32>>>,
+    is_tuf: bool,
 ) -> MainWindow {
     slint::set_xdg_app_id("rog-control-center")
         .map_err(|e| warn!("Couldn't set application ID: {e:?}"))
@@ -127,6 +128,8 @@ pub fn setup_window(
     let ui = MainWindow::new()
         .map_err(|e| warn!("Couldn't create main window: {e:?}"))
         .unwrap();
+    // propagate TUF flag to the UI so the sidebar can swap logo branding
+    ui.set_is_tuf(is_tuf);
     ui.window()
         .show()
         .map_err(|e| warn!("Couldn't show main window: {e:?}"))

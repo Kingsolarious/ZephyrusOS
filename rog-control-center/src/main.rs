@@ -148,6 +148,12 @@ async fn main() -> Result<()> {
         }
     };
 
+    let is_tuf = {
+        let b = board_name.to_lowercase();
+        let p = prod_family.to_lowercase();
+        b.contains("tuf") || p.contains("tuf")
+    };
+
     #[cfg(feature = "rog_ally")]
     if is_rog_ally {
         config.notifications.enabled = false;
@@ -198,7 +204,7 @@ async fn main() -> Result<()> {
         loop {
             if is_rog_ally {
                 let config_copy_2 = config.clone();
-                let newui = setup_window(config.clone(), prefetched_supported.clone());
+                let newui = setup_window(config.clone(), prefetched_supported.clone(), is_tuf);
                 newui.window().on_close_requested(move || {
                     exit(0);
                 });
@@ -256,7 +262,7 @@ async fn main() -> Result<()> {
                             });
                         } else {
                             let config_copy_2 = config_copy.clone();
-                            let newui = setup_window(config_copy, pref_for_invoke.clone());
+                            let newui = setup_window(config_copy, pref_for_invoke.clone(), is_tuf);
                             newui.window().on_close_requested(move || {
                                 if let Ok(mut app_state) = app_state_copy.lock() {
                                     *app_state = AppState::MainWindowClosed;
