@@ -18,8 +18,22 @@ export component PageGPU inherits Rectangle {
 
     ScrollView {
         VerticalLayout {
-            padding: 10px;
-            spacing: 10px;
+            padding: 12px;
+            spacing: 8px;
+
+            Rectangle {
+                background: Palette.alternate-background;
+                border-color: Palette.border;
+                border-width: 1px;
+                border-radius: 2px;
+                height: 36px;
+                Text {
+                    font-size: 16px;
+                    color: Palette.control-foreground;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    text: @tr("Internal/Discrete GPU");
+                }
+            }
 
             HorizontalLayout {
                 padding-right: 10px;

@@ -238,17 +238,6 @@ export component PageAura inherits Rectangle {
                     }
                 }
             }
-
-            Button {
-                x: root.width - self.width - 6px;
-                y: 6px;
-                text: "✕";
-                height: 36px;
-                clicked => {
-                    root.show_aura_power = false;
-                    root.show_fade_cover = false;
-                }
-            }
         }
     }
 
@@ -290,17 +279,6 @@ export component PageAura inherits Rectangle {
                         AuraPageData.led_power.states[idx].shutdown = tuf_zone.shutdown_checked;
                         AuraPageData.cb_led_power(AuraPageData.led_power);
                     }
-                }
-            }
-
-            Button {
-                x: root.width - self.width - 6px;
-                y: 6px;
-                text: "✕";
-                height: 36px;
-                clicked => {
-                    root.show_aura_power = false;
-                    root.show_fade_cover = false;
                 }
             }
         }
@@ -346,17 +324,17 @@ export component PageAura inherits Rectangle {
                     }
                 }
             }
+        }
+    }
 
-            Button {
-                x: root.width - self.width - 6px;
-                y: 6px;
-                text: "✕";
-                height: 36px;
-                clicked => {
-                    root.show_aura_power = false;
-                    root.show_fade_cover = false;
-                }
-            }
+    if root.show_aura_power: Button {
+        x: root.width - self.width - 6px;
+        y: 6px;
+        text: "✕";
+        height: 36px;
+        clicked => {
+            root.show_aura_power = false;
+            root.show_fade_cover = false;
         }
     }
 }

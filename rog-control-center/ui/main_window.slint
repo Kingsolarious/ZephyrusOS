@@ -104,31 +104,37 @@ export component MainWindow inherits Window {
 
             /*if(side-bar.current-item == 1):*/ aura := PageAura {
                 width: root.width - side-bar.width;
+                height: root.height + 12px;
                 visible: side-bar.current-item == 1;
             }
 
             if(side-bar.current-item == 2): PageAnime {
                 width: root.width - side-bar.width;
+                height: root.height + 12px;
                 visible: side-bar.current-item == 2;
             }
 
             if(side-bar.current-item == 3): fans := PageFans {
                 width: root.width - side-bar.width;
+                height: root.height + 12px;
                 visible: side-bar.current-item == 3;
             }
 
             if(side-bar.current-item == 4): PageGPU {
                 width: root.width - side-bar.width;
+                height: root.height + 12px;
                 visible: side-bar.current-item == 4;
             }
 
             if(side-bar.current-item == 5): PageAppSettings {
                 width: root.width - side-bar.width;
+                height: root.height + 12px;
                 visible: side-bar.current-item == 5;
             }
 
             if(side-bar.current-item == 6): PageAbout {
                 width: root.width - side-bar.width;
+                height: root.height + 12px;
                 visible: side-bar.current-item == 6;
             }
 
