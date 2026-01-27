@@ -257,7 +257,6 @@ impl FirmwareAttributes {
 pub enum FirmwareAttributeType {
     #[default]
     Immediate,
-    TUFKeyboard,
     Ppt,
     Gpu,
     Bios,
@@ -346,11 +345,6 @@ define_attribute_getters!(
         panel_hd_mode: Immediate,
         panel_od: Immediate,
 
-        kbd_leds_awake: TUFKeyboard,
-        kbd_leds_sleep: TUFKeyboard,
-        kbd_leds_boot: TUFKeyboard,
-        kbd_leds_shutdown: TUFKeyboard,
-
         charge_mode: Immediate,
     }
 );
@@ -400,10 +394,6 @@ pub enum FirmwareAttribute {
     PptEnabled = 24,
     None = 25,
     ScreenAutoBrightness = 26,
-    KbdLedsAwake = 27,
-    KbdLedsSleep = 28,
-    KbdLedsBoot = 29,
-    KbdLedsShutdown = 30,
 }
 
 impl From<&str> for FirmwareAttribute {
@@ -425,10 +415,6 @@ impl From<&str> for FirmwareAttribute {
             "nv_tgp" => Self::DgpuTgp,
             "charge_mode" => Self::ChargeMode,
             "boot_sound" => Self::BootSound,
-            "kbd_leds_awake" => Self::KbdLedsAwake,
-            "kbd_leds_sleep" => Self::KbdLedsSleep,
-            "kbd_leds_boot" => Self::KbdLedsBoot,
-            "kbd_leds_shutdown" => Self::KbdLedsShutdown,
             "mcu_powersave" => Self::McuPowersave,
             "panel_overdrive" => Self::PanelOverdrive,
             "panel_hd_mode" => Self::PanelHdMode,
@@ -474,10 +460,6 @@ impl From<FirmwareAttribute> for &str {
             FirmwareAttribute::DgpuDisable => "dgpu_disable",
             FirmwareAttribute::GpuMuxMode => "gpu_mux_mode",
             FirmwareAttribute::MiniLedMode => "mini_led_mode",
-            FirmwareAttribute::KbdLedsAwake => "kbd_leds_awake",
-            FirmwareAttribute::KbdLedsSleep => "kbd_leds_sleep",
-            FirmwareAttribute::KbdLedsBoot => "kbd_leds_boot",
-            FirmwareAttribute::KbdLedsShutdown => "kbd_leds_shutdown",
             FirmwareAttribute::PendingReboot => "pending_reboot",
             FirmwareAttribute::ScreenAutoBrightness => "screen_auto_brightness",
             FirmwareAttribute::None => "none",

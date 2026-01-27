@@ -40,10 +40,6 @@ pub fn setup_system_page(ui: &MainWindow, _config: Arc<Mutex<Config>>) {
     ui.global::<SystemPageData>().set_platform_profile(-1);
     ui.global::<SystemPageData>().set_panel_overdrive(-1);
     ui.global::<SystemPageData>().set_boot_sound(-1);
-    ui.global::<SystemPageData>().set_kbd_leds_awake(-1);
-    ui.global::<SystemPageData>().set_kbd_leds_sleep(-1);
-    ui.global::<SystemPageData>().set_kbd_leds_boot(-1);
-    ui.global::<SystemPageData>().set_kbd_leds_shutdown(-1);
     ui.global::<SystemPageData>().set_screen_auto_brightness(-1);
     ui.global::<SystemPageData>().set_mcu_powersave(-1);
     ui.global::<SystemPageData>().set_mini_led_mode(-1);
@@ -672,26 +668,6 @@ pub fn setup_system_page_callbacks(ui: &MainWindow, _states: Arc<Mutex<Config>>)
                                 init_property!(boot_sound, handle, value, i32);
                                 setup_callback!(boot_sound, handle, attr, i32);
                                 setup_external!(boot_sound, i32, handle, attr, value)
-                            }
-                            FirmwareAttribute::KbdLedsAwake => {
-                                init_property!(kbd_leds_awake, handle, value, i32);
-                                setup_callback!(kbd_leds_awake, handle, attr, i32);
-                                setup_external!(kbd_leds_awake, i32, handle, attr, value)
-                            }
-                            FirmwareAttribute::KbdLedsSleep => {
-                                init_property!(kbd_leds_sleep, handle, value, i32);
-                                setup_callback!(kbd_leds_sleep, handle, attr, i32);
-                                setup_external!(kbd_leds_sleep, i32, handle, attr, value)
-                            }
-                            FirmwareAttribute::KbdLedsBoot => {
-                                init_property!(kbd_leds_boot, handle, value, i32);
-                                setup_callback!(kbd_leds_boot, handle, attr, i32);
-                                setup_external!(kbd_leds_boot, i32, handle, attr, value)
-                            }
-                            FirmwareAttribute::KbdLedsShutdown => {
-                                init_property!(kbd_leds_shutdown, handle, value, i32);
-                                setup_callback!(kbd_leds_shutdown, handle, attr, i32);
-                                setup_external!(kbd_leds_shutdown, i32, handle, attr, value)
                             }
                             FirmwareAttribute::ScreenAutoBrightness => {
                                 init_property!(screen_auto_brightness, handle, value, i32);

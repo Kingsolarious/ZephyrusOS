@@ -51,14 +51,6 @@ export global SystemPageData {
     callback cb_panel_overdrive(int);
     in-out property <int> boot_sound;
     callback cb_boot_sound(int);
-    in-out property <int> kbd_leds_awake;
-    callback cb_kbd_leds_awake(int);
-    in-out property <int> kbd_leds_sleep;
-    callback cb_kbd_leds_sleep(int);
-    in-out property <int> kbd_leds_boot;
-    callback cb_kbd_leds_boot(int);
-    in-out property <int> kbd_leds_shutdown;
-    callback cb_kbd_leds_shutdown(int);
     in-out property <int> screen_auto_brightness;
     callback cb_screen_auto_brightness(int);
     in-out property <int> mcu_powersave;
@@ -246,66 +238,6 @@ export component PageSystem inherits Rectangle {
                             checked <=> SystemPageData.screenpad_sync_with_primary;
                             toggled => {
                                 SystemPageData.cb_screenpad_sync_with_primary(self.checked);
-                            }
-                        }
-                    }
-                }
-            }
-
-            if SystemPageData.kbd_leds_awake != -1 ||
-                    SystemPageData.kbd_leds_sleep != -1 ||
-                    SystemPageData.kbd_leds_boot != -1 ||
-                    SystemPageData.kbd_leds_shutdown != -1: VerticalLayout {
-                padding: 0px;
-                spacing: 0px;
-                alignment: LayoutAlignment.start;
-                Rectangle {
-                    background: Palette.alternate-background;
-                    border-color: Palette.border;
-                    border-width: 1px;
-                    border-radius: 2px;
-                    height: 40px;
-                    Text {
-                        font-size: 16px;
-                        color: Palette.control-foreground;
-                        horizontal-alignment: TextHorizontalAlignment.center;
-                        text: @tr("Keyboard Power Management");
-                    }
-                }
-
-                GroupBox {
-
-                    HorizontalLayout {
-                        spacing: 10px;
-                        if SystemPageData.kbd_leds_awake != -1: SystemToggleInt {
-                            text: @tr("Keyboard Awake Effect");
-                            checked_int <=> SystemPageData.kbd_leds_awake;
-                            toggled => {
-                                SystemPageData.cb_kbd_leds_awake(SystemPageData.kbd_leds_awake)
-                            }
-                        }
-
-                        if SystemPageData.kbd_leds_sleep != -1: SystemToggleInt {
-                            text: @tr("Keyboard Sleep Effect");
-                            checked_int <=> SystemPageData.kbd_leds_sleep;
-                            toggled => {
-                                SystemPageData.cb_kbd_leds_sleep(SystemPageData.kbd_leds_sleep)
-                            }
-                        }
-
-                        if SystemPageData.kbd_leds_boot != -1: SystemToggleInt {
-                            text: @tr("Keyboard Boot Effect");
-                            checked_int <=> SystemPageData.kbd_leds_boot;
-                            toggled => {
-                                SystemPageData.cb_kbd_leds_boot(SystemPageData.kbd_leds_boot)
-                            }
-                        }
-
-                        if SystemPageData.kbd_leds_shutdown != -1: SystemToggleInt {
-                            text: @tr("Keyboard Shutdown Effect");
-                            checked_int <=> SystemPageData.kbd_leds_shutdown;
-                            toggled => {
-                                SystemPageData.cb_kbd_leds_shutdown(SystemPageData.kbd_leds_shutdown)
                             }
                         }
                     }
