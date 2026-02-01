@@ -654,6 +654,15 @@ impl CtrlPlatform {
             .enabled = enable;
         self.config.lock().await.write();
 
+        // Re-emit armoury attribute limits so GUI sees updated min/max for PPT
+        // attributes which can change when enabling/disabling PPT tuning groups.
+        // Fire-and-forget: we don't want to fail the property call if emit fails.
+        let _ = self
+            .armoury_registry
+            .emit_limits(&self.connection)
+            .await
+            .map_err(|e| log::error!("Failed to emit armoury limits: {e:?}"));
+
         Ok(())
     }
 }
@@ -712,6 +721,13 @@ impl ReloadAndNotify for CtrlPlatform {
             *config = data;
             config.base_charge_control_end_threshold =
                 base_charge_control_end_threshold.unwrap_or_default();
+
+            // Ensure any armoury limits changes from the new config are emitted
+            let _ = self
+                .armoury_registry
+                .emit_limits(&self.connection)
+                .await
+                .map_err(|e| log::error!("Failed to emit armoury limits after reload: {e:?}"));
         }
         Ok(())
     }

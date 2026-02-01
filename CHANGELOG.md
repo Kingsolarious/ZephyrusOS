@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Changes
+- Fix PPT sliders not updating
+
 ## [6.3.2]
 
 ### Changes
