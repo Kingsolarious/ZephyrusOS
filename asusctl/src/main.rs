@@ -970,52 +970,72 @@ fn print_firmware_attr(attr: &AsusArmouryProxyBlocking) -> Result<(), Box<dyn st
     let name = attr.name()?;
     println!("{}:", <&str>::from(name));
 
-    let attrs = attr.available_attrs()?;
-    if attrs.contains(&"min_value".to_string())
-        && attrs.contains(&"max_value".to_string())
-        && attrs.contains(&"current_value".to_string())
-    {
-        let c = attr.current_value()?;
-        let min = attr.min_value()?;
-        let max = attr.max_value()?;
-        println!("  current: {min}..[{c}]..{max}");
-        if attrs.contains(&"default_value".to_string()) {
-            println!("  default: {}\n", attr.default_value()?);
+    // Be resilient to DBus read failures: if any read fails, show "unavailable"
+    let attrs = attr.available_attrs().unwrap_or_default();
+
+    let has_min = attrs.contains(&"min_value".to_string());
+    let has_max = attrs.contains(&"max_value".to_string());
+    let has_current = attrs.contains(&"current_value".to_string());
+    let has_possible = attrs.contains(&"possible_values".to_string());
+    let has_default = attrs.contains(&"default_value".to_string());
+
+    if has_min && has_max && has_current {
+        let c = attr.current_value().ok();
+        let min = attr.min_value().ok();
+        let max = attr.max_value().ok();
+        match (min, c, max) {
+            (Some(min), Some(c), Some(max)) => println!("  current: {min}..[{c}]..{max}"),
+            _ => println!("  current: unavailable"),
+        }
+
+        if has_default {
+            match attr.default_value().ok() {
+                Some(d) => println!("  default: {}\n", d),
+                None => println!("  default: unavailable\n"),
+            }
         } else {
             println!();
         }
-    } else if attrs.contains(&"possible_values".to_string())
-        && attrs.contains(&"current_value".to_string())
-    {
-        let c = attr.current_value()?;
-        let v = attr.possible_values()?;
-        for p in v.iter().enumerate() {
-            if p.0 == 0 {
-                print!("  current: [");
+    } else if has_possible && has_current {
+        let c = attr.current_value().ok();
+        let v = attr.possible_values().ok();
+        if let (Some(c), Some(v)) = (c, v) {
+            for p in v.iter().enumerate() {
+                if p.0 == 0 {
+                    print!("  current: [");
+                }
+                if *p.1 == c {
+                    print!("({c})");
+                } else {
+                    print!("{}", p.1);
+                }
+                if p.0 < v.len() - 1 {
+                    print!(",");
+                }
+                if p.0 == v.len() - 1 {
+                    print!("]");
+                }
             }
-            if *p.1 == c {
-                print!("({c})");
+            if has_default {
+                match attr.default_value().ok() {
+                    Some(d) => println!("  default: {}\n", d),
+                    None => println!("  default: unavailable\n"),
+                }
             } else {
-                print!("{}", p.1);
+                println!("\n");
             }
-            if p.0 < v.len() - 1 {
-                print!(",");
-            }
-            if p.0 == v.len() - 1 {
-                print!("]");
-            }
-        }
-        if attrs.contains(&"default_value".to_string()) {
-            println!("  default: {}\n", attr.default_value()?);
         } else {
-            println!("\n");
+            println!("  current: unavailable\n");
         }
-    } else if attrs.contains(&"current_value".to_string()) {
-        let c = attr.current_value()?;
-        println!("  current: {c}\n");
+    } else if has_current {
+        match attr.current_value().ok() {
+            Some(c) => println!("  current: {c}\n"),
+            None => println!("  current: unavailable\n"),
+        }
     } else {
-        println!();
+        println!("  unavailable\n");
     }
+
     Ok(())
 }
 
