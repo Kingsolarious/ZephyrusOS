@@ -183,6 +183,7 @@ impl DeviceHandle {
             AuraDeviceType::LaptopKeyboard2021
                 | AuraDeviceType::LaptopKeyboardPre2021
                 | AuraDeviceType::LaptopKeyboardTuf
+                | AuraDeviceType::Ally
         ) {
             log::info!("Unknown or invalid laptop aura: {prod_id:?}, skipping");
             return Err(RogError::NotFound("No laptop aura device".to_string()));
