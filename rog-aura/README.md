@@ -14,9 +14,9 @@ The majority of the crate deals with converting from the API to USB packets suit
 - Set various basic modes
 - Set various basic zones
 - Set advanced/direct addressing of:
-  + Single zone
-  + Multizone
-  + Per-key
+  - Single zone
+  - Multizone
+  - Per-key
 - Physical layout mapping
 
 ## Config files
@@ -39,9 +39,9 @@ It also includes layouts for some laptops. Also heavily dependant on contributio
     ),
 ```
 
-in the above example the board name is found from `cat /sys/devices/virtual/dmi/id/board_name`. In some model ranges the last letter (which is likely the dGPU/feature variant) can be ommited. `layout_name` is the first part of a related filename for the layout as described in the next section - the filename should be postfixed with a locale such as `g513i_US.ron`.
+in the above example the board name is found from `cat /sys/devices/virtual/dmi/id/board_name`. In some model ranges the last letter (which is likely the dGPU/feature variant) can be omitted. `layout_name` is the first part of a related filename for the layout as described in the next section - the filename should be postfixed with a locale such as `g513i_US.ron`.
 
-`basic_modes` are the default inbuilt modes the keyboard supports. Not all keyboards have the same set of modes. `basic_zones` is a secondary part of `basic_modes` where this lists which zones can be set as part of the basic mode. Each zone reauires a full basic mode setting. The zones supported here are
+`basic_modes` are the default inbuilt modes the keyboard supports. Not all keyboards have the same set of modes. `basic_zones` is a secondary part of `basic_modes` where this lists which zones can be set as part of the basic mode. Each zone requires a full basic mode setting. The zones supported here are
 
 - `Key1`
 - `Key2`
@@ -58,8 +58,8 @@ note that the zone support seems to have changed with new generations of keyboar
 - `None`, no advanced aura at all
 - `PerKey`, can use any of `LedCode` except for the `Zoned` items below which work in a different way
 - `Zoned`, takes an array such as:
-  + `Zoned([SingleZone])`, only one zone
-  + `Zoned([ ... ]),`, array with any combination of:
+  - `Zoned([SingleZone])`, only one zone
+  - `Zoned([ ... ]),`, array with any combination of:
     - `ZonedKbLeft` // keyboard left
     - `ZonedKbLeftMid` // keyboard left-middle
     - `ZonedKbRightMid` // etc
@@ -244,3 +244,4 @@ When working with Rog Control Center you can test layouts by starting the app on
   -b, --board-name      set board name for testing, this will make ROGCC show only the keyboard page
   -l, --layout-viewing  put ROGCC in layout viewing mode - this is helpful for finding existing layouts that might match your laptop
 ```
+
