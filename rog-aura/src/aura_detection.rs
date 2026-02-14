@@ -69,7 +69,7 @@ impl LedSupportData {
         // let prod_family = dmi.product_family().expect("Could not get
         // product_family");
 
-        if let Some(data) = LedSupportFile::load_from_supoprt_db() {
+        if let Some(data) = LedSupportFile::load_from_support_db() {
             return data.match_device(&dmi.board_name, product_id);
         }
         info!("Using generic LED control for keyboard brightness only. No aura_support file found");
@@ -125,7 +125,7 @@ impl LedSupportFile {
     /// `/etc/asusd/asusd_user_ledmodes.ron` if that file is available.
     ///
     /// Returns `None` if neither file exists or does not parse correctly.
-    pub fn load_from_supoprt_db() -> Option<Self> {
+    pub fn load_from_support_db() -> Option<Self> {
         let mut loaded = false;
         let mut data = LedSupportFile::default();
         // Load user configs first so they are first to be checked
