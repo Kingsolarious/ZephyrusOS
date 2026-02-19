@@ -22,7 +22,7 @@
 
 %define version 6.3.2
 %define specrelease %{?dist}
-%define pkg_release 1%{specrelease}
+%define pkg_release 2%{specrelease}
 
 # Use hardening ldflags.
 %global rustflags -Clink-arg=-Wl,-z,relro,-z,now
@@ -105,7 +105,6 @@ install -D -m 0755 %{_target_dir}/rog-control-center %{buildroot}%{_bindir}/rog-
 
 # Install systemd units
 install -D -m 0644 data/asusd.service %{buildroot}%{_unitdir}/asusd.service
-install -D -m 0644 data/asusd-user.service %{buildroot}%{_userunitdir}/asusd-user.service
 
 # Install udev rules
 install -D -m 0644 data/asusd.rules %{buildroot}%{_udevrulesdir}/99-asusd.rules
@@ -162,7 +161,6 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/rog-control-center.de
 %{_bindir}/asusd-user
 %{_bindir}/asusctl
 %{_unitdir}/asusd.service
-%{_userunitdir}/asusd-user.service
 %{_udevrulesdir}/99-asusd.rules
 %{_datadir}/dbus-1/system.d/asusd.conf
 %{_datadir}/icons/hicolor/512x512/apps/asus_notif_yellow.png
