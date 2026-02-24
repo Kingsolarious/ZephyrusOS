@@ -7,6 +7,7 @@
 - add g614fm LEDs support: thanks @Tohid
 - add ga403uv LEDs support: thanks @SPanner0
 - add ga403ww LEDs support: thanks @foerderd
+- add fx507vv: thanks @goqunatum30
 
 ## [6.3.2]
 
