@@ -90,6 +90,15 @@
         power_zones: [Keyboard],
     ),
     (
+        device_name: "FX507VV",
+        product_id: "",
+        layout_name: "fa506i",
+        basic_modes: [Static, Breathe, RainbowCycle, RainbowWave, Pulse],
+        basic_zones: [],
+        advanced_type: r#None,
+        power_zones: [Keyboard],
+    ),
+    (
         device_name: "FX507Z",
         product_id: "",
         layout_name: "fa506i",
