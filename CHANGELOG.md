@@ -6,6 +6,7 @@
 - Fix PPT sliders not updating
 - add g614fm LEDs support: thanks @Tohid
 - add ga403uv LEDs support: thanks @SPanner0
+- add ga403ww LEDs support: thanks @foerderd
 
 ## [6.3.2]
 
