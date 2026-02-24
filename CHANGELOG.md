@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [6.3.3]
+
 ### Changes
 - Fix PPT sliders not updating
 - add g614fm LEDs support: thanks @Tohid
