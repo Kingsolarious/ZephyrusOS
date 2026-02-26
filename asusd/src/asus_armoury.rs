@@ -500,6 +500,7 @@ pub async fn set_config_or_default(
     power_plugged: bool,
     profile: PlatformProfile,
 ) {
+    let mut changed = false;
     for attr in attrs.attributes().iter() {
         let name: FirmwareAttribute = attr.name().into();
         if name.property_type() == FirmwareAttributeType::Ppt {
@@ -529,7 +530,7 @@ pub async fn set_config_or_default(
                         <&str>::from(name),
                         i
                     );
-                    // config.write();
+                    changed = true;
                 }
             }
         } else {
@@ -547,5 +548,8 @@ pub async fn set_config_or_default(
                 );
             }
         }
+    }
+    if changed {
+        config.write();
     }
 }
