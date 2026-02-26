@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Changes
+- Fix ppt_pl3_sppt not being classified as a ppt attribute: thanks @evert
+
 ## [6.3.3]
 
 ### Changes
