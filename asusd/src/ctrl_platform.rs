@@ -723,6 +723,9 @@ impl ReloadAndNotify for CtrlPlatform {
                 base_charge_control_end_threshold.unwrap_or_default();
 
             // Ensure any armoury limits changes from the new config are emitted
+            // Drop the config lock before emitting to avoid deadlocking when
+            // emit_limits attempts to lock the same config.
+            drop(config);
             let _ = self
                 .armoury_registry
                 .emit_limits(&self.connection)
