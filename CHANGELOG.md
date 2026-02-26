@@ -5,6 +5,7 @@
 ### Changes
 - Fix ppt_pl3_sppt not being classified as a ppt attribute: thanks @evert
 - Fix config not reloading due to mutex being improperly held: thanks @evert
+- Fix GX650R missing lightbar: thanks @gaxompe
 
 ## [6.3.3]
 
