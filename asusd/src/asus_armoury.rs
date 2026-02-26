@@ -506,7 +506,7 @@ pub async fn set_config_or_default(
             let tuning = config.select_tunings(power_plugged, profile);
             if !tuning.enabled {
                 debug!("Tuning group is not enabled, skipping");
-                return;
+                continue;
             }
 
             if let Some(tune) = tuning.group.get(&name) {
