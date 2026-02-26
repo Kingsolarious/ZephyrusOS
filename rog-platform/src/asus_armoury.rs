@@ -298,6 +298,7 @@ define_attribute_getters!(
     cores_efficiency,
     ppt_pl1_spl,
     ppt_pl2_sppt,
+    ppt_pl3_fppt,
     ppt_apu_sppt,
     ppt_platform_sppt,
     ppt_fppt,
@@ -323,6 +324,7 @@ define_attribute_getters!(
     ; types {
         ppt_pl1_spl: Ppt,
         ppt_pl2_sppt: Ppt,
+        ppt_pl3_fppt: Ppt,
         ppt_apu_sppt: Ppt,
         ppt_platform_sppt: Ppt,
         ppt_fppt: Ppt,
