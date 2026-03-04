@@ -1,0 +1,96 @@
+import { RogItem, SystemToggle, SystemDropdown } from "../widgets/common.slint";
+import { Palette, Button, VerticalBox, GroupBox, HorizontalBox, ScrollView } from "std-widgets.slint";
+import { SlashPageData, SlashMode, SlashShowOptions } from "../types/slash_types.slint";
+
+export component PageSlash inherits Rectangle {
+    ScrollView {
+        VerticalLayout {
+            padding: 10px;
+            spacing: 10px;
+            alignment: LayoutAlignment.start;
+            
+            RogItem {
+                SystemToggle {
+                    text: @tr("Enable Slash LED");
+                    checked <=> SlashPageData.enabled;
+                    toggled => {
+                        SlashPageData.cb_enabled(SlashPageData.enabled)
+                    }
+                }
+            }
+
+            HorizontalLayout {
+                spacing: 10px;
+                RogItem {
+                    SystemDropdown {
+                        text: @tr("Brightness");
+                        current_value: SlashPageData.brightness;
+                        model: ["0", "64", "128", "192", "255"];
+                        current-index: SlashPageData.brightness / 51;
+                        selected => {
+                            SlashPageData.cb_brightness(self.current-index * 51)
+                        }
+                    }
+                }
+                
+                RogItem {
+                    SystemDropdown {
+                        text: @tr("Animation Speed");
+                        current-index <=> SlashPageData.interval;
+                        current_value: SlashPageData.interval_names[self.current-index];
+                        model <=> SlashPageData.interval_names;
+                        selected => {
+                            SlashPageData.cb_interval(SlashPageData.interval)
+                        }
+                    }
+                }
+            }
+
+            RogItem {
+                SystemDropdown {
+                    text: @tr("Animation Mode");
+                    current-index <=> SlashPageData.current_mode;
+                    current_value: SlashPageData.mode_names[self.current-index];
+                    model <=> SlashPageData.mode_names;
+                    selected => {
+                        SlashPageData.cb_mode(SlashPageData.current_mode)
+                    }
+                }
+            }
+
+            GroupBox {
+                title: @tr("Show When:");
+                VerticalLayout {
+                    padding: 10px;
+                    spacing: 5px;
+                    
+                    SystemToggle {
+                        text: @tr("On Boot");
+                        checked <=> SlashPageData.show_on_boot;
+                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
+                    }
+                    SystemToggle {
+                        text: @tr("On Shutdown");
+                        checked <=> SlashPageData.show_on_shutdown;
+                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
+                    }
+                    SystemToggle {
+                        text: @tr("On Sleep");
+                        checked <=> SlashPageData.show_on_sleep;
+                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
+                    }
+                    SystemToggle {
+                        text: @tr("On Battery");
+                        checked <=> SlashPageData.show_on_battery;
+                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
+                    }
+                    SystemToggle {
+                        text: @tr("Low Battery Warning");
+                        checked <=> SlashPageData.show_battery_warning;
+                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -4,7 +4,7 @@ use zbus::proxy;
 #[proxy(
     interface = "xyz.ljones.Slash",
     default_service = "xyz.ljones.Asusd",
-    default_path = "/xyz/ljones"
+    default_path = "/xyz/ljones/aura/193b_4_8"
 )]
 pub trait Slash {
     /// EnableDisplay property
