@@ -18,7 +18,7 @@ ENV ZEPHYRUS_VERSION=${ZEPHYRUS_VERSION}
 ENV ZEPHYRUS_BUILD_DATE=${ZEPHYRUS_BUILD_DATE}
 
 # =============================================================================
-# PHASE 2: ALL BUILD DEPENDENCIES
+ ALL BUILD DEPENDENCIES
 # =============================================================================
 
 RUN rpm-ostree install \
@@ -30,7 +30,7 @@ RUN rpm-ostree install \
     ostree container commit
 
 # =============================================================================
-# PHASE 2.3-2.4: KVANTUM + KDE COMPONENTS
+ KVANTUM + KDE COMPONENTS
 # =============================================================================
 
 RUN rpm-ostree install \
@@ -87,7 +87,7 @@ RUN cd /tmp && mkdir ectool && cd ectool && \
     ostree container commit
 
 # =============================================================================
-# PHASE 8: VIRTUALIZATION
+ VIRTUALIZATION
 # =============================================================================
 
 RUN rpm-ostree install \
@@ -97,7 +97,7 @@ RUN rpm-ostree install \
     ostree container commit
 
 # =============================================================================
-# PHASE 3: WHITE SUR THEMES
+ WHITE SUR THEMES
 # =============================================================================
 
 RUN mkdir -p /usr/share/zephyrus-crimson/themes && \
@@ -110,7 +110,7 @@ RUN mkdir -p /usr/share/zephyrus-crimson/themes && \
     ostree container commit
 
 # =============================================================================
-# PHASE 3.6: INTER FONT
+ INTER FONT
 # =============================================================================
 
 RUN mkdir -p /usr/share/fonts/inter && cd /tmp && \
@@ -122,7 +122,7 @@ RUN mkdir -p /usr/share/fonts/inter && cd /tmp && \
     ostree container commit
 
 # =============================================================================
-# PHASE 4: ROG CUSTOM ASSETS
+ ROG CUSTOM ASSETS
 # =============================================================================
 
 COPY os-build/overlays/etc/ /etc/
@@ -151,7 +151,7 @@ RUN ln -sf /usr/share/plymouth/themes/zephyrus-crimson/zephyrus-crimson.plymouth
 COPY theme/ /usr/share/themes/Zephyrus-Crimson/
 
 # =============================================================================
-# PHASE 8: VS CODE & NODE.JS
+ VS CODE & NODE.JS
 # =============================================================================
 
 RUN echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo && \
@@ -162,7 +162,7 @@ RUN rpm-ostree install \
     ostree container commit
 
 # =============================================================================
-# PHASE 8: AI/ML PYTHON PACKAGES
+ AI/ML PYTHON PACKAGES
 # =============================================================================
 
 # AI/ML packages installed via distrobox container instead to avoid conflicts
@@ -176,9 +176,6 @@ RUN pip3 install --prefix=/usr --upgrade pip --break-system-packages && \
 RUN mkdir -p /etc/xdg && printf '%s\n' '[General]' 'font=Inter,10,-1,5,50,0,0,0,0,0' 'fixed=JetBrains Mono,10,-1,5,50,0,0,0,0,0' 'menuFont=Inter,10,-1,5,50,0,0,0,0,0' 'toolBarFont=Inter,10,-1,5,50,0,0,0,0,0' 'activeFont=Inter,10,-1,5,75,0,0,0,0,0' > /etc/xdg/kcmfonts
 
 RUN mkdir -p /etc/xdg/gtk-3.0 && printf '%s\n' '[Settings]' 'gtk-theme-name=Adwaita-dark' 'gtk-icon-theme-name=hicolor' 'gtk-font-name=Inter 10' 'gtk-application-prefer-dark-theme=1' > /etc/xdg/gtk-3.0/settings.ini
-
-# =============================================================================
-# AI CODER SCRIPTS - will be created post-install to avoid build issues
 
 # =============================================================================
 # ENABLE SERVICES
@@ -202,7 +199,6 @@ RUN echo "Zephyrus Crimson OS ${ZEPHYRUS_VERSION}" > /etc/zephyrus-release && \
     echo "BUILD_DATE=${ZEPHYRUS_BUILD_DATE}" >> /etc/zephyrus-release && \
     echo "DESKTOP_ENVIRONMENT=KDE Plasma 6" >> /etc/zephyrus-release && \
     echo "THEME=WhiteSur macOS + ROG" >> /etc/zephyrus-release && \
-    echo "AI_ENVIRONMENT=Full" >> /etc/zephyrus-release && \
     echo "zephyrus-crimson" > /etc/hostname && \
     ostree container commit
 

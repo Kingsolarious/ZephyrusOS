@@ -1,6 +1,8 @@
 # Zephyrus OS - Official Treefile
-# Complete OSTree-based Linux distribution for ASUS ROG laptops
-
+  # Simple welcome message
+  - |
+    Welcome to Zephyrus OS
+    ASUS ROG Zephyrus G16
 ref: zephyrus-os/41/x86_64/stable
 
 # Pure Fedora Silverblue base (no Bazzite)
@@ -138,25 +140,6 @@ postprocess:
     #!/bin/bash
     cat > /etc/issue << 'EOF'
     
-    ███████╗███████╗██████╗ ██╗  ██╗██╗   ██╗██████╗ ██╗   ██╗███████╗     ██████╗ ███████╗
-    ╚══███╔╝██╔════╝██╔══██╗██║  ██║██║   ██║██╔══██╗██║   ██║██╔════╝    ██╔═══██╗██╔════╝
-      ███╔╝ █████╗  ██████╔╝███████║██║   ██║██████╔╝██║   ██║███████╗    ██║   ██║███████╗
-     ███╔╝  ██╔══╝  ██╔═══╝ ██╔══██║██║   ██║██╔══██╗██║   ██║╚════██║    ██║   ██║╚════██║
-    ███████╗███████╗██║     ██║  ██║╚██████╔╝██║  ██║╚██████╔╝███████║    ╚██████╔╝███████║
-    ╚══════╝╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝     ╚═════╝ ╚══════╝
-    
-    Welcome to Zephyrus OS - The Ultimate ROG Linux Experience
-    
-    EOF
-    
-    cat > /etc/motd << 'EOF'
-    ╔═══════════════════════════════════════════════════════════════╗
-    ║                 Welcome to Zephyrus OS                        ║
-    ║                                                               ║
-    ║  The ultimate Linux distribution for ASUS ROG laptops        ║
-    ║  Optimized • Customized • Gaming Ready                        ║
-    ╚═══════════════════════════════════════════════════════════════╝
-    EOF
     
   # Zephyrus OS GNOME defaults
   - |

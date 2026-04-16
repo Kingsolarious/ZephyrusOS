@@ -8,10 +8,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORK_DIR="$HOME/zephyrus-os-build/custom-packages"
 RPMBUILD_DIR="$HOME/rpmbuild"
 
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  PACKAGE CUSTOM SOFTWARE FOR ZEPHYRUS OS                  ║"
-echo "║  ✓ Safe Mode - Will NOT overwrite existing files          ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 
 mkdir -p "$WORK_DIR"
@@ -20,13 +16,9 @@ cd "$WORK_DIR"
 echo "Working directory: $WORK_DIR"
 echo ""
 
-# ============================================================================
 # CHECK: Do you have source code already?
-# ============================================================================
 
-echo "═══════════════════════════════════════════════════════════"
 echo "SAFETY CHECK: Looking for your source code"
-echo "═══════════════════════════════════════════════════════════"
 echo ""
 
 ROG_SOURCE=""
@@ -35,26 +27,24 @@ KB_SOURCE=""
 # Check for ROG Control Center source
 if [ -d "rog-control-center-1.0.0" ] || [ -d "rog-control-center" ]; then
     ROG_SOURCE=$(ls -d rog-control-center* 2>/dev/null | head -1)
-    echo "✓ Found ROG Control Center source: $ROG_SOURCE"
+    echo "ok Found ROG Control Center source: $ROG_SOURCE"
 else
-    echo "⚠️  ROG Control Center source NOT found"
+    echo "warn  ROG Control Center source NOT found"
     echo "   Expected: $WORK_DIR/rog-control-center-1.0.0/"
 fi
 
 # Check for Keyboard Control source
 if [ -d "zephyrus-keyboard-control-1.0.0" ] || [ -d "zephyrus-keyboard-control" ]; then
     KB_SOURCE=$(ls -d zephyrus-keyboard-control* 2>/dev/null | head -1)
-    echo "✓ Found Keyboard Control source: $KB_SOURCE"
+    echo "ok Found Keyboard Control source: $KB_SOURCE"
 else
-    echo "⚠️  Keyboard Control source NOT found"
+    echo "warn  Keyboard Control source NOT found"
     echo "   Expected: $WORK_DIR/zephyrus-keyboard-control-1.0.0/"
 fi
 
 echo ""
 
-# ============================================================================
 # Create spec files (these are safe to create/overwrite)
-# ============================================================================
 
 create_specs() {
     echo "Creating RPM spec files..."
@@ -128,7 +118,7 @@ Provides control over ASUS ROG laptop features including:
 
 # Install desktop entry
 mkdir -p %{buildroot}%{_datadir}/applications
-cat > %{buildroot}%{_datadir}/applications/rog-control-center.desktop << 'EOF'
+cat > %{buildroot}%{_datadir}/applications/rog-control-center.desktop <<-EOF
 [Desktop Entry]
 Name=ROG Control Center
 Comment=Control your ROG laptop
@@ -153,7 +143,7 @@ touch %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/rog-control-center.svg
 * Thu Mar 06 2025 Zephyrus OS Builder <builder@zephyrus-os.local> - 1.0.0-1
 - Initial package for Zephyrus OS
 ROG_SPEC
-    echo "  ✓ Created rog-control-center.spec"
+    echo "  ok Created rog-control-center.spec"
 }
 
 _create_kb_spec() {
@@ -189,7 +179,7 @@ make install DESTDIR=%{buildroot}
 
 # Install systemd service
 mkdir -p %{buildroot}%{_unitdir}
-cat > %{buildroot}%{_unitdir}/zephyrus-keyboard.service << 'EOF'
+cat > %{buildroot}%{_unitdir}/zephyrus-keyboard.service <<END
 [Unit]
 Description=Zephyrus Keyboard Backlight Control
 After=asusctl.service
@@ -239,18 +229,14 @@ EOF
 * Thu Mar 06 2025 Zephyrus OS Builder <builder@zephyrus-os.local> - 1.0.0-1
 - Initial package for Zephyrus OS
 KEYBOARD_SPEC
-    echo "  ✓ Created zephyrus-keyboard-control.spec"
+    echo "  ok Created zephyrus-keyboard-control.spec"
 }
 
-# ============================================================================
 # Main menu
-# ============================================================================
 
 while true; do
     echo ""
-    echo "═══════════════════════════════════════════════════════════"
     echo "OPTIONS"
-    echo "═══════════════════════════════════════════════════════════"
     echo ""
     echo "1. Create spec files (safe - doesn't touch source code)"
     echo "2. Create tarball from your source (for RPM build)"
@@ -271,17 +257,17 @@ while true; do
             if [ -n "$ROG_SOURCE" ]; then
                 echo "Creating $ROG_SOURCE.tar.gz..."
                 tar czf "${ROG_SOURCE}.tar.gz" "$ROG_SOURCE/"
-                echo "  ✓ Created"
+                echo "  ok Created"
             else
-                echo "  ⚠️  No ROG source found"
+                echo "  warn  No ROG source found"
             fi
             
             if [ -n "$KB_SOURCE" ]; then
                 echo "Creating $KB_SOURCE.tar.gz..."
                 tar czf "${KB_SOURCE}.tar.gz" "$KB_SOURCE/"
-                echo "  ✓ Created"
+                echo "  ok Created"
             else
-                echo "  ⚠️  No Keyboard source found"
+                echo "  warn  No Keyboard source found"
             fi
             ;;
         3)
@@ -303,7 +289,7 @@ while true; do
             
             # Copy specs and sources
             cp *.spec ~/rpmbuild/SPECS/ 2>/dev/null || true
-            cp *.tar.gz ~/rpmbuild/SOURCES/ 2>/dev/null || true
+            cp *.tar.gz ~/rpmbuild/SOURCES/ || true
             
             echo ""
             echo "To build, run:"
@@ -313,9 +299,7 @@ while true; do
             ;;
         4)
             echo ""
-            echo "═══════════════════════════════════════════════════════════"
             echo "SETUP INSTRUCTIONS"
-            echo "═══════════════════════════════════════════════════════════"
             echo ""
             echo "To prepare your source for packaging:"
             echo ""

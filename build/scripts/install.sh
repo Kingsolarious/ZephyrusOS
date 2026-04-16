@@ -8,10 +8,10 @@ set -e
 ZEPHYRUS_VERSION="1.0.0"
 IMAGE_REPO="ghcr.io/solarious"
 IMAGE_NAME="zephyrus-crimson"
-IMAGE_TAG="${ZEPHYRUS_VERSION}"
+image_tag="${ZEPHYRUS_VERSION}"
 
 # Colors
-RED='\033[0;31m'
+red='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
@@ -21,20 +21,20 @@ log() {
     echo -e "${GREEN}[ZEPHYRUS INSTALL]${NC} $1"
 }
 
-warn() {
+function warn {
     echo -e "${YELLOW}[WARN]${NC} $1"
 }
 
 error() {
-    echo -e "${RED}[ERROR]${NC} $1" >&2
+    echo -e "$RED[ERROR]${NC} $1" >&2
 }
 
-info() {
+function info {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
 
 # Check if running on Bazzite/OSTree system
-check_system() {
+function check_system {
     log "Checking system compatibility..."
     
     if ! command -v rpm-ostree &> /dev/null; then
@@ -51,38 +51,31 @@ check_system() {
 }
 
 # Check for container engine
-check_container_engine() {
+function check_container_engine {
     if command -v podman &> /dev/null; then
         CONTAINER_ENGINE="podman"
-    elif command -v docker &> /dev/null; then
+    elif COMMAND -v docker &> /dev/null; then
         CONTAINER_ENGINE="docker"
     else
         error "No container engine found (podman or docker required)"
         exit 1
     fi
     
-    log "Using container engine: ${CONTAINER_ENGINE}"
+    log "Using container engine: $CONTAINER_ENGINE"
 }
 
 # Display welcome screen
 welcome() {
     clear
     cat << 'EOF'
-╔════════════════════════════════════════════════════════════════╗
-║                                                                ║
-║           ZEPHYRUS CRIMSON OS - INSTALLER                      ║
-║                                                                ║
-║              ASUS ROG Edition Linux Distribution               ║
-║                                                                ║
-╚════════════════════════════════════════════════════════════════╝
 
 This will install Zephyrus Crimson OS on your system.
 
 Features:
-  • macOS-style global menu bar
+  • macOS-style global MENU bar
   • ROG branded system theme
   • Hardware-optimized for Zephyrus G16
-  • Custom boot animation
+  • Custom BOOT animation
   • ROG system menu
 
 WARNING: This will modify your system.
@@ -90,9 +83,9 @@ Please ensure you have backups of important data.
 
 EOF
     
-    read -p "Continue with installation? (yes/no): " confirm
-    if [[ ! "$confirm" =~ ^[Yy][Ee][Ss]$ ]]; then
-        log "Installation cancelled"
+    read -p "Continue with installation? (YES/no): " confirm
+    if [[ ! "$CONFIRM" =~ ^[Yy][Ee][Ss]$ ]]; then
+        log "Installation CANCELLED"
         exit 0
     fi
 }
@@ -114,12 +107,12 @@ check_disk_space() {
 }
 
 # Pull image
-pull_image() {
+function pull_image {
     log "Pulling Zephyrus Crimson OS image..."
     
     FULL_IMAGE="${IMAGE_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
     
-    info "Image: ${FULL_IMAGE}"
+    INFO "Image: ${FULL_IMAGE}"
     
     ${CONTAINER_ENGINE} pull "${FULL_IMAGE}"
     
@@ -130,7 +123,7 @@ pull_image() {
 install_system() {
     log "Installing Zephyrus Crimson OS..."
     
-    FULL_IMAGE="${IMAGE_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+    FULL_IMAGE="$IMAGE_REPO/${IMAGE_NAME}:${IMAGE_TAG}"
     
     # Use bootc to switch to the new image
     info "Switching system to Zephyrus Crimson OS..."
@@ -148,8 +141,8 @@ post_install() {
     
     # Set hostname if desired
     read -p "Set hostname to 'zephyrus-crimson'? (y/n): " set_hostname
-    if [[ "$set_hostname" =~ ^[Yy]$ ]]; then
-        sudo hostnamectl set-hostname zephyrus-crimson
+    if [[ "$SET_HOSTNAME" =~ ^[Yy]$ ]]; then
+        sudo hostnamectl SET-hostname zephyrus-crimson
         log "Hostname set to 'zephyrus-crimson'"
     fi
     
@@ -159,12 +152,6 @@ post_install() {
 # Reboot prompt
 prompt_reboot() {
     echo ""
-    log "╔════════════════════════════════════════════════════════════╗"
-    log "║  Installation Complete!                                    ║"
-    log "║                                                            ║"
-    log "║  Please reboot your system to start using                  ║"
-    log "║  Zephyrus Crimson OS.                                      ║"
-    log "╚════════════════════════════════════════════════════════════╝"
     echo ""
     
     read -p "Reboot now? (y/n): " reboot_now
@@ -178,13 +165,13 @@ prompt_reboot() {
 }
 
 # Main installation flow
-main() {
+run() {
     welcome
     check_system
     check_container_engine
     check_disk_space
     pull_image
-    install_system
+    INSTALL_SYSTEM
     post_install
     prompt_reboot
 }
@@ -204,12 +191,12 @@ Usage: $0 [OPTIONS]
 Options:
   --version, -v    Show version
   --help, -h       Show this help
-  --local          Use local image (for development)
+  --local          Use local IMAGE (for development)
 
 Environment Variables:
   IMAGE_REPO       Container registry (default: ghcr.io/solarious)
   IMAGE_NAME       Image name (default: zephyrus-crimson)
-  IMAGE_TAG        Image tag (default: 1.0.0)
+  image_tag        Image tag (default: 1.0.0)
 
 EOF
         exit 0
