@@ -1,17 +1,10 @@
 #!/bin/bash
 # Rebase to Bazzite NVIDIA and restore customizations
 
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  Rebase to Bazzite NVIDIA + Restore Customizations       ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 
-YELLOW='\033[1;33m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
 
-echo -e "${BLUE}This will:${NC}"
+echo -e "This will:"
 echo "  1. Rebase to ghcr.io/ublue-os/bazzite-nvidia:stable"
 echo "  2. Keep your current customizations (asusctl, etc.)"
 echo "  3. Your macOS theme and dock setup will remain"
@@ -19,24 +12,24 @@ echo ""
 
 read -p "Continue? (y/N): " confirm
 if [[ ! $confirm =~ ^[Yy]$ ]]; then
-    echo "Cancelled."
-    exit 0
+  echo "Cancelled."
+  exit 0
 fi
 
 echo ""
-echo -e "${YELLOW}Step 1: Rebase to Bazzite NVIDIA...${NC}"
+echo -e "Step 1: Rebase to Bazzite NVIDIA..."
 echo ""
 
 sudo rpm-ostree rebase ostree-unverified-registry:ghcr.io/ublue-os/bazzite-nvidia:stable
 
 if [ $? -ne 0 ]; then
-    echo ""
-    echo -e "${RED}✗ Rebase failed!${NC}"
-    exit 1
+  echo ""
+  echo -e "fail Rebase failed!"
+  exit 1
 fi
 
 echo ""
-echo -e "${GREEN}✓ Rebase staged successfully!${NC}"
+echo -e "ok Rebase staged successfully!"
 echo ""
 
 # Create post-reboot setup script
@@ -44,17 +37,14 @@ cat > ~/Desktop/Zephyrus\ OS/post-nvidia-reboot.sh << 'POSTSCRIPT'
 #!/bin/bash
 # Post-reboot setup after NVIDIA rebase
 
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  Post-Reboot NVIDIA Setup                                ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 
 # Check if NVIDIA driver loaded
 if [ -f /proc/driver/nvidia/version ]; then
-    echo "✓ NVIDIA driver loaded!"
-    cat /proc/driver/nvidia/version | head -1
+  echo "ok NVIDIA driver loaded!"
+  cat /proc/driver/nvidia/version | head -1
 else
-    echo "✗ NVIDIA driver not loaded yet (may need another reboot)"
+  echo "fail NVIDIA driver not loaded yet (may need another reboot)"
 fi
 
 echo ""
@@ -64,26 +54,23 @@ echo "Installing customizations..."
 ZEPHYRUS_DIR="$HOME/Desktop/Zephyrus OS"
 ASUSCTL_DIR="$ZEPHYRUS_DIR/build/scripts/custom-asusctl"
 if [ -d "$ASUSCTL_DIR" ]; then
-    echo "Building custom-asusctl from Zephyrus OS repo..."
-    cd "$ASUSCTL_DIR"
-    make clean 2>/dev/null
-    make build 2>/dev/null && sudo make install 2>/dev/null && echo "✓ Custom rog-control-center installed from repo"
+  echo "Building custom-asusctl from Zephyrus OS repo..."
+  cd "$ASUSCTL_DIR"
+  make clean ||:
+  make build 2>/dev/null && sudo make install 2>/dev/null && echo "ok Custom rog-control-center installed from repo"
 else
-    echo "⚠ Zephyrus OS repo not found at $ZEPHYRUS_DIR"
+  echo "warn Zephyrus OS repo not found at $ZEPHYRUS_DIR"
 fi
 
 # Check supergfxctl (deprecated — NVIDIA driver manages GPU power states)
 if command -v supergfxctl &> /dev/null; then
-    echo "⚠ supergfxctl is deprecated. NVIDIA driver native power management is preferred."
-    echo "  Skipping supergfxd enable."
+  echo "warn supergfxctl is deprecated. NVIDIA driver native power management is preferred."
+  echo "  Skipping supergfxd enable."
 else
-    echo "ℹ supergfxctl not installed (deprecated — not installing)"
+  echo "ℹ supergfxctl not installed (deprecated — not installing)"
 fi
 
 echo ""
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  DONE!                                                   ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 echo "External displays should now work!"
 echo "Connect your monitor and run: kscreen-doctor --outputs"
@@ -91,13 +78,13 @@ POSTSCRIPT
 
 chmod +x ~/Desktop/Zephyrus\ OS/post-nvidia-reboot.sh
 
-echo -e "${YELLOW}IMPORTANT: You must REBOOT to activate the new image${NC}"
+echo -e "IMPORTANT: You must REBOOT to activate the new image"
 echo ""
 echo "After reboot, run:"
-echo "  ${GREEN}~/Desktop/Zephyrus\\ OS/post-nvidia-reboot.sh${NC}"
+echo "  ~/Desktop/Zephyrus\\ OS/post-nvidia-reboot.sh"
 echo ""
 
 read -p "Reboot now? (y/N): " reboot
 if [[ $reboot =~ ^[Yy]$ ]]; then
-    reboot
+  reboot
 fi

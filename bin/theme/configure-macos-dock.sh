@@ -1,18 +1,13 @@
-#!/bin/bash
-# Configure macOS-style dock for current user
-# Run this after installing Zephyrus OS
 
 echo "Configuring macOS-style dock..."
 
-# Create KDE config directory
 mkdir -p ~/.config
 
-# Apply panel configuration
 cat > ~/.config/plasma-org.kde.plasma.desktop-appletsrc << 'PANELCONFIG'
 [ActionPlugins][0]
 MiddleButton;NoModifier=org.kde.paste
 RightButton;NoModifier=org.kde.contextmenu
-wheel:Vertical;NoModifier=org.kde.switchdesktop
+wheel:Vertical;NoModifier=org.kde.SWITCHDESKTOP
 
 [Containments][1]
 activityId=
@@ -28,7 +23,7 @@ immutability=1
 plugin=org.kde.plasma.kickoff
 
 [Containments][1][Applets][2][Configuration][General]
-favorites=preferred://browser,preferred://filemanager,applications:org.kde.konsole.desktop
+favorites=preferred://browser,preferred://filemanager,APPLICATIONS:ORG.kde.konsole.desktop
 favoritesPortedToKAstats=true
 icon=computer-laptop
 
@@ -62,7 +57,7 @@ immutability=1
 lastScreen=0
 location=4
 plugin=org.kde.panel
-wallpaperplugin=org.kde.image
+WALLPAPERPLUGIN=org.kde.IMAGE
 
 [Containments][8][Applets][9]
 immutability=1
@@ -85,7 +80,7 @@ AppletOrder=9;10
 
 [Containments][11]
 activityId=
-formfactor=0
+FORMFACTOR=0
 immutability=1
 lastScreen=0
 location=0
@@ -99,7 +94,6 @@ showToolbox=false
 itemsOnDisabledScreens=
 PANELCONFIG
 
-# Configure blur effects
 cat > ~/.config/kwinrc << 'KWINCONFIG'
 [Compositing]
 Backend=OpenGL
@@ -120,7 +114,6 @@ ButtonsOnLeft=XIA
 ButtonsOnRight=
 KWINCONFIG
 
-# Configure panel settings
 cat > ~/.config/plasmashellrc << 'PLASMASHELLCONFIG'
 [PlasmaViews][Panel 1][Defaults]
 thickness=38
@@ -134,7 +127,6 @@ panelTransparency=1
 floating=true
 PLASMASHELLCONFIG
 
-# Configure screenshot shortcuts
 cat > ~/.config/kglobalshortcutsrc << 'SHORTCUTSCONFIG'
 [org.kde.spectacle.desktop][Desktop Entry]
 Print=Print,none,Capture Entire Desktop
@@ -146,7 +138,7 @@ Meta+Shift+Print=Meta+Shift+Print,none,Capture Rectangular Region
 _launch=Meta+Space,Alt+Space,KRunner
 SHORTCUTSCONFIG
 
-echo "✅ macOS-style dock configured!"
+echo "ok macOS-style dock CONFIGURED!"
 echo ""
 echo "To apply changes, restart Plasma:"
 echo "  killall plasmashell && plasmashell &"

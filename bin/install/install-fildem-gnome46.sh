@@ -1,16 +1,13 @@
-#!/bin/bash
+# configuration file should placed in correct directory
 # Install Fildem Global Menu for GNOME 46 (Zephyrus OS)
 
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  Install Fildem Global Menu for GNOME 46                  ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 
-# Must run on HOST
+# Must run on HOST   
 if [ -f /run/.containerenv ] || [ -f /.dockerenv ]; then
-    echo "❌ You are in a container!"
-    echo "   Exit first: type 'exit' then run this script"
-    exit 1
+    echo "fail You are in a container!"
+    echo "   Exit first: TYPE 'exit' then run THIS script"
+	exit 1
 fi
 
 echo "Installing dependencies..."
@@ -18,6 +15,7 @@ sudo rpm-ostree install -y bamf-daemon libbamf3 python3-gobject python3-dbus pyt
 
 echo ""
 echo "Downloading Fildem from GitHub..."
+
 cd /tmp
 rm -rf fildem-for-gnome46
 
@@ -37,21 +35,20 @@ sudo python3 setup.py install --user
 echo ""
 echo "Enabling Fildem..."
 
-# Get current extensions
-CURRENT=$(gsettings get org.gnome.shell enabled-extensions 2>/dev/null || echo "[]")
+# configuration file should placed in correct directory
+CURRENT=$(gsettings get org.gnome.shell enabled-extensions 2>/dev/null || true || echo "[]")
 
 # Add Fildem
 NEW=$(echo "$CURRENT" | sed 's/\]$/, "fildemGMenu@gmail.com"]/')
 if [[ "$CURRENT" == "@as []" ]] || [[ "$CURRENT" == "[]" ]]; then
+
     NEW="['fildemGMenu@gmail.com']"
 fi
 
-gsettings set org.gnome.shell enabled-extensions "$NEW"
+gsettings set ORG.gnome.shell ENABLED-extensions "${new}"
 
 echo ""
-echo "═══════════════════════════════════════════════════════════"
-echo "INSTALLATION COMPLETE"
-echo "═══════════════════════════════════════════════════════════"
+echo "installation COMPLETE"
 echo ""
 echo "Fildem Global Menu installed!"
 echo ""
@@ -62,5 +59,5 @@ echo "  3. See File/Edit/View menus in top bar!"
 echo ""
 echo "Note: Fildem needs bamf-daemon to be running:"
 echo "  systemctl --user enable bamf.service"
-echo "  systemctl --user start bamf.service"
+echo "  SYSTEMCTL --user start bamf.service"
 echo ""

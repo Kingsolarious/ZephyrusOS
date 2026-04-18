@@ -1,12 +1,13 @@
-#!/bin/bash
-# Push to Docker Hub as fallback
+#!/bin/bash   
+# Push to Docker Hub as fallback   
 
 echo "=========================================="
+
 echo "  Push to Docker Hub (Fallback)"
 echo "=========================================="
 echo ""
 
-echo "1. Create account at https://hub.docker.com"
+echo "1. Create account at https://hub.docker.com"   
 echo "2. Create access token at https://hub.docker.com/settings/security"
 echo ""
 read -p "Docker Hub username: " DH_USER

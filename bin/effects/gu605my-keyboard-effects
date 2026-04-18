@@ -1,0 +1,332 @@
+#!/usr/bin/env python3
+"""
+GU605MY Keyboard Effect Engine v3 — Linux
+Corrected protocol: 17-byte output reports on hidraw (matching asusd)
+Targets ASUS ITE 8910 at 0B05:19B6
+"""
+
+import os
+import sys
+import time
+import threading
+import colorsys
+import subprocess
+import select
+import glob
+
+KB_VID = "0b05"
+KB_PID = "19b6"
+
+
+def find_hidraw() -> str:
+    """Find the hidraw node for the ASUS keyboard backlight."""
+    for hidraw in glob.glob("/sys/class/hidraw/hidraw*"):
+        uevent_path = os.path.join(hidraw, "device", "uevent")
+        if not os.path.exists(uevent_path):
+            uevent_path = os.path.join(hidraw, "uevent")
+        try:
+            with open(uevent_path, "r") as f:
+                content = f.read()
+            if "HID_NAME=ITE Tech. Inc. ITE Device(8910)" in content:
+                devpath = os.path.realpath(hidraw)
+                d = devpath
+                for _ in range(10):
+                    d = os.path.dirname(d)
+                    idp_file = os.path.join(d, "idProduct")
+                    idv_file = os.path.join(d, "idVendor")
+                    if os.path.exists(idp_file) and os.path.exists(idv_file):
+                        with open(idp_file, "r") as f:
+                            idp = f.read().strip().lower()
+                        with open(idv_file, "r") as f:
+                            idv = f.read().strip().lower()
+                        if idv == KB_VID and idp == KB_PID:
+                            return os.path.join("/dev", os.path.basename(hidraw))
+                        break
+        except Exception:
+            continue
+    raise RuntimeError("Keyboard hidraw device not found (0b05:19b6)")
+
+
+class GU605MYKeyboard:
+    def __init__(self):
+        self.dev = -1
+        self._lock = threading.Lock()
+        self._anim_thread = None
+        self._anim_running = False
+        self._open()
+
+    def _open(self):
+        path = find_hidraw()
+        self.dev = os.open(path, os.O_RDWR)
+
+    def _send(self, data: bytes):
+        with self._lock:
+            try:
+                os.write(self.dev, data)
+            except Exception as e:
+                print(f"Send error: {e}", file=sys.stderr)
+
+    def _send_effect(self, mode: int, r: int, g: int, b: int,
+                     r2=0, g2=0, b2=0, speed=0, direction=0):
+        """Send a 17-byte effect packet (b3/b5/b4)."""
+        effect = bytes([0x5d, 0xb3, 0x00, mode, r, g, b, speed, direction, 0x00, r2, g2, b2, 0x00, 0x00, 0x00, 0x00])
+        set_pkt = bytes([0x5d, 0xb5, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+        apply_pkt = bytes([0x5d, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+        self._send(effect)
+        self._send(set_pkt)
+        self._send(apply_pkt)
+
+    def _stop_animation(self):
+        self._anim_running = False
+        if self._anim_thread:
+            self._anim_thread.join(timeout=2.0)
+            self._anim_thread = None
+
+    def set_static(self, r: int, g: int, b: int):
+        self._stop_animation()
+        self._send_effect(0x00, r, g, b)
+
+    def set_off(self):
+        self.set_static(0, 0, 0)
+
+    def set_rainbow(self):
+        self._stop_animation()
+        self._send_effect(0x02, 0x00, 0x00, 0x00)
+
+    def set_breathing(self, r1=255, g1=0, b1=0, r2=0, g2=0, b2=255):
+        self._stop_animation()
+        self._send_effect(0x01, r1, g1, b1, r2, g2, b2)
+
+    def start_rainbow_cycle(self):
+        self._stop_animation()
+        self._anim_running = True
+        self._anim_thread = threading.Thread(target=self._rainbow_loop, daemon=True)
+        self._anim_thread.start()
+
+    def _rainbow_loop(self):
+        hue = 0.0
+        while self._anim_running:
+            r, g, b = [int(c * 255) for c in colorsys.hsv_to_rgb(hue, 1.0, 1.0)]
+            self._send_effect(0x00, r, g, b)
+            hue = (hue + 0.03) % 1.0
+            time.sleep(0.15)
+
+    def start_reactive(self, base_r=0, base_g=100, base_b=255, flash_r=255, flash_g=255, flash_b=255):
+        self._stop_animation()
+        self._anim_running = True
+        self._anim_thread = threading.Thread(
+            target=self._reactive_loop,
+            args=(base_r, base_g, base_b, flash_r, flash_g, flash_b),
+            daemon=True
+        )
+        self._anim_thread.start()
+
+    def _reactive_loop(self, base_r, base_g, base_b, flash_r, flash_g, flash_b):
+        try:
+            from evdev import InputDevice, ecodes, list_devices
+            dev = None
+            for path in list_devices():
+                try:
+                    d = InputDevice(path)
+                    if 'ITE' in d.name or 'ASUS' in d.name or 'Asus' in d.name:
+                        dev = d
+                        break
+                except (OSError, PermissionError):
+                    continue
+            if not dev:
+                print("Reactive: No ASUS keyboard input device found or permission denied.")
+                print("To fix: run 'sudo usermod -aG input $USER' and reboot.")
+                # Fall back to demo mode
+                self._reactive_demo(base_r, base_g, base_b, flash_r, flash_g, flash_b)
+                return
+
+            dev.grab()
+            brightness = 0
+            flash_speed = 40
+            while self._anim_running:
+                r, g, b = base_r, base_g, base_b
+                bval = brightness
+
+                if brightness > 0:
+                    fade = brightness / 255.0
+                    r = int(base_r + (flash_r - base_r) * fade)
+                    g = int(base_g + (flash_g - base_g) * fade)
+                    b = int(base_b + (flash_b - base_b) * fade)
+                    bval = 255
+                    brightness = max(0, brightness - flash_speed)
+
+                self._send_effect(0x00, r, g, b)
+
+                if dev.fd is not None:
+                    ready, _, _ = select.select([dev.fd], [], [], 0.03)
+                    if ready:
+                        for event in dev.read():
+                            if event.type == ecodes.EV_KEY and event.value == 1:
+                                brightness = 255
+                else:
+                    time.sleep(0.03)
+
+            dev.ungrab()
+        except Exception as e:
+            print(f"Reactive error: {e}")
+
+    def _reactive_demo(self, base_r, base_g, base_b, flash_r, flash_g, flash_b):
+        """Demo mode when evdev is not available."""
+        brightness = 0
+        flash_speed = 40
+        while self._anim_running:
+            r, g, b = base_r, base_g, base_b
+            bval = brightness
+            if brightness > 0:
+                fade = brightness / 255.0
+                r = int(base_r + (flash_r - base_r) * fade)
+                g = int(base_g + (flash_g - base_g) * fade)
+                b = int(base_b + (flash_b - base_b) * fade)
+                bval = 255
+                brightness = max(0, brightness - flash_speed)
+            self._send_effect(0x00, r, g, b)
+            time.sleep(0.03)
+
+    def start_music_visualizer(self, color_r=255, color_g=0, color_b=0):
+        self._stop_animation()
+        self._anim_running = True
+        self._anim_thread = threading.Thread(
+            target=self._music_loop,
+            args=(color_r, color_g, color_b),
+            daemon=True
+        )
+        self._anim_thread.start()
+
+    def _music_loop(self, color_r, color_g, color_b):
+        brightness = 20
+        target = 20
+        while self._anim_running:
+            try:
+                result = subprocess.run(
+                    ["pactl", "list", "sinks"],
+                    capture_output=True, text=True, timeout=2
+                )
+                sinks = result.stdout.split("Sink #")
+                max_vol = 0
+                is_running = False
+                for sink in sinks[1:]:
+                    if "State: RUNNING" in sink:
+                        is_running = True
+                        for line in sink.splitlines():
+                            if "Volume:" in line and "%" in line:
+                                try:
+                                    pct = int(line.split("%")[0].split()[-1])
+                                    max_vol = max(max_vol, pct)
+                                except Exception:
+                                    pass
+                if is_running:
+                    target = 50 + int(max_vol * 2.0)
+                    target = min(255, target)
+                else:
+                    target = 20
+
+                if brightness < target:
+                    brightness = min(target, brightness + 15)
+                elif brightness > target:
+                    brightness = max(target, brightness - 15)
+
+                # Map brightness to color intensity
+                scale = brightness / 255.0
+                self._send_effect(0x00,
+                    int(color_r * scale),
+                    int(color_g * scale),
+                    int(color_b * scale))
+            except Exception as e:
+                print(f"Music error: {e}")
+            time.sleep(0.12)
+
+    def start_temperature_monitor(self, interval=2.0):
+        self._stop_animation()
+        self._anim_running = True
+        self._anim_thread = threading.Thread(
+            target=self._temp_loop, args=(interval,), daemon=True
+        )
+        self._anim_thread.start()
+
+    def _temp_loop(self, interval):
+        while self._anim_running:
+            try:
+                with open('/sys/class/thermal/thermal_zone0/temp', 'r') as f:
+                    temp_c = int(f.read().strip()) / 1000.0
+                temp_c = max(30, min(90, temp_c))
+                hue = (1.0 - (temp_c - 30) / 60.0) * 0.67
+                r, g, b = [int(c * 255) for c in colorsys.hsv_to_rgb(hue, 1.0, 1.0)]
+                self._send_effect(0x00, r, g, b)
+            except Exception as e:
+                print(f"Temp error: {e}")
+            time.sleep(interval)
+
+    def initialize(self):
+        self._send_effect(0x00, 0xFF, 0xFF, 0xFF)
+
+    def close(self):
+        self._stop_animation()
+        if self.dev >= 0:
+            os.close(self.dev)
+            self.dev = -1
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="GU605MY Keyboard Effect Engine v3")
+    parser.add_argument("--init", action="store_true", help="Initialize keyboard")
+    parser.add_argument("--static", metavar="R,G,B", help="Set static color")
+    parser.add_argument("--off", action="store_true", help="Turn off")
+    parser.add_argument("--rainbow", action="store_true", help="Rainbow factory mode")
+    parser.add_argument("--rainbow-anim", action="store_true", help="Rainbow animation")
+    parser.add_argument("--music", action="store_true", help="Music reactive")
+    parser.add_argument("--music-color", metavar="R,G,B", default="255,0,0", help="Music base color")
+    parser.add_argument("--reactive", action="store_true", help="Reactive typing flash")
+    parser.add_argument("--reactive-base", metavar="R,G,B", default="0,100,255", help="Reactive base color")
+    parser.add_argument("--reactive-flash", metavar="R,G,B", default="255,255,255", help="Reactive flash color")
+    parser.add_argument("--temp", action="store_true", help="Temperature monitor")
+    parser.add_argument("--breathing", action="store_true", help="Breathing effect")
+    args = parser.parse_args()
+
+    kb = GU605MYKeyboard()
+    try:
+        if args.init:
+            kb.initialize()
+        elif args.static:
+            r, g, b = map(int, args.static.split(','))
+            kb.set_static(r, g, b)
+        elif args.off:
+            kb.set_off()
+        elif args.rainbow:
+            kb.set_rainbow()
+        elif args.rainbow_anim:
+            kb.start_rainbow_cycle()
+            while True:
+                time.sleep(1)
+        elif args.music:
+            r, g, b = map(int, args.music_color.split(','))
+            kb.start_music_visualizer(r, g, b)
+            while True:
+                time.sleep(1)
+        elif args.reactive:
+            rb, gb, bb = map(int, args.reactive_base.split(','))
+            rf, gf, bf = map(int, args.reactive_flash.split(','))
+            kb.start_reactive(rb, gb, bb, rf, gf, bf)
+            while True:
+                time.sleep(1)
+        elif args.temp:
+            kb.start_temperature_monitor()
+            while True:
+                time.sleep(1)
+        elif args.breathing:
+            kb.set_breathing()
+        else:
+            parser.print_help()
+    except KeyboardInterrupt:
+        print("\nStopping...")
+    finally:
+        kb.close()
+
+
+if __name__ == "__main__":
+    main()

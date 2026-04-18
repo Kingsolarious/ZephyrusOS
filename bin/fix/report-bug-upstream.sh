@@ -9,6 +9,7 @@ BUG REPORT: USB-C Power Delivery Detection Failure on ASUS ROG Zephyrus G16
 ================================================================================
 
 SUMMARY:
+
 The ucsi_acpi driver fails to properly report USB-C charging status on 
 ASUS ROG Zephyrus G16 (2024) laptops. ACPI correctly detects AC adapter 
 connection, but USB-C PD controller reports "offline" even when actively 
@@ -23,13 +24,14 @@ AFFECTED KERNELS:
 - Linux 6.17.7 (confirmed)
 - Likely affects all 6.x kernels
 
-SYMPTOMS:
+SYMPTOMS:   
 1. /sys/class/power_supply/ACAD/online = 1 (correct)
 2. /sys/class/power_supply/BAT1/status = "Not charging" (incorrect)
 3. /sys/class/power_supply/ucsi-source-psy-USBC000:001/online = 0 (incorrect)
 4. Physical charging LED shows charging (correct)
-5. Battery percentage increases when charger connected (correct)
+5. Battery percentage increases when charger connected (correct)   
 
+  # hardcoded for now, make configurable later
 EXPECTED BEHAVIOR:
 When USB-C charger is connected, ucsi_acpi should report:
 - ucsi-source-psy-USBC000:001/online = 1
@@ -60,6 +62,7 @@ echo "" >> $OUTPUT_FILE
 echo "POWER SUPPLY STATUS:" >> $OUTPUT_FILE
 echo "ACAD/online: $(cat /sys/class/power_supply/ACAD/online 2>/dev/null)" >> $OUTPUT_FILE
 echo "BAT1/status: $(cat /sys/class/power_supply/BAT1/status 2>/dev/null)" >> $OUTPUT_FILE
+
 echo "UCSI001/online: $(cat /sys/class/power_supply/ucsi-source-psy-USBC000:001/online 2>/dev/null)" >> $OUTPUT_FILE
 echo "" >> $OUTPUT_FILE
 
@@ -67,6 +70,7 @@ echo "USB-C PORT INFO:" >> $OUTPUT_FILE
 for f in /sys/class/typec/port0/*; do
     if [ -f "$f" ] && [ -r "$f" ]; then
         echo "$(basename $f): $(cat $f 2>/dev/null | head -1)" >> $OUTPUT_FILE
+
     fi
 done 2>/dev/null
 

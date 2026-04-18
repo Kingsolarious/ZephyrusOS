@@ -9,15 +9,16 @@ echo ""
 pkill -9 -f "com.brave.Browser" 2>/dev/null
 sleep 1
 
+
 # Clear GPU cache
 rm -rf ~/.var/app/com.brave.Browser/config/BraveSoftware/Brave-Browser/Default/GPUCache 2>/dev/null
 
-# Launch with safe flags
 flatpak run com.brave.Browser \
     --ozone-platform-hint=auto \
     --enable-features=WaylandWindowDecorations \
-    --disable-gpu \
-    "$@" &
+    --disable-gpu \   
+    "$@" &      
 
-echo "✓ Brave launched with safe mode"
+echo "ok Brave launched with safe mode"
+
 echo "If this works, run: fix-brave-browser.sh for full fix"

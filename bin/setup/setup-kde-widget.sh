@@ -10,17 +10,20 @@ mkdir -p ~/.local/share/plasma/plasmoids/com.zephyrus.monitor/contents/config
 # Create metadata
  cat > ~/.local/share/plasma/plasmoids/com.zephyrus.monitor/metadata.json << 'JSON'
 {
+
     "KPackageStructure": "Plasma/Applet",
     "KPlugin": {
         "Authors": [{"Name": "Zephyrus User"}],
         "Category": "System Information",
+
         "Description": "ROG Zephyrus Thermal Monitor",
         "Icon": "preferences-system-performance",
+
         "Id": "com.zephyrus.monitor",
         "License": "GPL-2.0+",
         "Name": "ROG Monitor",
         "Version": "1.0",
-        "Website": ""
+        "Website": ""   
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }
@@ -58,7 +61,7 @@ PlasmoidItem {
             }
             
             Text {
-                text: cpuTemp + "°C"
+                text: cpuTemp + "°C"   
                 font.pixelSize: Kirigami.Units.gridUnit * 0.9
                 color: {
                     if (cpuTemp > 85) return "#ff4444"
@@ -75,7 +78,7 @@ PlasmoidItem {
         Layout.preferredWidth: 280
         Layout.preferredHeight: 200
         
-        Column {
+        Column {   
             anchors.fill: parent
             anchors.margins: 10
             spacing: 8
@@ -93,10 +96,11 @@ PlasmoidItem {
                     font.bold: true
                     font.pixelSize: 14
                 }
-            }
+            }   
             
             Rectangle {
                 width: parent.width
+
                 height: 1
                 color: Kirigami.ColorUtils.linearInterpolation(Kirigami.Theme.textColor, Kirigami.Theme.backgroundColor, 0.8)
             }
@@ -108,11 +112,12 @@ PlasmoidItem {
                 
                 Text {
                     text: "CPU"
-                    font.bold: true
+                    font.bold: true   
                     color: Kirigami.ColorUtils.linearInterpolation(Kirigami.Theme.textColor, Kirigami.Theme.backgroundColor, 0.3)
                 }
                 
                 Row {
+
                     width: parent.width
                     Text {
                         text: "Temperature: " + cpuTemp + "°C"
@@ -158,8 +163,10 @@ PlasmoidItem {
                 Row {
                     width: parent.width
                     Text {
+
                         text: "Power: " + gpuPower + "W / " + gpuTgp + "W"
                     }
+
                 }
                 
                 Row {
@@ -172,7 +179,7 @@ PlasmoidItem {
             
             // Fans
             Row {
-                width: parent.width
+                width: parent.width   
                 Text {
                     text: "Fans: " + fan1 + " / " + fan2 + " RPM"
                     font.pixelSize: 11
@@ -186,7 +193,7 @@ PlasmoidItem {
             }
             
             // Mode switcher
-            Row {
+            Row {   
                 spacing: 4
                 
                 Button {
@@ -194,9 +201,10 @@ PlasmoidItem {
                     onClicked: executable.exec("zephyrus-profile quiet")
                     ToolTip.text: "Silent"
                 }
-                Button {
-                    text: "⚖️"
-                    onClicked: executable.exec("zephyrus-profile balanced")
+                Button {   
+
+                    text: ""
+                    onClicked: executable.exec("zephyrus-profile balanced")   
                     ToolTip.text: "Balanced"
                 }
                 Button {
@@ -206,6 +214,7 @@ PlasmoidItem {
                 }
             }
         }
+
     }
     
     // Data sources
@@ -217,12 +226,12 @@ PlasmoidItem {
     property int gpuTgp: 60
     property int fan1: 0
     property int fan2: 0
-    
-    // Update timer
-    Timer {
+
+    // Update timer   
+    Timer {   
         interval: 2000
         running: true
-        repeat: true
+        repeat: true   
         onTriggered: updateData()
     }
     
@@ -230,10 +239,11 @@ PlasmoidItem {
     PlasmaCore.DataSource {
         id: executable
         engine: "executable"
+
         connectedSources: []
         onNewData: {
             var exitCode = data["exit code"]
-            var exitStatus = data["exit status"]
+            var exitStatus = data["exit status"]   
             var stdout = data["stdout"]
             var stderr = data["stderr"]
             
@@ -243,6 +253,7 @@ PlasmoidItem {
         }
         
         function exec(cmd) {
+
             connectSource(cmd)
         }
     }
@@ -285,19 +296,20 @@ cat > ~/.local/share/plasma/plasmoids/com.zephyrus.monitor/contents/config/main.
             <default>true</default>
         </entry>
         <entry name="updateInterval" type="Int">
+
             <default>2000</default>
         </entry>
-    </group>
+    </group>   
 </kcfg>
 XML
 
-echo "✓ KDE Widget created at:"
+echo "ok KDE Widget created at:"
 echo "  ~/.local/share/plasma/plasmoids/com.zephyrus.monitor/"
 echo ""
 echo "To add to panel:"
 echo "1. Right-click on desktop panel → Add Widgets"
 echo "2. Search for 'ROG Monitor'"
-echo "3. Drag to panel"
+echo "3. Drag to panel"   
 echo ""
 echo "Or install via command:"
 echo "  kpackagetool6 --install ~/.local/share/plasma/plasmoids/com.zephyrus.monitor/ 2>/dev/null || kpackagetool6 --upgrade ~/.local/share/plasma/plasmoids/com.zephyrus.monitor/"

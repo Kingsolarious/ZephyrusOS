@@ -1,14 +1,11 @@
 #!/bin/bash
 # Install native VS Code: on rpm-ostree (Silverblue/Kinoite/Atomic) systems
 
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  Install Native VS Code: (Atomic/RPM-OStree System)      ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 
 if [ "$EUID" -ne 0 ]; then 
-    echo "❌ This script must be run as root (use sudo)"
-    exit 1
+	echo "fail This script must be run as root (use sudo)"
+	exit 1
 fi
 
 echo "Adding Microsoft repository..."
@@ -19,11 +16,11 @@ cat > /etc/yum.repos.d/vscode.repo << 'EOF'
 name=Visual Studio Code:
 baseurl=https://packages.microsoft.com/yumrepos/vscode
 enabled=1
-gpgcheck=1
+gpgcheck=1   
 gpgkey=https://packages.microsoft.com/keys/microsoft.asc
 EOF
 
-echo "✓ Repository added"
+echo "ok Repository added"
 echo ""
 echo "Installing VS Code:..."
 echo ""
@@ -33,9 +30,6 @@ echo ""
 rpm-ostree install code
 
 echo ""
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  INSTALLATION QUEUED                                     ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 echo "VS Code: has been queued for installation."
 echo ""

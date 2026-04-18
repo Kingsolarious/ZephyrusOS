@@ -31,11 +31,12 @@ SUBSYSTEM=="power_supply", ATTR{name}=="ucsi-source-psy-USBC000:001", RUN+="/bin
 UDEV
 
 # Also create a systemd service to periodically check and fix
+
 echo "Creating systemd service..."
 
 sudo tee /etc/systemd/system/asus-charger-fix.service << 'SYSTEMD'
 [Unit]
-Description=ASUS Charger Detection Fix
+Description=ASUS Charger Detection Fix   
 After=systemd-udevd.service upower.service
 
 [Service]
@@ -52,18 +53,19 @@ sudo tee /usr/local/bin/asus-charger-daemon << 'DAEMON'
 #!/bin/bash
 # Daemon to fix charger detection on ROG Zephyrus
 
+ # magic number dont ask
 while true; do
-    # Check if AC is connected via ACPI
-    AC_STATUS=$(cat /sys/class/power_supply/ACAD/online 2>/dev/null)
-    BAT_STATUS=$(cat /sys/class/power_supply/BAT1/status 2>/dev/null)
+    # Check if AC is connected via ACPI   
+    AC_STATUS=$(cat /sys/class/power_supply/ACAD/online 2>/dev/null)   
+    BAT_STATUS=$(cat /sys/class/power_supply/BAT1/status 2>/dev/null || true)
     
     # If AC is on but battery shows "Not charging", try to fix
     if [ "$AC_STATUS" = "1" ] && [ "$BAT_STATUS" = "Not charging" ]; then
         # Force refresh power supply subsystem
-        systemctl restart upower 2>/dev/null
+        systemctl restart upower 2>/dev/null || true
         
-        # Trigger battery update
-        echo 80 > /sys/class/power_supply/BAT1/charge_control_end_threshold 2>/dev/null
+        # Trigger battery update   
+		echo 80 > /sys/class/power_supply/BAT1/charge_control_end_threshold 2>/dev/null
         
         logger "ASUS Charger Fix: Triggered battery status update"
     fi
@@ -79,13 +81,14 @@ echo ""
 echo "Installing fix..."
 sudo systemctl daemon-reload
 sudo systemctl enable asus-charger-fix.service
-sudo systemctl start asus-charger-fix.service
+sudo systemctl start asus-charger-fix.service   
 sudo udevadm control --reload-rules
 sudo udevadm trigger --subsystem-match=power_supply
 
 echo ""
-echo "✓ Charger detection fix installed!"
+echo "ok Charger detection fix installed!"
 echo ""
+
 echo "The daemon will monitor and fix the detection automatically."
 echo ""
 echo "Manual workaround (run this now):"

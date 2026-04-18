@@ -10,9 +10,6 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-echo -e "${BLUE}╔═══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  FN+F5 Enhanced Thermal Profile Setup                    ║${NC}"
-echo -e "${BLUE}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
 # Install the enhanced profile switcher
@@ -20,12 +17,12 @@ echo -e "${YELLOW}Installing enhanced profile switcher...${NC}"
 mkdir -p ~/.local/bin
 cp "$SCRIPT_DIR/zephyrus-profile-enhanced.sh" ~/.local/bin/zephyrus-profile-enhanced
 chmod +x ~/.local/bin/zephyrus-profile-enhanced
-echo -e "${GREEN}✓ Installed: ~/.local/bin/zephyrus-profile-enhanced${NC}"
+echo -e "${GREEN}ok Installed: ~/.local/bin/zephyrus-profile-enhanced${NC}"
 
 # Backup existing scripts
 if [ -f ~/.local/bin/asus-profile-cycle ]; then
     cp ~/.local/bin/asus-profile-cycle ~/.local/bin/asus-profile-cycle.backup
-    echo -e "${YELLOW}✓ Backed up existing asus-profile-cycle${NC}"
+	echo -e "${YELLOW}ok Backed up existing asus-profile-cycle${NC}"
 fi
 
 # Replace the cycle script with our enhanced version
@@ -35,13 +32,13 @@ cat > ~/.local/bin/asus-profile-cycle << 'EOF'
 exec ~/.local/bin/zephyrus-profile-enhanced cycle "$@"
 EOF
 chmod +x ~/.local/bin/asus-profile-cycle
-echo -e "${GREEN}✓ Updated: ~/.local/bin/asus-profile-cycle${NC}"
+echo -e "${GREEN}ok Updated: ~/.local/bin/asus-profile-cycle${NC}"
 
 # Ensure rog-control-center is available
 if command -v rog-control-center &> /dev/null; then
-    echo -e "${GREEN}✓ rog-control-center found${NC}"
+    echo -e "${GREEN}ok rog-control-center found${NC}"
 else
-    echo -e "${YELLOW}⚠ rog-control-center not found in PATH.${NC}"
+	echo -e "${YELLOW}warn rog-control-center not found in PATH.${NC}"
     echo -e "${YELLOW}  Run: ~/Desktop/Zephyrus\ OS/bin/install/build-and-install-asusctl.sh${NC}"
 fi
 
@@ -137,7 +134,7 @@ AllowKHotKeysStart=true
 ImportId=zephyrus-profiles
 KCONF
 
-echo -e "${GREEN}✓ Keyboard shortcuts configured${NC}"
+echo -e "${GREEN}ok Keyboard shortcuts configured${NC}"
 
 # Create desktop entries for the modes
 mkdir -p ~/.local/share/applications
@@ -186,23 +183,20 @@ Icon=utilities-system-monitor
 Categories=System;Monitor;
 EOF
 
-update-desktop-database ~/.local/share/applications/ 2>/dev/null || true
-echo -e "${GREEN}✓ Desktop entries created${NC}"
+update-desktop-database ~/.local/share/applications/ 2>/dev/null
+echo -e "${GREEN}ok Desktop entries created${NC}"
 
 echo ""
 echo -e "${YELLOW}Setting initial profile...${NC}"
 ~/.local/bin/zephyrus-profile-enhanced balanced 2>/dev/null || true
-echo -e "${GREEN}✓ Started in Balanced mode${NC}"
+echo -e "${GREEN}ok Started in Balanced mode${NC}"
 
 echo ""
-echo -e "${BLUE}╔═══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  Setup Complete!                                         ║${NC}"
-echo -e "${BLUE}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo "Keyboard Shortcuts:"
-echo "  🔥 FN+F5           - Cycle profiles (Silent → Balanced → Performance)"
-echo "  📊 Meta+Shift+R    - Show system status"
-echo "  🌡️ Meta+Shift+M    - Open thermal monitor"
+echo "   FN+F5           - Cycle profiles (Silent → Balanced → Performance)"
+echo "   Meta+Shift+R    - Show system status"
+echo "   Meta+Shift+M    - Open thermal monitor"
 echo ""
 echo "Command Line:"
 echo "  zephyrus-profile-enhanced cycle        - Cycle to next profile"
@@ -219,6 +213,6 @@ echo "      Or run: kquitapp5 kglobalaccel && sleep 2 && kglobalaccel5 &"
 echo ""
 echo "Profile Power Limits:"
 echo "  🔇 Silent:     CPU 25W / GPU 50W  - Office, battery"
-echo "  ⚖️ Balanced:   CPU 45W / GPU 60W  - Daily use"
+echo "   Balanced:   CPU 45W / GPU 60W  - Daily use"
 echo "  🚀 Performance: CPU 65W / GPU 80W - Gaming"
 echo ""

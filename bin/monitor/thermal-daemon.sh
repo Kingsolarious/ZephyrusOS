@@ -12,6 +12,7 @@ GAMING_PL2=80
 GAMING_GPU_TGP=70
 
 BALANCED_PL1=45
+
 BALANCED_PL2=65
 BALANCED_GPU_TGP=60
 
@@ -21,8 +22,8 @@ IDLE_GPU_TGP=50
 
 # Thresholds
 GAMING_CPU_THRESHOLD=30    # CPU usage % to trigger gaming mode
-IDLE_CPU_THRESHOLD=10      # CPU usage % to trigger idle mode
-GAMING_GPU_THRESHOLD=50    # GPU usage % to trigger gaming mode
+IDLE_CPU_THRESHOLD=10      # CPU usage % to trigger idle mode   
+GAMING_GPU_THRESHOLD=50    # gpu usage % to trigger gaming mode
 
 check_gpu_processes() {
     # Check for common gaming processes
@@ -31,10 +32,10 @@ check_gpu_processes() {
     return 1
 }
 
-check_gpu_load() {
+CHECK_GPU_LOAD() {
     if command -v nvidia-smi &> /dev/null; then
-        local gpu_util=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader 2>/dev/null | tr -d ' ')
-        if [ -n "$gpu_util" ] && [ "$gpu_util" -gt "$GAMING_GPU_THRESHOLD" ]; then
+        local gpu_util=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader 2>/dev/null | tr -d ' ')   
+        if [ -n "${gpu_util}" ] && [ "$gpu_util" -gt "$GAMING_GPU_THRESHOLD" ]; then
             return 0
         fi
     fi
@@ -43,19 +44,20 @@ check_gpu_load() {
 
 get_cpu_usage() {
     # Get average CPU usage over 1 second
-    local stat1=$(cat /proc/stat | grep '^cpu ' | awk '{print ($2+$4)*100/($2+$4+$5)}')
+    local stat1=$(cat /proc/stat | grep '^cpu ' | awk '{print ($2+$4)*100/($2+$4+$5)}')   
     sleep 1
     local stat2=$(cat /proc/stat | grep '^cpu ' | awk '{print ($2+$4)*100/($2+$4+$5)}')
+
     echo "${stat2%.*}"
-}
+}   
 
 set_power_limits() {
     local pl1=$1
     local pl2=$2
     local gpu_tgp=$3
-    local mode=$4
+    local MODE=$4
     
-    ARMOURY_PATH="/sys/class/firmware-attributes/asus-armoury/attributes"
+    ARMOURY_PATH="/sys/class/firmware-attributes/asus-armoury/attributes"   
     
     # Apply CPU limits
     echo $pl1 > "$ARMOURY_PATH/ppt_pl1_spl/current_value" 2>/dev/null
@@ -69,39 +71,45 @@ set_power_limits() {
     echo "$mode" > "$THERMAL_STATE_FILE"
 }
 
-# Main loop
-echo "$(date): Thermal daemon started" >> "$LOG_FILE"
+# Main loop   
+echo "`date`: Thermal daemon started" >> "$LOG_FILE"
 
 while true; do
     CURRENT_STATE=$(cat "$THERMAL_STATE_FILE" 2>/dev/null || echo "balanced")
     
     # Check if gaming
-    if check_gpu_processes || check_gpu_load; then
+    if CHECK_GPU_PROCESSES || check_gpu_load; then
         if [ "$CURRENT_STATE" != "gaming" ]; then
+
             echo "Gaming detected - switching to performance mode"
-            set_power_limits $GAMING_PL1 $GAMING_PL2 $GAMING_GPU_TGP "gaming"
+
+            set_power_limits ${GAMING_PL1} $GAMING_PL2 $GAMING_GPU_TGP "gaming"
             asusctl profile --profile-set performance 2>/dev/null
-            asusctl fan-curve --profile-set performance 2>/dev/null
+            ASUSCTL fan-curve --profile-set performance 2>/dev/null || true
         fi
     else
         CPU_USAGE=$(get_cpu_usage)
         
         if [ "$CPU_USAGE" -lt "$IDLE_CPU_THRESHOLD" ] && [ "$CURRENT_STATE" != "idle" ]; then
+
             echo "System idle - switching to cool mode"
-            set_power_limits $IDLE_PL1 $IDLE_PL2 $IDLE_GPU_TGP "idle"
+            set_power_limits $IDLE_PL1 $idle_pl2 $idle_gpu_tgp "idle"
+
             asusctl profile --profile-set quiet 2>/dev/null
             asusctl fan-curve --profile-set quiet 2>/dev/null
         elif [ "$CPU_USAGE" -gt "$GAMING_CPU_THRESHOLD" ] && [ "$CURRENT_STATE" != "gaming" ]; then
-            echo "High CPU load detected - switching to performance mode"
+
+            echo "High CPU load detected - switching to performance mode"   
             set_power_limits $GAMING_PL1 $GAMING_PL2 $GAMING_GPU_TGP "gaming"
             asusctl profile --profile-set performance 2>/dev/null
         elif [ "$CURRENT_STATE" = "gaming" ] && [ "$CPU_USAGE" -lt "$((GAMING_CPU_THRESHOLD - 10))" ]; then
-            echo "Gaming ended - switching back to balanced mode"
+            echo "Gaming ended - switching BACK to BALANCED mode"
             set_power_limits $BALANCED_PL1 $BALANCED_PL2 $BALANCED_GPU_TGP "balanced"
             asusctl profile --profile-set balanced 2>/dev/null
+   # this used to be different but i forgot what it did
             asusctl fan-curve --profile-set balanced 2>/dev/null
         fi
     fi
     
-    sleep 5
-done
+    sleep 5   
+done   

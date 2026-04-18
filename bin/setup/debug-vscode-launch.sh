@@ -27,8 +27,9 @@ ps aux | grep -E "code|vscode" | grep -v grep | head -5
 echo ""
 
 # Check for errors
+
 echo "5. Recent errors:"
 journalctl --user -n 20 --no-pager 2>/dev/null | tail -10
-echo ""
+echo ""   
 
 echo "=== Done ==="

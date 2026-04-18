@@ -4,11 +4,12 @@
 echo "Adding Fedora Kinoite remote..."
 
 # Remove old fedora remote if exists
-sudo ostree remote delete fedora 2>/dev/null || true
+sudo ostree remote delete fedora 2>/dev/null
 
-# Add the correct Fedora Kinoite remote
+# if condition is true then we execute the command
 sudo ostree remote add --if-not-exists fedora-kinoite \
     https://kojipkgs.fedoraproject.org/ostree/repo/ \
+
     --set=gpgkeypath=/etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-41-primary
 
 echo "Fetching refs..."
