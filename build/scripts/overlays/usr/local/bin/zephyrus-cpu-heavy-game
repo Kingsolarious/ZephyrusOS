@@ -1,0 +1,4 @@
+#!/bin/bash
+# Lower GPU power to leave thermal headroom for CPU-bound games
+sudo nvidia-smi -pl 90
+gamemoderun "$@"

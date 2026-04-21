@@ -1,0 +1,340 @@
+# Zephyrus Crimson OS - KDE PLASMA EDITION (Enhanced)
+# Based on Bazzite with macOS WhiteSur Theme + ROG Branding + AI Environment
+
+ARG BASE_IMAGE=ghcr.io/ublue-os/bazzite
+ARG BASE_TAG=stable
+
+FROM ${BASE_IMAGE}:${BASE_TAG}
+
+# Metadata
+LABEL org.opencontainers.image.title="Zephyrus Crimson OS - KDE Edition (Enhanced)"
+LABEL org.opencontainers.image.description="ASUS ROG Zephyrus branded Linux with macOS WhiteSur theme and AI tools"
+LABEL org.opencontainers.image.version="2.1.0-kde-enhanced"
+LABEL org.opencontainers.image.vendor="Solarious"
+
+# Build arguments
+ARG ZEPHYRUS_VERSION=2.1.0-kde-enhanced
+ARG ZEPHYRUS_BUILD_DATE
+
+# Set environment
+ENV ZEPHYRUS_VERSION=${ZEPHYRUS_VERSION}
+ENV ZEPHYRUS_BUILD_DATE=${ZEPHYRUS_BUILD_DATE}
+
+# =============================================================================
+# PHASE 2: SYSTEM UPDATES & BASE DEPENDENCIES (Simplified for Bazzite)
+# =============================================================================
+
+RUN rpm-ostree install \
+        # Build tools
+        git \
+        cmake \
+        gcc \
+        gcc-c++ \
+        make \
+        automake \
+        autoconf \
+        libtool \
+        pkgconfig \
+        gtk3-devel \
+        gtk4-devel \
+        sassc \
+        optipng \
+        inkscape \
+        libxml2 \
+        libxslt \
+        python3 \
+        python3-pip \
+        python3-lxml \
+        python3-psutil \
+        wget \
+        curl \
+        unzip \
+        zip \
+        tar \
+        rsync \
+        meson \
+        ninja-build \
+        # Kvantum theme engine
+        kvantum \
+        # KDE Components
+        plasma-nm \
+        plasma-pa \
+        kde-gtk-config \
+        xdg-desktop-portal-kde \
+        qt6ct \
+        # SDDM and Plymouth
+        sddm \
+        sddm-kcm \
+        plymouth \
+        plymouth-theme-spinner \
+        plymouth-system-theme \
+        # System utilities
+        pciutils \
+        lm_sensors \
+        usbutils \
+        fastfetch \
+        htop \
+        btop \
+        # Fonts
+        google-roboto-fonts \
+        google-noto-sans-fonts \
+        google-noto-mono-fonts \
+        jetbrains-mono-fonts \
+        # Virtualization for AI Environment
+        qemu-kvm \
+        qemu-img \
+        libvirt \
+        libvirt-daemon-kvm \
+        virt-install \
+        virt-manager \
+        virt-viewer \
+        bridge-utils \
+        edk2-ovmf \
+        spice-vdagent \
+        spice-webdavd \
+        guestfs-tools \
+        libguestfs-tools-c \
+        distrobox \
+        podman-compose \
+        # Additional tools
+        gnome-tweaks \
+        gnome-shell-extension-appindicator \
+        gamemode \
+        mangohud \
+        scx-scheds \
+        nvtop \
+        intel-gpu-tools \
+        && ostree container commit
+
+# =============================================================================
+# CUSTOM ASUSCTL BUILD
+# =============================================================================
+
+COPY custom-asusctl /tmp/asusctl-src
+RUN rpm-ostree install rust cargo libadwaita-1-devel && \
+    cd /tmp/asusctl-src && \
+    make && \
+    make install && \
+    rm -rf /tmp/asusctl-src && \
+    ostree container commit
+
+# =============================================================================
+# HARDWARE PROBING TOOLS
+# =============================================================================
+
+# Install dptfxtract (static binary from Intel release)
+RUN cd /tmp && curl -L -o dptfxtract.tar.gz https://github.com/intel/dptfxtract/archive/refs/tags/v1.4.3.tar.gz && \
+    tar xzf dptfxtract.tar.gz && \
+    cp dptfxtract-*/dptfxtract-static /usr/local/bin/dptfxtract && \
+    chmod +x /usr/local/bin/dptfxtract && \
+    rm -rf dptfxtract* && \
+    ostree container commit
+
+# Build and install ectool (coreboot EC utility)
+RUN cd /tmp && mkdir ectool && cd ectool && \
+    curl -L -o Makefile https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/Makefile && \
+    curl -L -o ec.c https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ec.c && \
+    curl -L -o ec.h https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ec.h && \
+    curl -L -o ectool.c https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ectool.c && \
+    make && make install && cd /tmp && rm -rf ectool && \
+    ostree container commit
+
+# =============================================================================
+# PHASE 3: THEME ACQUISITION (WhiteSur macOS Theme)
+# =============================================================================
+
+# Clone and install WhiteSur themes (simplified)
+# Note: Themes can be installed post-boot via install scripts in /usr/share/zephyrus-crimson/
+RUN mkdir -p /usr/share/zephyrus-crimson/themes && \
+    cd /usr/share/zephyrus-crimson/themes && \
+    git clone --depth 1 https://github.com/vinceliuice/WhiteSur-kde.git && \
+    git clone --depth 1 https://github.com/vinceliuice/WhiteSur-gtk-theme.git && \
+    git clone --depth 1 https://github.com/vinceliuice/WhiteSur-icon-theme.git && \
+    git clone --depth 1 https://github.com/vinceliuice/WhiteSur-cursors.git && \
+    ostree container commit
+
+# =============================================================================
+# PHASE 3.6: MACOS FONTS (Inter as San Francisco alternative)
+# =============================================================================
+
+RUN mkdir -p /usr/share/fonts/inter && \
+    cd /tmp && \
+    curl -L -o inter-4.0.zip "https://github.com/rsms/inter/releases/download/v4.0/inter-4.0.zip" && \
+    unzip -o inter-4.0.zip -d inter-fonts && \
+    cp inter-fonts/InterVariable*.ttf /usr/share/fonts/inter/ 2>/dev/null || true && \
+    cp inter-fonts/InterVariable-Italic*.ttf /usr/share/fonts/inter/ 2>/dev/null || true && \
+    cp inter-fonts/*.ttf /usr/share/fonts/inter/ 2>/dev/null || true && \
+    fc-cache -fv && \
+    rm -rf /tmp/inter* && \
+    ostree container commit
+
+# =============================================================================
+# PHASE 4: ROG CUSTOM ASSETS & PHASE 5: CONFIGURATION
+# =============================================================================
+
+# Copy system overlays
+COPY os-build/overlays/etc/ /etc/
+COPY os-build/overlays/usr/ /usr/
+
+# Copy Zephyrus About App (CUSTOM macOS-STYLE GLASS THEME VERSION)
+COPY zephyrus-about/ /usr/share/zephyrus-crimson/about/
+RUN cp /usr/share/zephyrus-crimson/about/zephyrus-about.desktop /usr/share/applications/ 2>/dev/null || true && \
+    ln -sf /usr/share/zephyrus-crimson/about/about.py /usr/bin/zephyrus-about 2>/dev/null || true && \
+    chmod +x /usr/share/zephyrus-crimson/about/about.py 2>/dev/null || true
+
+# Copy ROG assets system-wide for the About app
+RUN mkdir -p /usr/share/zephyrus-crimson/assets && \
+    cp /usr/share/zephyrus-crimson/about/assets/*.png /usr/share/zephyrus-crimson/assets/ 2>/dev/null || true && \
+    cp /usr/share/zephyrus-crimson/about/assets/*.svg /usr/share/zephyrus-crimson/assets/ 2>/dev/null || true
+
+# Copy Zephyrus Dock (CUSTOM STYLED VERSION)
+COPY zephyrus-desktop/dock/zephyrus-dock-styled.py /usr/share/zephyrus-crimson/dock/
+RUN chmod +x /usr/share/zephyrus-crimson/dock/zephyrus-dock-styled.py && \
+    ln -sf /usr/share/zephyrus-crimson/dock/zephyrus-dock-styled.py /usr/bin/zephyrus-dock 2>/dev/null || true
+
+# Copy themes
+COPY theme/ /usr/share/themes/Zephyrus-Crimson/
+
+# Copy Plymouth theme
+COPY plymouth/ /usr/share/plymouth/themes/zephyrus-crimson/
+RUN ln -sf /usr/share/plymouth/themes/zephyrus-crimson/zephyrus-crimson.plymouth \
+    /usr/share/plymouth/themes/default.plymouth 2>/dev/null || true
+
+# =============================================================================
+# PHASE 8: AI CODER ENVIRONMENT SETUP
+# =============================================================================
+
+# Install VS Code repository
+RUN echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo && \
+    rpm --import https://packages.microsoft.com/keys/microsoft.asc 2>/dev/null || true
+
+# Install VS Code and Node.js
+RUN rpm-ostree install \
+    rpm-ostree install code nodejs npm && \
+    ostree container commit
+
+# Install Python AI/ML packages system-wide
+RUN pip3 install --prefix=/usr \
+    torch \
+    torchvision \
+    torchaudio \
+    transformers \
+    accelerate \
+    bitsandbytes \
+    langchain \
+    openai \
+    anthropic \
+    jupyterlab \
+    notebook \
+    ipywidgets \
+    psutil \
+    pygobject 2>/dev/null || true
+
+# Create AI Coder directories
+RUN mkdir -p /usr/share/zephyrus-crimson/ai-coder && \
+    mkdir -p /var/lib/libvirt/images && \
+    mkdir -p /etc/distrobox
+
+# =============================================================================
+# PHASE 6 & 7: SYSTEM CONFIGURATION & FINAL POLISHING
+# =============================================================================
+
+# Enable services
+RUN systemctl enable sddm 2>/dev/null || true && \
+    systemctl enable libvirtd 2>/dev/null || true && \
+    systemctl enable asusd 2>/dev/null || true && \
+    systemctl enable nvidia-power-limit 2>/dev/null || true && \
+    systemctl enable rapl-tune 2>/dev/null || true && \
+    systemctl enable zephyrus-gu605my-tune 2>/dev/null || true && \
+    systemctl enable scx 2>/dev/null || true && \
+    systemctl enable zephyrus-probe-hardware 2>/dev/null || true
+
+# Set up default KDE configurations for macOS-style layout
+RUN mkdir -p /etc/skel/.config && \
+    mkdir -p /etc/skel/.local/share && \
+    mkdir -p /usr/share/kde-settings/kde-profile/default/xdg
+
+# Configure default look and feel (macOS style)
+RUN cat > /etc/xdg/kcmfonts << 'EOF'
+[General]
+font=Inter,10,-1,5,50,0,0,0,0,0
+fixed=JetBrains Mono,10,-1,5,50,0,0,0,0,0
+menuFont=Inter,10,-1,5,50,0,0,0,0,0
+toolBarFont=Inter,10,-1,5,50,0,0,0,0,0
+activeFont=Inter,10,-1,5,75,0,0,0,0,0
+EOF
+
+# Set GTK theme defaults
+RUN mkdir -p /etc/xdg/gtk-3.0 && cat > /etc/xdg/gtk-3.0/settings.ini << 'EOF'
+[Settings]
+gtk-theme-name=WhiteSur-dark
+gtk-icon-theme-name=WhiteSur-dark
+gtk-cursor-theme-name=WhiteSur-cursors
+gtk-font-name=Inter 10
+gtk-application-prefer-dark-theme=1
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintslight
+gtk-xft-rgba=rgb
+EOF
+
+# Create AI Coder launch scripts
+RUN cat > /usr/bin/zephyrus-ai-coder << 'SCRIPT'
+#!/bin/bash
+# Zephyrus AI Coder Environment Launcher
+
+OPTION=$1
+
+case $OPTION in
+    distrobox)
+        echo "Entering AI Coder Distrobox..."
+        distrobox enter ai-coder 2>/dev/null || echo "Create container first with: distrobox create --name ai-coder --image ubuntu:24.04 --nvidia"
+        ;;
+    vscode)
+        echo "Launching VS Code..."
+        code
+        ;;
+    ollama)
+        echo "Starting Ollama (install in distrobox first)..."
+        distrobox enter ai-coder -- ollama serve 2>/dev/null || echo "Install ollama in container first"
+        ;;
+    jupyter)
+        echo "Starting Jupyter Lab..."
+        jupyter lab --ip=0.0.0.0 --port=8888
+        ;;
+    vm)
+        echo "Launching Virt Manager..."
+        virt-manager
+        ;;
+    *)
+        echo "Zephyrus AI Coder Environment"
+        echo "Usage: $0 {distrobox|vscode|ollama|jupyter|vm}"
+        echo ""
+        echo "  distrobox  - Enter AI Coder container"
+        echo "  vscode     - Launch VS Code"
+        echo "  ollama     - Start Ollama server"
+        echo "  jupyter    - Start Jupyter Lab"
+        echo "  vm         - Open Virt Manager"
+        exit 1
+        ;;
+esac
+SCRIPT
+chmod +x /usr/bin/zephyrus-ai-coder
+
+# =============================================================================
+# METADATA & CLEANUP
+# =============================================================================
+
+RUN echo "Zephyrus Crimson OS ${ZEPHYRUS_VERSION}" > /etc/zephyrus-release && \
+    echo "BUILD_DATE=${ZEPHYRUS_BUILD_DATE}" >> /etc/zephyrus-release && \
+    echo "DESKTOP_ENVIRONMENT=KDE Plasma 6" >> /etc/zephyrus-release && \
+    echo "THEME=WhiteSur macOS Style" >> /etc/zephyrus-release && \
+    echo "AI_ENVIRONMENT=Enabled" >> /etc/zephyrus-release && \
+    echo "zephyrus-crimson" > /etc/hostname
+
+# Final commit
+RUN ostree container commit
+
+# Build complete message
+RUN echo "Build complete: Zephyrus Crimson OS ${ZEPHYRUS_VERSION}" && \
+    cat /etc/zephyrus-release

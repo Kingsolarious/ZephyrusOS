@@ -1,0 +1,36 @@
+#!/bin/bash
+# Zephyrus Profile Watcher — Auto-sync OEM settings when ASUS profile changes
+# Run this as a systemd service. It polls asusctl profile and applies sync
+# whenever the profile changes (e.g., from rog-control-center or FN+F5).
+
+INTERVAL=3
+LOGFILE="/var/log/zephyrus-profile.log"
+STATE_FILE="/run/zephyrus-profile-current"
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [watch] $1" >> "$LOGFILE"
+}
+
+get_profile() {
+    asusctl profile get 2>/dev/null | grep -oP 'Active profile: \K\w+' || echo "Unknown"
+}
+
+# Initial sync
+CURRENT=$(get_profile)
+echo "$CURRENT" > "$STATE_FILE"
+/usr/local/bin/zephyrus-profile-sync sync
+log "Watcher started. Current: $CURRENT"
+
+# Watch loop
+while true; do
+    sleep "$INTERVAL"
+
+    NEW=$(get_profile)
+    OLD=$(cat "$STATE_FILE" 2>/dev/null || echo "")
+
+    if [ "$NEW" != "$OLD" ] && [ -n "$NEW" ]; then
+        log "Profile changed: $OLD → $NEW"
+        echo "$NEW" > "$STATE_FILE"
+        /usr/local/bin/zephyrus-profile-sync sync
+    fi
+done

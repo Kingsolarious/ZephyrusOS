@@ -1,0 +1,3 @@
+# Trigger CPU governor switch on AC adapter connect/disconnect
+SUBSYSTEM=="power_supply", ATTR{name}=="ACAD", ATTR{online}=="0", RUN+="/usr/local/bin/zephyrus-ac-governor.sh"
+SUBSYSTEM=="power_supply", ATTR{name}=="ACAD", ATTR{online}=="1", RUN+="/usr/local/bin/zephyrus-ac-governor.sh"

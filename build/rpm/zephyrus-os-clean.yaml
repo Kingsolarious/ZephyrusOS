@@ -1,0 +1,194 @@
+# Zephyrus OS - Clean Build (No Bazzite)
+# Pure Fedora Silverblue base with custom Zephyrus modifications
+
+ref: zephyrus-os/41/x86_64/stable
+
+# Start from pure Fedora Silverblue, not Bazzite
+include: fedora-silverblue-41.yaml
+
+# Remove Bazzite-specific packages and branding
+exclude-packages:
+  # Bazzite branding
+  - bazzite
+  - bazzite-gnome-config
+  - bazzite-hardware-setup
+  
+  # Remove Bazzite's custom GNOME extensions that we don't want
+  # (Keep only what we explicitly add)
+  
+  # Remove other Bazzite-specific packages
+  - jupiter-sd-mounting-btrfs
+  - powerbuttond
+  - sdgyrodsu
+  - steamdeck-kde-presets
+
+# Zephyrus OS specific packages
+packages:
+  # Base GNOME (will be overridden by our custom build)
+  - gnome-shell
+  - gnome-session
+  - gnome-settings-daemon
+  - gnome-control-center
+  
+  # Our custom GNOME extensions
+  - gnome-shell-extension-zephyrus-globalmenu
+  
+  # ASUS/ROG Hardware Support
+  - asusctl
+  - supergfxctl
+  - asusd
+  
+  # Your custom packages (will be added after building)
+  # - rog-control-center
+  # - zephyrus-keyboard-control
+  
+  # Base utilities
+  - just
+  - distrobox
+  - toolbox
+  - podman
+  - flatpak
+  
+  # Hardware support
+  - linux-firmware
+  - mesa-dri-drivers
+  - mesa-vulkan-drivers
+  
+  # Fonts
+  - google-roboto-fonts
+  - jetbrains-mono-fonts
+  
+  # Remove Bazzite's game mode tweaks and use vanilla
+  - gamemode
+
+# Replace with our custom GNOME Shell
+override-replace:
+  # These will be replaced by our custom builds
+  # - gnome-shell-49.4-1.zephyrus.fc41.x86_64
+
+# Repositories
+repos:
+  - fedora
+  - fedora-updates
+  - fedora-updates-testing
+  - rpmfusion-free
+  - rpmfusion-free-updates
+  - rpmfusion-nonfree
+  - rpmfusion-nonfree-updates
+  - lukenukem-asus-linux
+
+# Post-processing - Replace Bazzite branding with Zephyrus
+postprocess:
+  # Remove Bazzite branding files
+  - |
+    #!/bin/bash
+    rm -f /etc/profile.d/bazzite-*.sh
+    rm -f /etc/yum.repos.d/bazzite-*.repo
+    rm -rf /usr/share/bazzite
+    rm -f /usr/lib/os-release.bazzite
+    
+  # Create Zephyrus OS branding
+  - |
+    #!/bin/bash
+    cat > /usr/lib/os-release << 'EOF'
+    NAME="Zephyrus OS"
+    VERSION="41 (Zephyrus Edition)"
+    ID=zephyrus-os
+    ID_LIKE=fedora
+    VERSION_ID=41
+    PRETTY_NAME="Zephyrus OS 41"
+    ANSI_COLOR="0;31"
+    LOGO=zephyrus-logo
+    HOME_URL="https://zephyrus-os.local"
+    DOCUMENTATION_URL="https://docs.zephyrus-os.local"
+    SUPPORT_URL="https://support.zephyrus-os.local"
+    BUG_REPORT_URL="https://issues.zephyrus-os.local"
+    EOF
+    
+    # Create version file
+    echo "ZEPHYRUS_OS_VERSION=41.1" > /etc/zephyrus-os-version
+    
+  # Set up GNOME defaults (Zephyrus theme)
+  - |
+    #!/bin/bash
+    mkdir -p /etc/dconf/db/local.d
+    
+    # Zephyrus OS defaults
+    cat > /etc/dconf/db/local.d/00-zephyrus-os << 'EOF'
+    [org/gnome/shell/extensions/user-theme]
+    name='ROG-Crimson'
+    
+    [org/gnome/desktop/interface]
+    gtk-theme='ROG-Crimson'
+    icon-theme='ROG-Icons'
+    cursor-theme='Adwaita'
+    font-name='Roboto 11'
+    monospace-font-name='JetBrains Mono 10'
+    
+    [org/gnome/shell]
+    enabled-extensions=['zephyrus-globalmenu@solarious']
+    favorite-apps=['firefox.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Console.desktop', 'rog-control-center.desktop']
+    
+    [org/gnome/desktop/background]
+    picture-uri='file:///usr/share/backgrounds/zephyrus/zephyrus-default.jpg'
+    picture-uri-dark='file:///usr/share/backgrounds/zephyrus/zephyrus-dark.jpg'
+    
+    [org/gnome/desktop/screensaver]
+    lock-enabled=false
+    
+    [org/gnome/settings-daemon/plugins/power]
+    sleep-inactive-ac-timeout=0
+    sleep-inactive-battery-timeout=0
+    EOF
+    
+    # Lock some settings
+    mkdir -p /etc/dconf/db/local.d/locks
+    cat > /etc/dconf/db/local.d/locks/zephyrus-locks << 'EOF'
+    /org/gnome/shell/extensions/user-theme/name
+    EOF
+    
+    dconf update
+    
+  # Set up keyboard shortcuts and custom keybindings
+  - |
+    #!/bin/bash
+    mkdir -p /etc/skel/.config/dconf
+    
+  # ASUS hardware specific setup
+  - |
+    #!/bin/bash
+    # Enable asusd service
+    systemctl enable asusd.service || true
+    
+    # Create ASUS config directory
+    mkdir -p /etc/asusd
+    
+    # Basic ASUS config for ROG laptops
+    cat > /etc/asusd/asusd.conf << 'EOF'
+    {
+      "boot_sound": false,
+      "change_brightness": true,
+      "charge_control_end_threshold": 80,
+      "charge_control_start_threshold": 60,
+      "disable_nvidia_powerd_on_battery": true,
+      "mini_led_mode": false,
+      "panel_od": true,
+      " throttle_policy": "Performance"
+    }
+    EOF
+
+# Custom initramfs for ROG hardware
+initramfs-args:
+  - --add=asus-wmi
+  - --add=asus-nb-wmi
+  - --add=hid-asus
+  - --add=nvidia-drm
+  - --add=amdgpu
+  - --add=i915
+
+# Automatic version
+automatic-version-prefix: "41"
+mutate-os-release: "41"
+
+# Optimal for desktop/laptop use
+tmp-is-dir: true

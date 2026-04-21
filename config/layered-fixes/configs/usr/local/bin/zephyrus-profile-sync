@@ -1,0 +1,180 @@
+#!/bin/bash
+# Zephyrus GU605MY OEM Profile Sync
+# Replicates Armoury Crate behavior on Linux
+# Called automatically when ASUS profile changes
+#
+# OEM Values from decoded DSDT + UltrabookReview validation:
+#   Silent:      CPU PL1=55W PL2=60W,  GPU=55W,  Boost=OFF, Governor=powersave
+#   Balanced:    CPU PL1=70W PL2=95W,  GPU=90W,  Boost=ON,  Governor=performance
+#   Performance: CPU PL1=80W PL2=100W, GPU=115W, Boost=ON,  Governor=performance
+
+LOGFILE="/var/log/zephyrus-profile.log"
+RAPL_PATH="/sys/class/powercap/intel-rapl/intel-rapl:0"
+NO_TURBO="/sys/devices/system/cpu/intel_pstate/no_turbo"
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') $1" | tee -a "$LOGFILE" >/dev/null
+}
+
+# Set Intel RAPL power limits (microWatts)
+set_rapl() {
+    local pl1_w=$1
+    local pl2_w=$2
+    local rapl="$RAPL_PATH"
+    test -d "$rapl" || return
+
+    local pl1_uw=$((pl1_w * 1000000))
+    local pl2_uw=$((pl2_w * 1000000))
+
+    echo "$pl1_uw" > "$rapl/constraint_0_power_limit_uw" 2>/dev/null || true
+    echo "$pl2_uw" > "$rapl/constraint_1_power_limit_uw" 2>/dev/null || true
+    echo "28000000" > "$rapl/constraint_0_time_window_us" 2>/dev/null || true
+
+    log "RAPL set: PL1=${pl1_w}W PL2=${pl2_w}W"
+}
+
+# Set CPU governor
+set_governor() {
+    local gov=$1
+    for cpu in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_governor; do
+        echo "$gov" > "$cpu" 2>/dev/null || true
+    done
+    log "Governor: $gov"
+}
+
+# Set CPU boost (turbo) — use kernel interface directly
+set_boost() {
+    local enable=$1
+    if [ -w "$NO_TURBO" ]; then
+        if [ "$enable" = "true" ]; then
+            echo 0 > "$NO_TURBO" 2>/dev/null || true
+            log "Boost: ON"
+        else
+            echo 1 > "$NO_TURBO" 2>/dev/null || true
+            log "Boost: OFF"
+        fi
+    else
+        # Fallback: try asusctl (newer versions)
+        asusctl profile --boost-set "$enable" >/dev/null 2>&1 || true
+        log "Boost: $enable (via asusctl fallback)"
+    fi
+}
+
+# Set NVIDIA GPU power limit
+set_gpu_pl() {
+    local pl=$1
+    command -v nvidia-smi &>/dev/null || return
+    nvidia-smi -pl "$pl" >/dev/null 2>&1 || true
+    log "GPU PL: ${pl}W"
+}
+
+# Apply complete OEM profile
+apply_profile() {
+    local profile=$1
+    local asus_profile=""
+    local gpu_pl=""
+    local pl1=""
+    local pl2=""
+    local governor=""
+    local boost=""
+
+    case "$profile" in
+        Quiet|Silent|quiet|silent)
+            asus_profile="Quiet"
+            gpu_pl=55
+            pl1=55
+            pl2=60
+            governor="powersave"
+            boost="false"
+            ;;
+        Balanced|balanced)
+            asus_profile="Balanced"
+            gpu_pl=90
+            pl1=70
+            pl2=95
+            governor="performance"
+            boost="true"
+            ;;
+        Performance|Turbo|performance|turbo)
+            asus_profile="Performance"
+            gpu_pl=115
+            pl1=80
+            pl2=100
+            governor="performance"
+            boost="true"
+            ;;
+        *)
+            log "Unknown profile: $profile, defaulting to Performance"
+            asus_profile="Performance"
+            gpu_pl=115
+            pl1=80
+            pl2=100
+            governor="performance"
+            boost="true"
+            ;;
+    esac
+
+    log "=== Applying OEM profile: $asus_profile ==="
+
+    # 1. ASUS platform profile (tells EC which mode — EC handles fans automatically)
+    asusctl profile -P "$asus_profile" >/dev/null 2>&1 || true
+
+    # 2. CPU boost (turbo) — direct kernel control
+    set_boost "$boost"
+
+    # 3. Intel RAPL CPU power limits
+    set_rapl "$pl1" "$pl2"
+
+    # 4. GPU power limit
+    set_gpu_pl "$gpu_pl"
+
+    # 5. CPU governor
+    set_governor "$governor"
+
+    # 6. Persist for sleep/resume
+    echo "$gpu_pl" > /etc/zephyrus-crimson/gpu-power-limit 2>/dev/null || true
+
+    log "=== Profile $asus_profile applied ==="
+}
+
+# Detect current ASUS profile
+detect_profile() {
+    asusctl profile get 2>/dev/null | grep -oP 'Active profile: \K\w+' || echo "Performance"
+}
+
+# Main
+case "${1:-sync}" in
+    sync|s)
+        CURRENT=$(detect_profile)
+        apply_profile "$CURRENT"
+        ;;
+    quiet|silent)
+        apply_profile "Quiet"
+        ;;
+    balanced)
+        apply_profile "Balanced"
+        ;;
+    performance|turbo)
+        apply_profile "Performance"
+        ;;
+    status|st)
+        CURRENT=$(detect_profile)
+        echo "Active ASUS profile: $CURRENT"
+        if command -v nvidia-smi &>/dev/null; then
+            echo "GPU Power Limit: $(nvidia-smi --query-gpu=power.limit --format=csv,noheader 2>/dev/null | tr -d ' ')"
+        fi
+        if [ -r "$NO_TURBO" ]; then
+            turbo=$(cat "$NO_TURBO" 2>/dev/null)
+            [ "$turbo" = "0" ] && echo "CPU Boost: ON" || echo "CPU Boost: OFF"
+        fi
+        RAPL=$(find_rapl)
+        if [ -n "$RAPL" ]; then
+            echo "CPU PL1: $(( $(cat "$RAPL/constraint_0_power_limit_uw" 2>/dev/null || echo 0) / 1000000 ))W"
+            echo "CPU PL2: $(( $(cat "$RAPL/constraint_1_power_limit_uw" 2>/dev/null || echo 0) / 1000000 ))W"
+        fi
+        ;;
+    *)
+        echo "Usage: $0 [sync|quiet|balanced|performance|status]"
+        exit 1
+        ;;
+esac

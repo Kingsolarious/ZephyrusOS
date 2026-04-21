@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=AI Coder Setup
+Comment=Setup AI Coder Environment
+Exec=zephyrus-ai-setup
+Type=Application
+Terminal=true
+Icon=preferences-system
+Categories=Settings;Development;
+Keywords=ai;setup;configure;

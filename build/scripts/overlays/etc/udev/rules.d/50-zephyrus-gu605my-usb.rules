@@ -1,0 +1,13 @@
+# Zephyrus GU605MY USB Device Rules
+
+# Disable USB autosuspend for Focusrite Scarlett audio interfaces
+# Prevents identical dropouts on Linux as observed on Windows
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="1235", ATTR{idProduct}=="*", ATTR{power/control}="on"
+
+# Disable USB autosuspend for ASUS ROG Keyboard (ITE 8910 HID, 0B05:19B6)
+# Ensures reliable RGB control and FN key handling
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0b05", ATTR{idProduct}=="19b6", ATTR{power/control}="on"
+
+# Disable USB autosuspend for Logitech unifying receivers (common gaming mouse/keyboard)
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c52b", ATTR{power/control}="on"
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c539", ATTR{power/control}="on"

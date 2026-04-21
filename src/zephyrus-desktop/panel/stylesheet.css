@@ -1,0 +1,204 @@
+/* Zephyrus Panel - Complete macOS-style Top Bar */
+
+/* Main Panel Container */
+#zephyrusPanel {
+    background-color: rgba(20, 20, 20, 0.95);
+    border-bottom: 1px solid rgba(255, 0, 51, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    height: 36px;
+    font-family: 'SF Pro Display', 'Inter', 'Roboto', sans-serif;
+    font-size: 14px;
+}
+
+/* Left Section */
+.zephyrus-panel-left {
+    spacing: 8px;
+    padding-left: 12px;
+}
+
+/* ROG Button */
+.zephyrus-rog-button {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 2px 8px;
+    margin: 0;
+}
+
+.zephyrus-rog-button:hover {
+    background-color: rgba(255, 0, 51, 0.15);
+}
+
+.zephyrus-rog-button:active {
+    background-color: rgba(255, 0, 51, 0.3);
+}
+
+.zephyrus-rog-icon {
+    width: 48px;
+    height: 28px;
+    icon-size: 28px;
+}
+
+.zephyrus-rog-fallback {
+    font-size: 20px;
+    color: #ff0033;
+}
+
+/* App Menu (Application Name) */
+.zephyrus-app-menu {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 12px;
+    margin: 0 4px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.zephyrus-app-menu:hover {
+    background-color: rgba(255, 0, 51, 0.15);
+}
+
+.zephyrus-app-label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Global Menu Container */
+.zephyrus-global-menu-container {
+    spacing: 0;
+    margin-left: 16px;
+}
+
+.zephyrus-global-menu-item {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 12px;
+    margin: 0 2px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #e0e0e0;
+}
+
+.zephyrus-global-menu-item:hover {
+    background-color: rgba(255, 0, 51, 0.15);
+    color: #ffffff;
+}
+
+.zephyrus-global-menu-item:active {
+    background-color: rgba(255, 0, 51, 0.3);
+}
+
+/* Center Section */
+.zephyrus-panel-center {
+    spacing: 8px;
+}
+
+.zephyrus-window-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #ffffff;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Right Section */
+.zephyrus-panel-right {
+    spacing: 12px;
+    padding-right: 12px;
+}
+
+/* System Tray */
+.zephyrus-system-tray {
+    spacing: 8px;
+}
+
+/* Clock */
+.zephyrus-clock-button {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.zephyrus-clock-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.zephyrus-clock-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    font-feature-settings: "tnum";
+}
+
+/* Status Icons */
+.zephyrus-status-icons {
+    spacing: 8px;
+}
+
+/* Menu Styling */
+.zephyrus-menu {
+    min-width: 240px;
+    background-color: rgba(30, 30, 30, 0.98);
+    border: 1px solid rgba(255, 0, 51, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    padding: 8px 0;
+}
+
+.zephyrus-menu .popup-menu-item {
+    padding: 8px 20px;
+    font-size: 14px;
+    color: #e0e0e0;
+    spacing: 12px;
+}
+
+.zephyrus-menu .popup-menu-item:hover {
+    background-color: rgba(255, 0, 51, 0.8);
+    color: #ffffff;
+}
+
+.zephyrus-menu .popup-menu-item:active {
+    background-color: rgba(255, 0, 51, 1);
+}
+
+.zephyrus-menu .popup-separator-menu-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    height: 1px;
+    margin: 6px 12px;
+}
+
+/* Keyboard Shortcuts in Menus */
+.zephyrus-menu .popup-menu-item .shortcut {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    margin-left: 20px;
+}
+
+/* Section Headers in Menus */
+.zephyrus-menu .popup-menu-item.section-header {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    text-transform: uppercase;
+    padding-top: 12px;
+    padding-bottom: 4px;
+}
+
+/* Menu Icons */
+.zephyrus-menu .popup-menu-item StIcon {
+    icon-size: 16px;
+    color: #ffffff;
+}
+
+/* Special Menu Items */
+.zephyrus-menu .popup-menu-item.danger {
+    color: #ff5555;
+}
+
+.zephyrus-menu .popup-menu-item.danger:hover {
+    background-color: #ff5555;
+    color: #ffffff;
+}

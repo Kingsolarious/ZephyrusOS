@@ -1,0 +1,320 @@
+/* ============================================================================
+   Zephyrus Crimson GTK4 Theme
+   Red-black ASUS industrial aesthetic
+   ============================================================================ */
+
+@define-color accent_color #ff0033;
+@define-color accent_bg_color #ff1a1a;
+@define-color accent_fg_color #ffffff;
+
+@define-color window_bg_color #0a0000;
+@define-color window_fg_color #ffffff;
+
+@define-color view_bg_color #140000;
+@define-color view_fg_color #e6e6e6;
+
+@define-color headerbar_bg_color #0d0d0d;
+@define-color headerbar_fg_color #ffffff;
+@define-color headerbar_border_color #2a0000;
+
+@define-color sidebar_bg_color #0d0d0d;
+@define-color sidebar_fg_color #e6e6e6;
+
+@define-color card_bg_color #140000;
+@define-color card_fg_color #ffffff;
+
+@define-color dialog_bg_color #0a0000;
+@define-color dialog_fg_color #ffffff;
+
+@define-color popover_bg_color rgba(18, 18, 18, 0.98);
+@define-color popover_fg_color #ffffff;
+
+@define-color borders #2a0000;
+@define-color borders_alpha rgba(42, 0, 0, 0.5);
+
+/* Selection */
+selection {
+    background-color: rgba(255, 0, 51, 0.3);
+    color: #ffffff;
+}
+
+/* Buttons */
+button {
+    background-color: #1a0000;
+    color: #e6e6e6;
+    border: 1px solid #2a0000;
+    border-radius: 6px;
+    padding: 6px 12px;
+}
+
+button:hover {
+    background-color: #2a0000;
+    border-color: #ff0033;
+    box-shadow: 0 0 8px rgba(255, 0, 51, 0.3);
+}
+
+button:active {
+    background-color: #ff0033;
+    color: #ffffff;
+}
+
+button.suggested-action {
+    background-color: #ff0033;
+    color: #ffffff;
+}
+
+button.destructive-action {
+    background-color: #ff1a1a;
+    color: #ffffff;
+}
+
+/* Entries */
+entry {
+    background-color: #0d0d0d;
+    color: #ffffff;
+    border: 1px solid #2a0000;
+    border-radius: 6px;
+    padding: 6px;
+}
+
+entry:focus {
+    border-color: #ff0033;
+    box-shadow: 0 0 4px rgba(255, 0, 51, 0.5);
+}
+
+/* Header bars */
+headerbar {
+    background-color: #0d0d0d;
+    color: #ffffff;
+    border-bottom: 1px solid #2a0000;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.1);
+}
+
+headerbar:backdrop {
+    background-color: #0a0000;
+}
+
+/* Notebooks/Tabs */
+notebook {
+    background-color: #0a0000;
+}
+
+notebook tab {
+    background-color: #140000;
+    color: #888888;
+    padding: 8px 16px;
+}
+
+notebook tab:checked {
+    background-color: #ff0033;
+    color: #ffffff;
+}
+
+/* Lists */
+list {
+    background-color: #0a0000;
+}
+
+list row {
+    color: #e6e6e6;
+    padding: 8px;
+}
+
+list row:hover {
+    background-color: rgba(255, 0, 51, 0.1);
+}
+
+list row:selected {
+    background-color: rgba(255, 0, 51, 0.2);
+    color: #ffffff;
+}
+
+/* Popovers */
+popover {
+    background-color: rgba(18, 18, 18, 0.98);
+    color: #ffffff;
+    border: 1px solid #2a0000;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.15);
+}
+
+/* Menus */
+menu {
+    background-color: rgba(18, 18, 18, 0.98);
+    color: #ffffff;
+    border: 1px solid #2a0000;
+    border-radius: 12px;
+    padding: 8px 0;
+}
+
+menuitem {
+    color: #e6e6e6;
+    padding: 6px 16px;
+}
+
+menuitem:hover {
+    background-color: rgba(255, 0, 51, 0.15);
+    color: #ffffff;
+}
+
+/* Scrollbars */
+scrollbar {
+    background-color: transparent;
+}
+
+scrollbar slider {
+    background-color: #3a0000;
+    border-radius: 4px;
+}
+
+scrollbar slider:hover {
+    background-color: #ff0033;
+}
+
+/* Switches */
+switch {
+    background-color: #2a0000;
+    border-radius: 12px;
+}
+
+switch:checked {
+    background-color: #ff0033;
+}
+
+switch slider {
+    background-color: #ffffff;
+    border-radius: 50%;
+}
+
+/* Checkboxes and Radio buttons */
+checkbutton radio,
+checkbutton check {
+    background-color: #1a0000;
+    border: 1px solid #2a0000;
+}
+
+checkbutton radio:checked,
+checkbutton check:checked {
+    background-color: #ff0033;
+    border-color: #ff0033;
+}
+
+/* Progress bars */
+progressbar trough {
+    background-color: #2a0000;
+    border-radius: 4px;
+}
+
+progressbar progress {
+    background-color: #ff0033;
+    border-radius: 4px;
+}
+
+/* Scales (sliders) */
+scale trough {
+    background-color: #2a0000;
+    border-radius: 4px;
+}
+
+scale highlight {
+    background-color: #ff0033;
+    border-radius: 4px;
+}
+
+scale slider {
+    background-color: #ffffff;
+    border: 2px solid #ff0033;
+    border-radius: 50%;
+}
+
+/* Tooltips */
+tooltip {
+    background-color: #0d0d0d;
+    color: #ffffff;
+    border: 1px solid #2a0000;
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+/* Links */
+link {
+    color: #ff4d6d;
+}
+
+link:hover {
+    color: #ff8099;
+}
+
+/* Spinbuttons */
+spinbutton {
+    background-color: #0d0d0d;
+    color: #ffffff;
+    border: 1px solid #2a0000;
+}
+
+spinbutton button {
+    background-color: #1a0000;
+}
+
+/* Trees */
+treeview {
+    background-color: #0a0000;
+    color: #e6e6e6;
+}
+
+treeview:selected {
+    background-color: rgba(255, 0, 51, 0.2);
+    color: #ffffff;
+}
+
+/* Separators */
+separator {
+    background-color: #2a0000;
+}
+
+/* Frames */
+frame {
+    border: 1px solid #2a0000;
+    border-radius: 8px;
+}
+
+frame > label {
+    color: #888888;
+}
+
+/* Info bars */
+infobar {
+    background-color: #1a0000;
+    border: 1px solid #2a0000;
+    border-radius: 6px;
+}
+
+infobar.info {
+    background-color: rgba(0, 100, 255, 0.1);
+    border-color: #0064ff;
+}
+
+infobar.warning {
+    background-color: rgba(255, 200, 0, 0.1);
+    border-color: #ffc800;
+}
+
+infobar.error {
+    background-color: rgba(255, 0, 0, 0.2);
+    border-color: #ff0000;
+}
+
+/* Window decorations */
+window {
+    background-color: #0a0000;
+    color: #ffffff;
+}
+
+window.csd {
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.1);
+}
+
+window.csd:backdrop {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}

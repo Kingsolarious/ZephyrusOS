@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=About This Zephyrus
+Comment=View system information - macOS Style
+Exec=/usr/bin/zephyrus-about
+Icon=computer
+Type=Application
+Categories=System;Settings;
+StartupNotify=true
+Keywords=about;system;rog;zephyrus;

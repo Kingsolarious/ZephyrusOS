@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=ROG Gaming Mode
+Comment=Switch to high performance gaming mode
+Exec=/home/solarious/Desktop/Zephyrus%20OS/gaming-mode-gui.sh gaming
+Type=Application
+Terminal=false
+Icon=applications-games
+Categories=Game;

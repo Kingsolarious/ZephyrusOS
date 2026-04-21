@@ -1,0 +1,42 @@
+# Zephyrus OS Justfile
+# Build and manage your custom Zephyrus OS image
+
+image_name := "zephyrus-os"
+image_vendor := "zephyrus-os-project"
+base_image := "ghcr.io/ublue-os/bazzite"
+base_image_name := "bazzite"
+image_flavor := "main"
+akmods_flavor := "main"
+fedora_major_version := "41"
+
+# Build the container image
+build target="ghcr.io/{{image_vendor}}/{{image_name}}:latest" tag="latest":
+    @echo "Building {{target}}"
+    podman build \
+        --build-arg IMAGE_NAME={{image_name}} \
+        --build-arg IMAGE_VENDOR={{image_vendor}} \
+        --build-arg BASE_IMAGE_NAME={{base_image_name}} \
+        --build-arg IMAGE_FLAVOR={{image_flavor}} \
+        --build-arg AKMODS_FLAVOR={{akmods_flavor}} \
+        --build-arg FEDORA_MAJOR_VERSION={{fedora_major_version}} \
+        -t {{target}} \
+        .
+
+# Push to registry
+push target="ghcr.io/{{image_vendor}}/{{image_name}}:latest":
+    @echo "Pushing {{target}}"
+    podman push {{target}}
+
+# Clean build artifacts
+clean:
+    @echo "Cleaning build artifacts"
+    podman system prune -f
+
+# Help command
+help:
+    @echo "Zephyrus OS Build Commands"
+    @echo "=========================="
+    @echo "just build    - Build the image locally"
+    @echo "just push     - Push the image to registry"
+    @echo "just clean    - Clean build artifacts"
+    @echo "just help     - Show this help"

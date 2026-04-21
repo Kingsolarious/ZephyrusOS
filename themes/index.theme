@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Zephyrus-Crimson
+Comment=ASUS ROG Zephyrus Crimson Edition theme
+Type=X-GNOME-Metatheme
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+Name=Zephyrus-Crimson
+GtkTheme=Zephyrus-Crimson
+IconTheme=Zephyrus-Crimson
+ShellTheme=Zephyrus-Crimson
+CursorTheme=Adwaita
+ButtonLayout=close,minimize,maximize:

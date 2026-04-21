@@ -1,0 +1,22 @@
+#!/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+LOGFILE=/var/log/zephyrus-sleep.log
+log() { echo "$(date '+%Y-%m-%d %H:%M:%S') $1" >> "$LOGFILE"; }
+
+case "$1" in
+    pre)
+        log "SUSPEND: $2"
+        [ -d /sys/bus/thunderbolt/devices ] && \
+            for dev in /sys/bus/thunderbolt/devices/*/power/wakeup; do
+                [ -f "$dev" ] && echo disabled > "$dev" 2>/dev/null && log "Disabled TBT wakeup: $dev" || true
+            done
+        sync
+        ;;
+    post)
+        log "RESUME: $2"
+        # Restore full OEM profile state via unified sync script
+        if command -v zephyrus-profile-sync &>/dev/null; then
+            zephyrus-profile-sync sync >> "$LOGFILE" 2>&1 && log "Restored full OEM profile state" || log "Profile restore failed"
+        fi
+        ;;
+esac

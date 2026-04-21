@@ -1,0 +1,18 @@
+[Unit]
+Description=Verify CS35L56 Speaker DSP Firmware for GU605MY
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c '\
+    if [ ! -f /usr/lib/firmware/cirrus/CS35L56_Rev3.11.16.wmfw ]; then \
+        echo "CS35L56 firmware missing"; exit 1; \
+    fi && \
+    if [ ! -f /usr/lib/firmware/cirrus/10431C63_240426_V0_A0-init.bin ]; then \
+        echo "CS35L56 init config missing"; exit 1; \
+    fi && \
+    echo "CS35L56 firmware verified"'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

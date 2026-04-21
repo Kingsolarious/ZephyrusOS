@@ -1,0 +1,12 @@
+[Unit]
+Description=ROG Maximum Monitoring Autostart
+After=graphical-session.target
+
+[Service]
+Type=forking
+ExecStart=/home/solarious/Desktop/Zephyrus%20OS/start-maximum-monitoring.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

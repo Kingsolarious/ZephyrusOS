@@ -1,0 +1,39 @@
+# Zephyrus Crimson OS - Default Settings
+# Applied to all users
+
+[org/gnome/shell]
+enabled-extensions=['zephyrus-globalmenu@solarious']
+favorite-apps=['firefox.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Console.desktop', 'zephyrus-about.desktop']
+
+[org/gnome/shell/extensions/user-theme]
+name='Zephyrus-Crimson'
+
+[org/gnome/desktop/interface]
+gtk-theme='Zephyrus-Crimson'
+icon-theme='Zephyrus-Crimson'
+cursor-theme='Adwaita'
+font-name='Roboto 11'
+monospace-font-name='Roboto Mono 10'
+
+[org/gnome/desktop/wm/preferences]
+titlebar-font='Roboto Bold 11'
+
+[org/gnome/desktop/background]
+picture-uri='file:///usr/share/backgrounds/zephyrus-crimson/default.jpg'
+picture-uri-dark='file:///usr/share/backgrounds/zephyrus-crimson/default-dark.jpg'
+
+[org/gnome/desktop/screensaver]
+picture-uri='file:///usr/share/backgrounds/zephyrus-crimson/lock.jpg'
+
+[org/gnome/settings-daemon/plugins/power]
+sleep-inactive-ac-timeout=0
+
+[org/gnome/settings-daemon/plugins/color]
+night-light-enabled=true
+night-light-temperature=4000
+
+[org/gnome/system/location]
+enabled=true
+
+[org/gnome/desktop/datetime]
+automatic-timezone=true

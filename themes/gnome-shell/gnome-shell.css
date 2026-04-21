@@ -1,0 +1,440 @@
+/* ============================================================================
+   Zephyrus Crimson - GNOME Shell Theme
+   Red-black ASUS industrial aesthetic
+   ============================================================================ */
+
+/* === STAGE === */
+stage {
+    font-family: 'Roboto', 'Cantarell', sans-serif;
+    font-size: 11pt;
+    color: #ffffff;
+}
+
+/* === TOP PANEL === */
+#panel {
+    background-color: rgba(10, 0, 0, 0.95);
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.15);
+    border-bottom: 1px solid #2a0000;
+    height: 32px;
+}
+
+#panel:overview {
+    background-color: transparent;
+    box-shadow: none;
+    border-bottom: none;
+}
+
+.panel-button {
+    color: #e6e6e6;
+    font-weight: 500;
+    padding: 0 12px;
+    spacing: 6px;
+    border-radius: 0;
+}
+
+.panel-button:hover {
+    color: #ffffff;
+    background-color: rgba(255, 0, 51, 0.15);
+    box-shadow: inset 0 -2px 0 #ff0033;
+}
+
+.panel-button:active,
+.panel-button:overview,
+.panel-button:focus {
+    color: #ffffff;
+    background-color: rgba(255, 0, 51, 0.25);
+    box-shadow: inset 0 -2px 0 #ff0033;
+}
+
+.panel-button.clock-display:hover {
+    box-shadow: none;
+}
+
+/* === PANEL MENUS === */
+.popup-menu-boxpointer {
+    background-color: rgba(18, 18, 18, 0.98);
+    border: 1px solid #2a0000;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.15);
+}
+
+.popup-menu {
+    min-width: 200px;
+}
+
+.popup-menu-content {
+    padding: 12px 0;
+}
+
+.popup-menu-item {
+    color: #e6e6e6;
+    padding: 8px 16px;
+    spacing: 12px;
+}
+
+.popup-menu-item:hover {
+    background-color: rgba(255, 0, 51, 0.15);
+    color: #ffffff;
+}
+
+.popup-menu-item:active {
+    background-color: rgba(255, 0, 51, 0.25);
+    color: #ffffff;
+}
+
+.popup-menu-item:insensitive {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.popup-separator-menu-item {
+    background-color: #2a0000;
+    height: 1px;
+    margin: 8px 12px;
+}
+
+.popup-sub-menu {
+    background-color: rgba(30, 30, 30, 0.98);
+    border-left: 2px solid #ff0033;
+    margin-left: 12px;
+    border-radius: 0 8px 8px 0;
+}
+
+.popup-submenu-menu-item:open {
+    background-color: rgba(255, 0, 51, 0.15);
+}
+
+/* === OVERVIEW === */
+#overview {
+    background-color: rgba(10, 0, 0, 0.95);
+}
+
+.overview-controls {
+    padding-bottom: 32px;
+}
+
+.workspace-thumbnails {
+    spacing: 12px;
+}
+
+.workspace-thumbnail {
+    background-color: rgba(20, 0, 0, 0.8);
+    border: 1px solid #2a0000;
+    border-radius: 8px;
+}
+
+.workspace-thumbnail:selected {
+    border-color: #ff0033;
+    box-shadow: 0 0 12px rgba(255, 0, 51, 0.4);
+}
+
+.window-picker {
+    -horizontal-spacing: 16px;
+    -vertical-spacing: 16px;
+}
+
+.window-clone {
+    border: 2px solid transparent;
+    border-radius: 12px;
+}
+
+.window-clone:hover {
+    border-color: #ff0033;
+    box-shadow: 0 0 16px rgba(255, 0, 51, 0.4);
+}
+
+.search-entry {
+    background-color: rgba(20, 0, 0, 0.9);
+    border: 1px solid #2a0000;
+    border-radius: 24px;
+    padding: 12px 20px;
+    color: #ffffff;
+    font-size: 14pt;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.search-entry:hover {
+    border-color: #ff0033;
+}
+
+.search-entry:focus {
+    border-color: #ff0033;
+    box-shadow: 0 0 16px rgba(255, 0, 51, 0.3);
+}
+
+.search-section-content {
+    background-color: rgba(18, 18, 18, 0.9);
+    border: 1px solid #2a0000;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+/* === DASH === */
+#dash {
+    background-color: rgba(18, 18, 18, 0.95);
+    border: 1px solid #2a0000;
+    border-radius: 24px;
+    padding: 12px;
+    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.1);
+}
+
+.dash-item-container {
+    padding: 4px;
+}
+
+.app-well-app {
+    padding: 8px;
+    border-radius: 16px;
+}
+
+.app-well-app:hover {
+    background-color: rgba(255, 0, 51, 0.15);
+}
+
+.app-well-app:active {
+    background-color: rgba(255, 0, 51, 0.25);
+}
+
+.app-well-app-running-dot {
+    background-color: #ff0033;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255, 0, 51, 0.8);
+}
+
+/* === NOTIFICATIONS === */
+.notification-banner {
+    background-color: rgba(18, 18, 18, 0.98);
+    border: 1px solid #2a0000;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.15);
+}
+
+.notification-banner:hover {
+    border-color: #ff0033;
+}
+
+/* === MODAL DIALOGS === */
+.modal-dialog {
+    background-color: rgba(18, 18, 18, 0.98);
+    border: 1px solid #2a0000;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.15);
+}
+
+.modal-dialog-linked-button {
+    background-color: #1a0000;
+    color: #e6e6e6;
+    border: 1px solid #2a0000;
+    border-radius: 8px;
+    padding: 12px 24px;
+}
+
+.modal-dialog-linked-button:hover {
+    background-color: rgba(255, 0, 51, 0.15);
+    border-color: #ff0033;
+}
+
+.modal-dialog-linked-button:focus {
+    background-color: rgba(255, 0, 51, 0.25);
+    border-color: #ff0033;
+}
+
+/* === OSD === */
+.osd-window {
+    background-color: rgba(18, 18, 18, 0.98);
+    border: 1px solid #2a0000;
+    border-radius: 24px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.15);
+}
+
+.osd-window .osd-progress {
+    background-color: #2a0000;
+    border-radius: 4px;
+}
+
+.osd-window .osd-progress-bar {
+    background-color: #ff0033;
+    border-radius: 4px;
+}
+
+/* === SWITCHER === */
+.switcher-popup {
+    padding: 16px;
+}
+
+.switcher-list {
+    background-color: rgba(18, 18, 18, 0.98);
+    border: 1px solid #2a0000;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.15);
+}
+
+.switcher-list .item-box {
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.switcher-list .item-box:selected {
+    background-color: rgba(255, 0, 51, 0.25);
+    border: 1px solid #ff0033;
+}
+
+/* === LOOKING GLASS === */
+#lookingGlassDialog {
+    background-color: rgba(10, 0, 0, 0.98);
+    border: 1px solid #2a0000;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+/* === SCREEN SHIELD === */
+#lockDialogGroup {
+    background: radial-gradient(
+        circle at center,
+        #0a0000 0%,
+        #140000 40%,
+        #000000 100%
+    );
+}
+
+/* === LOGIN === */
+.login-dialog {
+    background-color: transparent;
+}
+
+.login-dialog-user-list {
+    spacing: 12px;
+}
+
+.login-dialog-user-list-item {
+    background-color: rgba(20, 0, 0, 0.8);
+    border: 1px solid #2a0000;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.login-dialog-user-list-item:hover {
+    background-color: rgba(255, 0, 51, 0.15);
+    border-color: #ff0033;
+}
+
+.login-dialog-user-list-item:selected {
+    background-color: rgba(255, 0, 51, 0.25);
+    border-color: #ff0033;
+    box-shadow: 0 0 16px rgba(255, 0, 51, 0.3);
+}
+
+.login-dialog-prompt-entry {
+    background-color: rgba(10, 0, 0, 0.9);
+    border: 1px solid #2a0000;
+    border-radius: 8px;
+    padding: 12px;
+    color: #ffffff;
+}
+
+.login-dialog-prompt-entry:focus {
+    border-color: #ff0033;
+    box-shadow: 0 0 8px rgba(255, 0, 51, 0.4);
+}
+
+/* === WORKSPACE SWITCHER === */
+.workspace-switcher {
+    background: transparent;
+}
+
+.ws-switcher-box {
+    background-color: rgba(18, 18, 18, 0.95);
+    border: 1px solid #2a0000;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.ws-switcher-active-up,
+.ws-switcher-active-down {
+    background-color: rgba(255, 0, 51, 0.3);
+    border: 2px solid #ff0033;
+    border-radius: 8px;
+}
+
+/* === HOT CORNER RIPPLE === */
+.ripple-box {
+    background-color: rgba(255, 0, 51, 0.3);
+    border-radius: 50%;
+}
+
+/* === MISC === */
+.candidate-popup-boxpointer {
+    background-color: rgba(18, 18, 18, 0.98);
+    border: 1px solid #2a0000;
+    border-radius: 12px;
+}
+
+.candidate-popup-content {
+    padding: 8px;
+}
+
+/* === KEYBOARD === */
+.keyboard-key {
+    background-color: #1a0000;
+    color: #e6e6e6;
+    border: 1px solid #2a0000;
+    border-radius: 8px;
+    min-height: 40px;
+    min-width: 40px;
+    font-size: 14pt;
+    font-weight: bold;
+}
+
+.keyboard-key:hover {
+    background-color: #2a0000;
+    border-color: #ff0033;
+}
+
+.keyboard-key:active,
+.keyboard-key:checked {
+    background-color: #ff0033;
+    color: #ffffff;
+    border-color: #ff0033;
+}
+
+.keyboard-subkeys {
+    background-color: rgba(18, 18, 18, 0.98);
+    border: 1px solid #2a0000;
+    border-radius: 12px;
+    padding: 8px;
+}
+
+/* === MAGNIFIER === */
+.magnifier-zoom-region {
+    border: 2px solid #ff0033;
+}
+
+/* === HIDE SCREEN LOCK TOGGLE === */
+/* Hide the screen lock/privacy toggle in Quick Settings */
+.quick-toggle-menu .privacy-screen,
+.privacy-screen-quick-toggle,
+.quick-toggle.privacy-screen,
+#quickSettingsGrid .privacy-screen {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Hide screen recording/sharing indicators */
+.screen-recording-indicator,
+.screen-sharing-indicator {
+    display: none !important;
+}
+
+/* Hide any privacy-related icons in panel */
+#panel .privacy-indicator,
+.panel-button.privacy-indicator {
+    display: none !important;
+}

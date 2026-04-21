@@ -1,0 +1,166 @@
+/* Zephyrus Panel - Exact mockup styling */
+/* Crimson gradient background like the image */
+
+#zephyrusPanel {
+    /* Crimson to dark gradient */
+    background: linear-gradient(
+        180deg,
+        rgba(60, 10, 15, 0.98) 0%,
+        rgba(40, 5, 10, 0.98) 50%,
+        rgba(25, 3, 5, 0.98) 100%
+    );
+    border-bottom: 1px solid rgba(255, 0, 51, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    height: 28px;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+/* Left section */
+.zephyrus-panel-left {
+    spacing: 0;
+    padding-left: 12px;
+}
+
+/* ROG Logo */
+.zephyrus-rog-button {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-right: 2px;
+}
+
+.zephyrus-rog-button:hover {
+    background-color: rgba(255, 0, 51, 0.2);
+}
+
+.zephyrus-rog-icon {
+    width: 36px;
+    height: 20px;
+}
+
+.zephyrus-rog-fallback {
+    font-size: 18px;
+    color: #ff0033;
+}
+
+/* Brand Text "Rüe" */
+.zephyrus-brand-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    padding: 0 8px;
+    letter-spacing: -0.3px;
+}
+
+/* App Button (Finder) */
+.zephyrus-app-button {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 12px;
+    margin: 0 2px;
+}
+
+.zephyrus-app-button:hover {
+    background-color: rgba(255, 0, 51, 0.2);
+}
+
+.zephyrus-app-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* Menu Buttons (File, Edit, View, etc.) */
+.zephyrus-menu-button {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 10px;
+    margin: 0 1px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #ffffff;
+}
+
+.zephyrus-menu-button:hover {
+    background-color: rgba(255, 0, 51, 0.25);
+}
+
+.zephyrus-menu-button:active {
+    background-color: rgba(255, 0, 51, 0.4);
+}
+
+/* Right section */
+.zephyrus-panel-right {
+    spacing: 12px;
+    padding-right: 12px;
+}
+
+/* Status Icons (WiFi, Battery) */
+.zephyrus-status-icon {
+    color: #ffffff;
+    icon-size: 16px;
+}
+
+/* Clock */
+.zephyrus-clock-button {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 8px;
+}
+
+.zephyrus-clock-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.zephyrus-clock-full {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    font-feature-settings: "tnum";
+    letter-spacing: 0.3px;
+}
+
+/* Menu Popups - macOS style */
+.zephyrus-menubar-popup {
+    min-width: 240px;
+    background-color: rgba(40, 40, 40, 0.98);
+    border: 1px solid rgba(255, 0, 51, 0.2);
+    border-radius: 6px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    padding: 6px 0;
+    margin-top: 4px;
+}
+
+.zephyrus-menubar-popup .popup-menu-item {
+    padding: 4px 16px 4px 20px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #ffffff;
+    spacing: 12px;
+    min-height: 22px;
+}
+
+.zephyrus-menubar-popup .popup-menu-item:hover {
+    background-color: rgba(255, 0, 51, 0.8);
+}
+
+.zephyrus-menubar-popup .popup-separator-menu-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    height: 1px;
+    margin: 4px 12px;
+}
+
+/* Separator between logo and brand */
+.zephyrus-separator {
+    width: 8px;
+}
+
+.zephyrus-right-padding {
+    width: 4px;
+}

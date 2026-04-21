@@ -1,0 +1,211 @@
+# Zephyrus Crimson OS - Containerfile
+# Based on Bazzite (Fedora Silverblue/Kinoite)
+# Builds a complete custom OS image with ROG branding
+
+ARG BASE_IMAGE=ghcr.io/ublue-os/bazzite-gnome
+ARG BASE_TAG=stable
+
+FROM ${BASE_IMAGE}:${BASE_TAG}
+
+# Metadata
+LABEL org.opencontainers.image.title="Zephyrus Crimson OS"
+LABEL org.opencontainers.image.description="ASUS ROG Zephyrus branded Linux distribution based on Bazzite"
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.vendor="Solarious"
+
+# Build arguments
+ARG ZEPHYRUS_VERSION=1.0.0
+ARG ZEPHYRUS_BUILD_DATE
+
+# Set environment
+ENV ZEPHYRUS_VERSION=${ZEPHYRUS_VERSION}
+ENV ZEPHYRUS_BUILD_DATE=${ZEPHYRUS_BUILD_DATE}
+
+# =============================================================================
+# SYSTEM CONFIGURATION
+# =============================================================================
+
+# Copy system overlay files
+COPY overlays/etc/ /etc/
+COPY overlays/usr/ /usr/
+
+# =============================================================================
+# PACKAGE INSTALLATION
+# =============================================================================
+
+# Add ASUS Linux COPR repository
+RUN curl -Lo /etc/yum.repos.d/_copr_lukenukem-asus-linux.repo \
+    https://copr.fedorainfracloud.org/coprs/lukenukem/asus-linux/repo/fedora-41/lukenukem-asus-linux-fedora-41.repo && \
+    ostree container commit
+
+# Install Zephyrus Crimson packages and dependencies
+RUN rpm-ostree install \
+        libadwaita \
+        libadwaita-devel \
+        python3-gobject \
+        python3-pip \
+        plymouth \
+        plymouth-devel \
+        plymouth-theme-spinner \
+        pciutils \
+        lm_sensors \
+        edid-decode \
+        i2c-tools \
+        usbutils \
+        fastfetch \
+        htop \
+        btop \
+        google-roboto-fonts \
+        google-noto-sans-fonts \
+        google-noto-mono-fonts \
+        supergfxctl \
+        gamemode \
+        mangohud \
+        scx-scheds \
+        nvtop \
+        intel-gpu-tools \
+        zip \
+        unzip \
+        && \
+    rm -rf /var/*
+
+# =============================================================================
+# CUSTOM ASUSCTL BUILD
+# =============================================================================
+
+COPY custom-asusctl /tmp/asusctl-src
+RUN rpm-ostree install rust cargo gtk4-devel libadwaita-devel clang-devel && \
+    export CARGO_HOME=/tmp/cargo && \
+    mkdir -p $CARGO_HOME && \
+    cd /tmp/asusctl-src && \
+    make && \
+    make install && \
+    rm -rf /tmp/asusctl-src $CARGO_HOME && \
+    ostree container commit
+
+# =============================================================================
+# HARDWARE PROBING TOOLS
+# =============================================================================
+
+# Install dptfxtract (static binary from Intel release)
+RUN cd /tmp && curl -L -o dptfxtract.tar.gz https://github.com/intel/dptfxtract/archive/refs/tags/v1.4.3.tar.gz && \
+    tar xzf dptfxtract.tar.gz && \
+    cp dptfxtract-*/dptfxtract-static /usr/local/bin/dptfxtract && \
+    chmod +x /usr/local/bin/dptfxtract && \
+    rm -rf dptfxtract* && \
+    ostree container commit
+
+# Build and install ectool (coreboot EC utility)
+RUN cd /tmp && mkdir ectool && cd ectool && \
+    curl -L -o Makefile https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/Makefile && \
+    curl -L -o ec.c https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ec.c && \
+    curl -L -o ec.h https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ec.h && \
+    curl -L -o ectool.c https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ectool.c && \
+    make && make install && cd /tmp && rm -rf ectool && \
+    ostree container commit
+
+# =============================================================================
+# PYTHON PACKAGES
+# ===================================================================
+
+# Install Python packages for the About app
+RUN pip3 install --prefix=/usr psutil pygobject
+
+# =============================================================================
+# ZEPHYRUS CRIMSON EXTENSION
+# =============================================================================
+
+# Copy and install the GNOME Shell extension
+COPY extension/ /usr/share/gnome-shell/extensions/zephyrus-globalmenu@solarious/
+
+# Set proper permissions
+RUN chmod -R 755 /usr/share/gnome-shell/extensions/zephyrus-globalmenu@solarious/
+
+# =============================================================================
+# ZEPHYRUS ABOUT APP
+# =============================================================================
+
+# Copy the About application
+COPY zephyrus-about/ /usr/share/zephyrus-crimson/about/
+
+# Install desktop entry
+COPY zephyrus-about/zephyrus-about.desktop /usr/share/applications/
+
+# Create symlink for easy access
+RUN ln -sf /usr/share/zephyrus-crimson/about/about.py /usr/bin/zephyrus-about && \
+    chmod +x /usr/share/zephyrus-crimson/about/about.py
+
+# =============================================================================
+# THEME INSTALLATION
+# =============================================================================
+
+# Copy GTK and Shell themes
+COPY theme/ /usr/share/themes/Zephyrus-Crimson/
+
+# Copy icon theme
+COPY icons/ /usr/share/icons/Zephyrus-Crimson/
+
+# =============================================================================
+# GDM THEME
+# =============================================================================
+
+# Copy GDM branding assets
+COPY gdm/assets/ /usr/share/zephyrus-crimson/gdm/
+
+# =============================================================================
+# PLYMOUTH THEME
+# =============================================================================
+
+# Copy Plymouth theme
+COPY plymouth/ /usr/share/plymouth/themes/zephyrus-crimson/
+
+# Set as default theme
+RUN ln -sf /usr/share/plymouth/themes/zephyrus-crimson/zephyrus-crimson.plymouth \
+    /usr/share/plymouth/themes/default.plymouth || true
+
+# =============================================================================
+# SYSTEM CONFIGURATION
+# =============================================================================
+
+# Copy GDM configuration
+COPY overlays/gdm/ /etc/gdm/
+
+# Set up system defaults
+RUN systemctl enable zephyrus-crimson-setup.service || true && \
+    systemctl enable asusd || true && \
+    systemctl enable supergfxd || true && \
+    systemctl enable zephyrus-gu605my-tune || true && \
+    systemctl enable zephyrus-profile-watch || true && \
+    systemctl enable zephyrus-gaming-qos || true && \
+    systemctl enable zephyrus-probe-hardware || true && \
+    systemctl disable tuned || true && \
+    systemctl disable nvidia-power-limit || true && \
+    systemctl disable rapl-tune || true && \
+    systemctl disable zephyrus-gpu-profile-sync || true
+
+# =============================================================================
+# CLEANUP
+# =============================================================================
+
+# Clean up and finalize
+RUN rm -rf /tmp/* /var/tmp/* && \
+    ostree container commit
+
+# =============================================================================
+# METADATA
+# =============================================================================
+
+# Create version file
+RUN echo "Zephyrus Crimson OS ${ZEPHYRUS_VERSION}" > /etc/zephyrus-release && \
+    echo "BUILD_DATE=${ZEPHYRUS_BUILD_DATE}" >> /etc/zephyrus-release && \
+    echo "BASE_IMAGE=${BASE_IMAGE}:${BASE_TAG}" >> /etc/zephyrus-release
+
+# Set hostname default
+RUN echo "zephyrus-crimson" > /etc/hostname
+
+# =============================================================================
+# DONE
+# =============================================================================
+
+# Final commit for bootc
+RUN ostree container commit

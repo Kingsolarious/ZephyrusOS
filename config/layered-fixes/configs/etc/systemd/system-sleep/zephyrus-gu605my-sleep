@@ -1,0 +1,28 @@
+#!/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+LOGFILE=/var/log/zephyrus-sleep.log
+log() { echo "$(date '+%Y-%m-%d %H:%M:%S') $1" >> "$LOGFILE"; }
+
+case "$1" in
+    pre)
+        log "SUSPEND: $2"
+        [ -d /sys/bus/thunderbolt/devices ] && \
+            for dev in /sys/bus/thunderbolt/devices/*/power/wakeup; do
+                [ -f "$dev" ] && echo disabled > "$dev" 2>/dev/null && log "Disabled TBT wakeup: $dev" || true
+            done
+        command -v nvidia-smi &>/dev/null && nvidia-smi &>/dev/null || true
+        sync
+        ;;
+    post)
+        log "RESUME: $2"
+        if command -v nvidia-smi &>/dev/null; then
+            GPU_PL=115
+            [ -f /etc/zephyrus-crimson/gpu-power-limit ] && GPU_PL=$(cat /etc/zephyrus-crimson/gpu-power-limit)
+            nvidia-smi -pl "$GPU_PL" >> "$LOGFILE" 2>&1 && log "Restored GPU PL: ${GPU_PL}W" || log "GPU PL restore failed"
+        fi
+        if command -v asusctl &>/dev/null; then
+            CURRENT=$(asusctl profile get 2>/dev/null | grep -oP 'Active profile: \K\w+' || echo "performance")
+            asusctl profile -P "$CURRENT" >> "$LOGFILE" 2>&1 && log "Restored ASUS profile: $CURRENT" || log "ASUS profile restore failed"
+        fi
+        ;;
+esac

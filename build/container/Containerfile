@@ -1,0 +1,26 @@
+# Zephyrus OS - Custom Bazzite for ASUS ROG Zephyrus
+FROM ghcr.io/ublue-os/bazzite:stable
+
+LABEL name="zephyrus-os"
+LABEL pretty_name="Zephyrus OS"
+LABEL vendor="Zephyrus OS Project"
+LABEL summary="Custom Bazzite image optimized for ASUS ROG Zephyrus laptops"
+
+# Install ASUS Linux tools from COPR
+RUN rpm-ostree install \
+    asusctl \
+    asusctl-rog-gui \
+    && rpm-ostree cleanup -p
+
+# Enable asusd service
+RUN systemctl enable asusd
+
+# Create Zephyrus OS branding
+RUN echo "ZEPHYRUS_OS=true" > /etc/zephyrus-release
+
+# Set default profile script
+RUN echo '#!/bin/bash\n# Zephyrus OS Default Settings\nasusctl profile -P balanced 2>/dev/null || true' > /etc/profile.d/zephyrus.sh && \
+    chmod +x /etc/profile.d/zephyrus.sh
+
+# Install recommended tools (optional - commented out for user choice)
+# RUN flatpak install -y flathub io.missioncenter.MissionCenter

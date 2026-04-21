@@ -1,0 +1,169 @@
+# Zephyrus Crimson OS - KDE PLASMA EDITION
+# Based on Bazzite (Fedora Kinoite - KDE version)
+
+ARG BASE_IMAGE=ghcr.io/ublue-os/bazzite
+ARG BASE_TAG=stable
+
+FROM ${BASE_IMAGE}:${BASE_TAG}
+
+# Metadata
+LABEL org.opencontainers.image.title="Zephyrus Crimson OS - KDE Edition"
+LABEL org.opencontainers.image.description="ASUS ROG Zephyrus branded Linux distribution based on Bazzite KDE"
+LABEL org.opencontainers.image.version="2.0.0-kde"
+LABEL org.opencontainers.image.vendor="Solarious"
+
+# Build arguments
+ARG ZEPHYRUS_VERSION=2.0.0-kde
+ARG ZEPHYRUS_BUILD_DATE
+
+# Set environment
+ENV ZEPHYRUS_VERSION=${ZEPHYRUS_VERSION}
+ENV ZEPHYRUS_BUILD_DATE=${ZEPHYRUS_BUILD_DATE}
+
+# =============================================================================
+# SYSTEM CONFIGURATION
+# =============================================================================
+
+# =============================================================================
+# PACKAGE INSTALLATION
+# =============================================================================
+
+RUN rpm-ostree install \
+        sddm \
+        sddm-kcm \
+        plymouth \
+        plymouth-theme-spinner \
+        pciutils \
+        lm_sensors \
+        usbutils \
+        fastfetch \
+        htop \
+        btop \
+        google-roboto-fonts \
+        google-noto-sans-fonts \
+        google-noto-mono-fonts \
+        gamemode \
+        mangohud \
+        scx-scheds \
+        nvtop \
+        intel-gpu-tools \
+        zip \
+        unzip && \
+    ostree container commit
+
+# =============================================================================
+# CUSTOM ASUSCTL BUILD
+# =============================================================================
+
+COPY custom-asusctl /tmp/asusctl-src
+RUN rpm-ostree install rust cargo gtk4-devel libadwaita-1-devel && \
+    cd /tmp/asusctl-src && \
+    make && \
+    make install && \
+    rm -rf /tmp/asusctl-src && \
+    ostree container commit
+
+# =============================================================================
+# HARDWARE PROBING TOOLS
+# =============================================================================
+
+# Install dptfxtract (static binary from Intel release)
+RUN cd /tmp && curl -L -o dptfxtract.tar.gz https://github.com/intel/dptfxtract/archive/refs/tags/v1.4.3.tar.gz && \
+    tar xzf dptfxtract.tar.gz && \
+    cp dptfxtract-*/dptfxtract-static /usr/local/bin/dptfxtract && \
+    chmod +x /usr/local/bin/dptfxtract && \
+    rm -rf dptfxtract* && \
+    ostree container commit
+
+# Build and install ectool (coreboot EC utility)
+RUN cd /tmp && mkdir ectool && cd ectool && \
+    curl -L -o Makefile https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/Makefile && \
+    curl -L -o ec.c https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ec.c && \
+    curl -L -o ec.h https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ec.h && \
+    curl -L -o ectool.c https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ectool.c && \
+    make && make install && cd /tmp && rm -rf ectool && \
+    ostree container commit
+
+# =============================================================================
+# PYTHON PACKAGES
+# =============================================================================
+
+RUN pip3 install --prefix=/usr psutil pygobject || true
+
+# =============================================================================
+# ZEPHYRUS ABOUT APP
+# =============================================================================
+
+# Copy the About application
+COPY zephyrus-about/ /usr/share/zephyrus-crimson/about/
+
+# Install desktop entry
+RUN cp /usr/share/zephyrus-crimson/about/zephyrus-about.desktop /usr/share/applications/ 2>/dev/null || true
+
+# Create symlink for easy access
+RUN ln -sf /usr/share/zephyrus-crimson/about/about.py /usr/bin/zephyrus-about 2>/dev/null || true && \
+    chmod +x /usr/share/zephyrus-crimson/about/about.py 2>/dev/null || true
+
+# =============================================================================
+# ZEPHYRUS DOCK (WORKING VERSION)
+# =============================================================================
+
+# Copy the working dock
+COPY zephyrus-desktop/dock/zephyrus-dock-working.py /usr/share/zephyrus-crimson/dock/
+RUN chmod +x /usr/share/zephyrus-crimson/dock/zephyrus-dock-working.py && \
+    ln -sf /usr/share/zephyrus-crimson/dock/zephyrus-dock-working.py /usr/bin/zephyrus-dock 2>/dev/null || true
+
+# =============================================================================
+# THEME INSTALLATION
+# =============================================================================
+
+# Copy GTK themes
+COPY theme/ /usr/share/themes/Zephyrus-Crimson/
+
+# Icons can be added later - skipping empty directory
+
+# =============================================================================
+# PLYMOUTH THEME
+# =============================================================================
+
+# Copy Plymouth theme
+COPY plymouth/ /usr/share/plymouth/themes/zephyrus-crimson/
+
+# Set as default theme
+RUN ln -sf /usr/share/plymouth/themes/zephyrus-crimson/zephyrus-crimson.plymouth \
+    /usr/share/plymouth/themes/default.plymouth 2>/dev/null || true
+
+# =============================================================================
+# SYSTEM CONFIGURATION
+# =============================================================================
+
+# Copy system overlays
+COPY os-build/overlays/etc/ /etc/
+COPY os-build/overlays/usr/ /usr/
+
+# Enable services
+RUN systemctl enable sddm 2>/dev/null || true && \
+    systemctl enable asusd 2>/dev/null || true && \
+    systemctl enable nvidia-power-limit 2>/dev/null || true && \
+    systemctl enable rapl-tune 2>/dev/null || true && \
+    systemctl enable zephyrus-gu605my-tune 2>/dev/null || true && \
+    systemctl enable scx 2>/dev/null || true && \
+    systemctl enable zephyrus-probe-hardware 2>/dev/null || true
+
+# =============================================================================
+# CLEANUP
+# =============================================================================
+
+RUN ostree container commit
+
+# =============================================================================
+# METADATA
+# =============================================================================
+
+RUN echo "Zephyrus Crimson OS ${ZEPHYRUS_VERSION}" > /etc/zephyrus-release && \
+    echo "BUILD_DATE=${ZEPHYRUS_BUILD_DATE}" >> /etc/zephyrus-release && \
+    echo "DESKTOP_ENVIRONMENT=KDE Plasma 6" >> /etc/zephyrus-release && \
+    echo "zephyrus-crimson" > /etc/hostname
+
+# Final commit
+RUN ostree container commit

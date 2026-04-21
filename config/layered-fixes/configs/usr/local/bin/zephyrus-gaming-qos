@@ -1,0 +1,36 @@
+#!/bin/bash
+# Gaming QoS - HTB traffic shaping for low-latency gaming
+# Run as root
+
+IFACE="${GAMING_IFACE:-$(ip route | grep default | awk '{print $5}' | head -n1)}"
+GAMING_PORTS="3074,3478,3480,4379,4380,27000-27050"
+RATE="${GAMING_RATE:-1000mbit}"
+
+case "${1:-start}" in
+    start)
+        echo "Applying gaming QoS on $IFACE..."
+        tc qdisc del dev "$IFACE" root 2>/dev/null || true
+        tc qdisc add dev "$IFACE" root handle 1: htb default 12
+        tc class add dev "$IFACE" parent 1: classid 1:1 htb rate "$RATE" ceil "$RATE"
+        tc class add dev "$IFACE" parent 1:1 classid 1:10 htb rate "$RATE" ceil "$RATE" prio 1
+        tc class add dev "$IFACE" parent 1:1 classid 1:12 htb rate "$RATE" ceil "$RATE" prio 2
+        tc filter add dev "$IFACE" protocol ip parent 1:0 prio 1 u32 \
+            match ip dport "$GAMING_PORTS" 0xffff flowid 1:10
+        tc filter add dev "$IFACE" protocol ip parent 1:0 prio 1 u32 \
+            match ip sport "$GAMING_PORTS" 0xffff flowid 1:10
+        echo "Gaming QoS active on $IFACE"
+        ;;
+    stop)
+        echo "Removing gaming QoS from $IFACE..."
+        tc qdisc del dev "$IFACE" root 2>/dev/null || true
+        echo "Gaming QoS removed"
+        ;;
+    status)
+        tc qdisc show dev "$IFACE"
+        tc class show dev "$IFACE"
+        ;;
+    *)
+        echo "Usage: $0 [start|stop|status]"
+        exit 1
+        ;;
+esac

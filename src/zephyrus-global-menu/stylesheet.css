@@ -1,0 +1,42 @@
+/* Zephyrus Global Menu Styles */
+
+.zephyrus-global-menu {
+    spacing: 4px;
+    margin: 0 8px;
+}
+
+.zephyrus-menu-item {
+    padding: 4px 12px;
+    margin: 0 2px;
+    border-radius: 4px;
+    font-weight: 500;
+    color: #ffffff;
+    background: transparent;
+}
+
+.zephyrus-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.zephyrus-menu-item:active {
+    background-color: rgba(255, 0, 51, 0.8);
+}
+
+.zephyrus-menu-placeholder {
+    width: 200px;
+}
+
+/* Submenu popup */
+.zephyrus-submenu {
+    min-width: 200px;
+    padding: 8px 0;
+}
+
+.zephyrus-submenu-item {
+    padding: 8px 16px;
+    color: #ffffff;
+}
+
+.zephyrus-submenu-item:hover {
+    background-color: rgba(255, 0, 51, 0.8);
+}

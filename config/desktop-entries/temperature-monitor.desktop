@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=ROG Temperature Monitor
+Comment=Monitor system temperatures
+Exec=/home/solarious/Desktop/Zephyrus%20OS/quick-status.sh
+Type=Application
+Terminal=true
+Icon=utilities-system-monitor
+Categories=System;Monitor;

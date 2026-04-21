@@ -1,0 +1,252 @@
+# Zephyrus OS - Official Treefile
+# Complete OSTree-based Linux distribution for ASUS ROG laptops
+
+ref: zephyrus-os/41/x86_64/stable
+
+# Pure Fedora Silverblue base (no Bazzite)
+include: fedora-silverblue-41.yaml
+
+# Zephyrus OS Release Information
+releasever: "41"
+automatic-version-prefix: "41"
+mutate-os-release: "41"
+
+# Remove Bazzite and generic Fedora branding
+exclude-packages:
+  - bazzite
+  - bazzite-gnome-config
+  - bazzite-hardware-setup
+  - fedora-logos
+  - fedora-release
+  - fedora-release-common
+  - fedora-release-silverblue
+  - fedora-release-workstation
+  - generic-logos
+  - generic-release
+  - jupiter-sd-mounting-btrfs
+  - powerbuttond
+  - sdgyrodsu
+  - steamdeck-kde-presets
+
+# Zephyrus OS Core Packages
+packages:
+  # Zephyrus OS branding (custom)
+  - zephyrus-os-release
+  - zephyrus-os-logos
+  - zephyrus-os-backgrounds
+  
+  # Zephyrus OS GNOME Shell (custom build)
+  - gnome-shell-zephyrus
+  
+  # ASUS/ROG Hardware Support
+  - asusctl-zephyrus
+  - supergfxctl
+  - asusd-zephyrus
+  
+  # Base GNOME
+  - gnome-session
+  - gnome-settings-daemon
+  - gnome-control-center
+  - gnome-software
+  
+  # Zephyrus OS Extensions
+  - gnome-shell-extension-zephyrus-globalmenu
+  
+  # Core utilities
+  - just
+  - distrobox
+  - toolbox
+  - podman
+  - flatpak
+  
+  # Hardware support
+  - linux-firmware
+  - mesa-dri-drivers
+  - mesa-vulkan-drivers
+  - vulkan-loader
+  
+  # Zephyrus OS Fonts
+  - google-roboto-fonts
+  - jetbrains-mono-fonts
+  
+  # Gaming/Performance
+  - gamemode
+  - gamescope
+  - mangohud
+
+# Replace with Zephyrus OS custom builds
+override-replace:
+  - gnome-shell-zephyrus
+  - asusctl-zephyrus
+
+# Zephyrus OS Repositories
+repos:
+  - fedora
+  - fedora-updates
+  - rpmfusion-free
+  - rpmfusion-free-updates
+  - rpmfusion-nonfree
+  - rpmfusion-nonfree-updates
+  - lukenukem-asus-linux
+  - zephyrus-os-local
+
+# Zephyrus OS Post-Processing
+postprocess:
+  # Remove all non-Zephyrus branding
+  - |
+    #!/bin/bash
+    # Clean up any remaining Fedora/Bazzite branding
+    rm -f /etc/profile.d/bazzite-*.sh
+    rm -f /etc/yum.repos.d/bazzite-*.repo
+    rm -rf /usr/share/bazzite
+    rm -f /usr/lib/os-release.bazzite
+    rm -f /etc/fedora-release
+    rm -rf /usr/share/fedora-logos
+    
+  # Zephyrus OS os-release
+  - |
+    #!/bin/bash
+    cat > /usr/lib/os-release << 'EOF'
+    NAME="Zephyrus OS"
+    VERSION="41 (ROG Edition)"
+    ID=zephyrus-os
+    ID_LIKE=fedora
+    VERSION_ID=41
+    VERSION_CODENAME="Crimson"
+    PLATFORM_ID="platform:zephyrus-os-41"
+    PRETTY_NAME="Zephyrus OS 41 (ROG Edition)"
+    ANSI_COLOR="0;31"
+    LOGO=zephyrus-os-logo
+    CPE_NAME="cpe:/o:zephyrus-os:zephyrus-os:41"
+    HOME_URL="https://zephyrus-os.org"
+    DOCUMENTATION_URL="https://docs.zephyrus-os.org"
+    SUPPORT_URL="https://support.zephyrus-os.org"
+    BUG_REPORT_URL="https://issues.zephyrus-os.org"
+    PRIVACY_POLICY_URL="https://zephyrus-os.org/privacy"
+    ZEPHYRUS_OS_RELEASE=41
+    ZEPHYRUS_OS_EDITION=ROG
+    ZEPHYRUS_OS_VARIANT=Crimson
+    EOF
+    
+    # Create release files
+    echo "Zephyrus OS release 41 (ROG Edition)" > /etc/zephyrus-os-release
+    echo "41" > /etc/zephyrus-os-version
+    echo "ROG" > /etc/zephyrus-os-variant
+    
+  # Zephyrus OS issue/motd
+  - |
+    #!/bin/bash
+    cat > /etc/issue << 'EOF'
+    
+    ███████╗███████╗██████╗ ██╗  ██╗██╗   ██╗██████╗ ██╗   ██╗███████╗     ██████╗ ███████╗
+    ╚══███╔╝██╔════╝██╔══██╗██║  ██║██║   ██║██╔══██╗██║   ██║██╔════╝    ██╔═══██╗██╔════╝
+      ███╔╝ █████╗  ██████╔╝███████║██║   ██║██████╔╝██║   ██║███████╗    ██║   ██║███████╗
+     ███╔╝  ██╔══╝  ██╔═══╝ ██╔══██║██║   ██║██╔══██╗██║   ██║╚════██║    ██║   ██║╚════██║
+    ███████╗███████╗██║     ██║  ██║╚██████╔╝██║  ██║╚██████╔╝███████║    ╚██████╔╝███████║
+    ╚══════╝╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝     ╚═════╝ ╚══════╝
+    
+    Welcome to Zephyrus OS - The Ultimate ROG Linux Experience
+    
+    EOF
+    
+    cat > /etc/motd << 'EOF'
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║                 Welcome to Zephyrus OS                        ║
+    ║                                                               ║
+    ║  The ultimate Linux distribution for ASUS ROG laptops        ║
+    ║  Optimized • Customized • Gaming Ready                        ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    EOF
+    
+  # Zephyrus OS GNOME defaults
+  - |
+    #!/bin/bash
+    mkdir -p /etc/dconf/db/local.d
+    
+    cat > /etc/dconf/db/local.d/00-zephyrus-os-branding << 'EOF'
+    [org/gnome/shell/extensions/user-theme]
+    name='Zephyrus-Crimson'
+    
+    [org/gnome/desktop/interface]
+    gtk-theme='Zephyrus-Crimson'
+    icon-theme='Zephyrus-Icons'
+    cursor-theme='Zephyrus-Cursor'
+    font-name='Roboto 11'
+    monospace-font-name='JetBrains Mono 10'
+    
+    [org/gnome/shell]
+    enabled-extensions=['zephyrus-globalmenu@solarious']
+    favorite-apps=['zephyrus-control-center.desktop', 'firefox.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Console.desktop']
+    
+    [org/gnome/desktop/background]
+    picture-uri='file:///usr/share/backgrounds/zephyrus/zephyrus-default.jpg'
+    picture-uri-dark='file:///usr/share/backgrounds/zephyrus/zephyrus-dark.jpg'
+    
+    [org/gnome/desktop/screensaver]
+    lock-enabled=false
+    
+    [org/gnome/settings-daemon/plugins/power]
+    sleep-inactive-ac-timeout=0
+    sleep-inactive-battery-timeout=0
+    EOF
+    
+    # Lock Zephyrus theme
+    mkdir -p /etc/dconf/db/local.d/locks
+    cat > /etc/dconf/db/local.d/locks/zephyrus-branding << 'EOF'
+    /org/gnome/shell/extensions/user-theme/name
+    EOF
+    
+    dconf update
+    
+  # Zephyrus OS ASUS configuration
+  - |
+    #!/bin/bash
+    mkdir -p /etc/asusd
+    
+    cat > /etc/asusd/asusd.conf << 'EOF'
+    {
+      "boot_sound": false,
+      "change_brightness": true,
+      "charge_control_end_threshold": 80,
+      "charge_control_start_threshold": 60,
+      "disable_nvidia_powerd_on_battery": true,
+      "mini_led_mode": false,
+      "panel_od": true,
+      "throttle_policy": "Performance",
+      "zephyrus_os": true,
+      "zephyrus_theme": "crimson"
+    }
+    EOF
+    
+  # Create Zephyrus OS directories
+  - |
+    #!/bin/bash
+    mkdir -p /usr/share/zephyrus-os
+    mkdir -p /etc/zephyrus-os
+    mkdir -p /var/lib/zephyrus-os
+    
+    # Create version marker
+    echo "ZEPHYRUS_OS_41_ROG_CRIMSON" > /usr/share/zephyrus-os/version
+
+# Zephyrus OS initramfs configuration
+initramfs-args:
+  - --add=asus-wmi
+  - --add=asus-nb-wmi
+  - --add=hid-asus
+  - --add=nvidia-drm
+  - --add=amdgpu
+  - --add=i915
+
+# Zephyrus OS recommends
+recommends:
+  - zephyrus-firstboot
+  - zephyrus-welcome
+
+# Optimal for ROG laptops
+tmp-is-dir: true
+
+# Boot location
+boot-location: new
+
+# SELinux
+selinux: true

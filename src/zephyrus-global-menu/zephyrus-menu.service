@@ -1,0 +1,12 @@
+[Unit]
+Description=Zephyrus Global Menu Service
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/zephyrus-menu-service
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,8 @@
+{
+    "name": "Zephyrus Global Menu",
+    "description": "Custom global menu system for Zephyrus OS",
+    "uuid": "zephyrus-global-menu@zephyrus-os",
+    "shell-version": ["45", "46", "47", "48", "49"],
+    "version": 1,
+    "url": "https://zephyrus-os.org"
+}

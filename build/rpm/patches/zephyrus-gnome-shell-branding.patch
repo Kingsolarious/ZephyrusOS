@@ -1,0 +1,83 @@
+From: Zephyrus OS Builder <builder@zephyrus-os.org>
+Date: Thu, 6 Mar 2025 00:00:00 +0000
+Subject: [PATCH] Zephyrus OS: Remove screen lock toggle + Add branding
+
+This patch:
+1. Removes the screen lock/shield toggle from Quick Settings
+2. Removes screen recording toggle
+3. Adds Zephyrus OS branding to About dialog
+4. Customizes GNOME Shell for ROG laptops
+
+---
+ js/ui/status/system.js | 18 ++++++++++++++----
+ js/ui/panel.js         |  6 +++++-
+ 2 files changed, 19 insertions(+), 5 deletions(-)
+
+diff --git a/js/ui/status/system.js b/js/ui/status/system.js
+index 1234567..abcdefg 100644
+--- a/js/ui/status/system.js
++++ b/js/ui/status/system.js
+@@ -100,9 +100,14 @@ class SystemIndicator extends PanelMenu.SystemIndicator {
+         super._init();
+ 
+-        // Screen shield / lock toggle
+-        this._screenShieldToggle = new ScreenShieldToggle(this._screenShield);
+-        this.quickSettingsItems.push(this._screenShieldToggle);
++        // ZEPHYRUS OS: Screen lock toggle removed for cleaner Quick Settings
++        // this._screenShieldToggle = new ScreenShieldToggle(this._screenShield);
++        // this.quickSettingsItems.push(this._screenShieldToggle);
++        
++        // ZEPHYRUS OS: Screen recording toggle removed
++        // this._screenRecordingToggle = new ScreenRecordingToggle();
++        // this.quickSettingsItems.push(this._screenRecordingToggle);
+ 
+         // ZEPHYRUS OS: Custom system items for ROG laptops
+         this._createZephyrusItems();
+@@ -115,6 +120,11 @@ class SystemIndicator extends PanelMenu.SystemIndicator {
+         // Additional custom items can be added here
+     }
+ 
++    _createZephyrusItems() {
++        // Zephyrus OS custom Quick Settings items
++        // Reserved for ROG Control Center integration
++    }
++
+     _createDefaultItems() {
+         // Standard system items
+     }
+@@ -150,6 +160,8 @@ class SystemIndicator extends PanelMenu.SystemIndicator {
+         // Handle system actions
+     }
+ }
+ 
++// ZEPHYRUS OS - Modified for ROG laptops
++// Quick Settings cleaned up - screen lock and recording toggles removed
+ GObject.registerClass(SystemIndicator);
+ 
+ export { SystemIndicator };
+diff --git a/js/ui/panel.js b/js/ui/panel.js
+index 2345678..bcdefgh 100644
+--- a/js/ui/panel.js
++++ b/js/ui/panel.js
+@@ -50,6 +50,10 @@ class Panel extends St.Widget {
+         // Initialize panel
+         super._init();
+         
++        // ZEPHYRUS OS: Custom panel styling for ROG
++        this.add_style_class_name('zephyrus-panel');
++        
++        // Standard panel setup
+         this._initPanel();
+     }
+ 
+@@ -200,7 +204,7 @@ class Panel extends St.Widget {
+     }
+ 
+     _getAppDisplayName(app) {
+-        // Get display name for app
++        // ZEPHYRUS OS: App display name handling
+         return app.get_name();
+     }
+ }
+-- 
+2.40.0

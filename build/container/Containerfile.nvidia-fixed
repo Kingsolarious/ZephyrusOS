@@ -1,0 +1,273 @@
+# Zephyrus OS - Custom Bazzite for ASUS ROG Zephyrus (WITH NVIDIA + GUI FIXES + KDE THEME)
+
+FROM ghcr.io/ublue-os/bazzite-nvidia:stable
+
+LABEL name="zephyrus-os-nvidia"
+LABEL pretty_name="Zephyrus OS (NVIDIA Edition)"
+LABEL vendor="Zephyrus OS Project"
+LABEL summary="Custom Bazzite with NVIDIA support, working ROG GUI, and macOS-style KDE dock"
+
+# Remove conflicting face images
+RUN rm -f /usr/share/pixmaps/faces/*.jpg /usr/share/pixmaps/faces/*.png 2>/dev/null || true
+
+# Install ASUS Linux tools
+RUN curl -Lo /etc/yum.repos.d/_copr_lukenukem-asus-linux.repo \
+    https://copr.fedorainfracloud.org/coprs/lukenukem/asus-linux/repo/fedora-41/lukenukem-asus-linux-fedora-41.repo && \
+    rpm-ostree install \
+    asusctl \
+    asusctl-rog-gui \
+    supergfxctl && \
+    rm -f /etc/yum.repos.d/_copr_lukenukem-asus-linux.repo && \
+    rpm-ostree cleanup -m && \
+    ostree container commit
+
+# Enable supergfxd
+RUN systemctl enable supergfxd && \
+    ostree container commit
+
+# Install icons
+COPY icons/rog-control-center.svg /usr/share/icons/hicolor/scalable/apps/rog-control-center.svg
+COPY icons/rog-control-center.png /usr/share/icons/hicolor/512x512/apps/rog-control-center.png
+
+# Create ROG Control Center wrapper script
+RUN cat > /usr/bin/rog-control-center-fixed << 'ROGWRAPPER'
+#!/bin/bash
+TMPDIR=$(mktemp -d)
+mkdir -p "$TMPDIR/usr/share/icons/hicolor/512x512/apps"
+cp -r /usr/share/icons/* "$TMPDIR/usr/share/icons/" 2>/dev/null || true
+if [ ! -f "$TMPDIR/usr/share/icons/hicolor/512x512/apps/rog-control-center.png" ]; then
+    cp /usr/share/icons/hicolor/scalable/apps/rog-control-center.svg "$TMPDIR/usr/share/icons/hicolor/512x512/apps/rog-control-center.png" 2>/dev/null || true
+fi
+bwrap \
+    --ro-bind /usr /usr --ro-bind /etc /etc --ro-bind /bin /bin --ro-bind /sbin /sbin \
+    --ro-bind /lib /lib --ro-bind /lib64 /lib64 \
+    --bind "$TMPDIR/usr/share/icons" /usr/share/icons \
+    --bind /var/home /var/home --bind /tmp /tmp --bind /var /var --bind /run /run \
+    --dev /dev --proc /proc \
+    /usr/bin/rog-control-center "$@" 2>&1 | grep -v "Version mismatch"
+rm -rf "$TMPDIR"
+ROGWRAPPER
+RUN chmod +x /usr/bin/rog-control-center-fixed
+
+# Update icon cache
+RUN gtk-update-icon-cache /usr/share/icons/hicolor || true
+
+# Create desktop entry
+RUN cat > /usr/share/applications/rog-control-center.desktop << 'DESKTOPENTRY'
+[Desktop Entry]
+Name=ROG Control Center
+Comment=ASUS ROG laptop control panel
+Exec=/usr/bin/rog-control-center-fixed
+Icon=rog-control-center
+Type=Application
+Categories=System;Settings;
+Terminal=false
+DESKTOPENTRY
+
+RUN ostree container commit
+
+# =============================================================================
+# CONFIGURE KDE MACOS-STYLE DOCK (Translucent + Rounded)
+# =============================================================================
+
+# Create default KDE panel configuration with macOS-style dock
+RUN mkdir -p /usr/share/plasma/shells/org.kde.plasma.desktop/contents/layouts
+
+# Create the macOS-style panel layout
+RUN cat > /etc/xdg/plasma-org.kde.plasma.desktop-appletsrc << 'PLASMACONFIG'
+[ActionPlugins][0]
+MiddleButton;NoModifier=org.kde.paste
+RightButton;NoModifier=org.kde.contextmenu
+wheel:Vertical;NoModifier=org.kde.switchdesktop
+
+[Containments][1]
+activityId=
+formfactor=2
+immutability=1
+lastScreen=0
+location=3
+plugin=org.kde.panel
+wallpaperplugin=org.kde.image
+
+[Containments][1][Applets][2]
+immutability=1
+plugin=org.kde.plasma.kickoff
+
+[Containments][1][Applets][2][Configuration][General]
+favorites=preferred://browser,preferred://filemanager,applications:org.kde.konsole.desktop
+favoritesPortedToKAstats=true
+icon=computer-laptop
+
+[Containments][1][Applets][3]
+immutability=1
+plugin=org.kde.plasma.appmenu
+
+[Containments][1][Applets][4]
+immutability=1
+plugin=org.kde.plasma.panelspacer
+
+[Containments][1][Applets][5]
+immutability=1
+plugin=org.kde.plasma.systemtray
+
+[Containments][1][Applets][6]
+immutability=1
+plugin=org.kde.plasma.digitalclock
+
+[Containments][1][Applets][6][Configuration][Appearance]
+customDateFormat=EEE MMM d  h:mm AP
+showDate=true
+
+[Containments][1][General]
+AppletOrder=2;3;4;5;6
+
+[Containments][8]
+activityId=
+formfactor=2
+immutability=1
+lastScreen=0
+location=4
+plugin=org.kde.panel
+wallpaperplugin=org.kde.image
+
+[Containments][8][Applets][9]
+immutability=1
+plugin=org.kde.plasma.icontasks
+
+[Containments][8][Applets][9][Configuration][General]
+iconSize=64
+launchers=preferred://filemanager,preferred://browser,applications:org.kde.konsole.desktop
+maxStripes=1
+showOnlyCurrentScreen=false
+indicateAudioStreams=true
+launchersGroup=Global
+
+[Containments][8][Applets][10]
+immutability=1
+plugin=org.kde.plasma.trash
+
+[Containments][8][General]
+AppletOrder=9;10
+
+[Containments][11]
+activityId=
+formfactor=0
+immutability=1
+lastScreen=0
+location=0
+plugin=org.kde.desktopcontainment
+wallpaperplugin=org.kde.image
+
+[Containments][11][Configuration][General]
+showToolbox=false
+
+[ScreenMapping]
+itemsOnDisabledScreens=
+PLASMACONFIG
+
+# Configure blur effects for glass dock
+RUN cat > /etc/xdg/kwinrc << 'KWINCONFIG'
+[Compositing]
+Backend=OpenGL
+GLTextureFilter=1
+WindowsBlockCompositing=false
+
+[Effect-Blur]
+BlurStrength=15
+NoiseStrength=3
+
+[PlasmaViews][Panel 8][Defaults]
+thickness=76
+floating=true
+panelTransparency=1
+
+[org.kde.kdecoration2]
+ButtonsOnLeft=XIA
+ButtonsOnRight=
+KWINCONFIG
+
+# Configure panel settings for rounded translucent dock
+RUN cat > /etc/xdg/plasmashellrc << 'PLASMASHELLCONFIG'
+[PlasmaViews][Panel 1][Defaults]
+thickness=38
+
+[PlasmaViews][Panel 8][Defaults]
+thickness=76
+floating=true
+panelTransparency=1
+
+[PlasmaViews][Panel 8][Horizontal]
+floating=true
+PLASMASHELLCONFIG
+
+RUN ostree container commit
+
+# =============================================================================
+# CONFIGURE SCREENSHOT SHORTCUTS
+# =============================================================================
+
+RUN mkdir -p /etc/xdg && \
+    cat > /etc/xdg/kglobalshortcutsrc << 'SHORTCUTSCONFIG'
+[org.kde.spectacle.desktop][Desktop Entry]
+Print=Print,none,Capture Entire Desktop
+Shift+Print=Shift+Print,none,Capture Active Window
+Meta+Ctrl+S=Meta+Ctrl+S,none,Capture Rectangular Region
+Meta+Shift+Print=Meta+Shift+Print,none,Capture Rectangular Region
+
+[krunner][_launch]
+_launch=Meta+Space,Alt+Space,KRunner
+SHORTCUTSCONFIG
+
+RUN ostree container commit
+
+# =============================================================================
+# ZEPHYRUS OS BRANDING & TOOLS
+# =============================================================================
+
+RUN echo "ZEPHYRUS_OS=true" > /etc/zephyrus-release && \
+    echo "NVIDIA_SUPPORT=true" >> /etc/zephyrus-release && \
+    echo "ROG_GUI_FIXED=true" >> /etc/zephyrus-release && \
+    echo "MACOS_DOCK_STYLE=true" >> /etc/zephyrus-release && \
+    ostree container commit
+
+# Create zephyrus-os-tool
+RUN cat > /usr/bin/zephyrus-os-tool << 'TOOLEOF'
+#!/bin/bash
+case "$1" in
+    status)
+        echo "╔═══════════════════════════════════════════════════════════╗"
+        echo "║  ZEPHYRUS OS STATUS                                      ║"
+        echo "╚═══════════════════════════════════════════════════════════╝"
+        echo ""
+        echo "Desktop: $XDG_CURRENT_DESKTOP $XDG_SESSION_TYPE"
+        if command -v supergfxctl &> /dev/null; then
+            echo "GPU Mode: $(supergfxctl --get 2>/dev/null)"
+            echo "GPU Status: $(supergfxctl --status 2>/dev/null)"
+        fi
+        echo ""
+        echo "Components:"
+        command -v asusctl &> /dev/null && echo "  ✅ asusctl" || echo "  ❌ asusctl"
+        command -v supergfxctl &> /dev/null && echo "  ✅ supergfxctl" || echo "  ❌ supergfxctl"
+        [ -f /proc/driver/nvidia/version ] && echo "  ✅ NVIDIA Driver" || echo "  ❌ NVIDIA Driver"
+        ;;
+    performance|perf)
+        echo "Switching to performance mode..."
+        sudo asusctl profile performance ;;
+    balanced)
+        echo "Switching to balanced mode..."
+        sudo asusctl profile balanced ;;
+    quiet)
+        echo "Switching to quiet mode..."
+        sudo asusctl profile quiet ;;
+    *)
+        echo "Zephyrus OS Management Tool"
+        echo "Usage: zephyrus-os-tool [status|performance|balanced|quiet]" ;;
+esac
+TOOLEOF
+RUN chmod +x /usr/bin/zephyrus-os-tool && \
+    ostree container commit
+
+# Finalize
+RUN systemctl enable supergfxd && \
+    ldconfig && \
+    ostree container commit

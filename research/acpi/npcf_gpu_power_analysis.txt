@@ -1,0 +1,656 @@
+========================================================================
+NPCF GPU Power Analysis Report
+Generated from: C:\Users\kings\Desktop\Optimization\dsdt_aml.bin
+Disassembly:    C:\Users\kings\Desktop\Optimization\dsdt_aml.dsl
+========================================================================
+
+------------------------------------------------------------------------
+1. RAW AML REFERENCES TO 'NPCF'
+------------------------------------------------------------------------
+Total raw occurrences of 'NPCF' in AML: 66
+  Offset 0x007032 : SB_UBTCQUCM...\/._SB_PC00RP12PXSX...\/._SB_PC00GFX0CLID...\._SB_ATKP...\/._SB_ATKDIANE...\/._SB_NPCFDBAC...\/._SB_NPCFDBDC...\/._SB_NPCFWM2M...\/._SB_NPCFATPP...\/._SB_NPCFDTPP...\/._SB_NPCFACBT..
+  Offset 0x007044 : SB_PC00RP12PXSX...\/._SB_PC00GFX0CLID...\._SB_ATKP...\/._SB_ATKDIANE...\/._SB_NPCFDBAC...\/._SB_NPCFDBDC...\/._SB_NPCFWM2M...\/._SB_NPCFATPP...\/._SB_NPCFDTPP...\/._SB_NPCFACBT...\._SB_ODV0...\._S
+  Offset 0x007056 : \/._SB_PC00GFX0CLID...\._SB_ATKP...\/._SB_ATKDIANE...\/._SB_NPCFDBAC...\/._SB_NPCFDBDC...\/._SB_NPCFWM2M...\/._SB_NPCFATPP...\/._SB_NPCFDTPP...\/._SB_NPCFACBT...\._SB_ODV0...\._SB_IETM...\/._SB_PC
+  Offset 0x007068 : D...\._SB_ATKP...\/._SB_ATKDIANE...\/._SB_NPCFDBAC...\/._SB_NPCFDBDC...\/._SB_NPCFWM2M...\/._SB_NPCFATPP...\/._SB_NPCFDTPP...\/._SB_NPCFACBT...\._SB_ODV0...\._SB_IETM...\/._SB_PC00RP12DL23...\/._S
+  Offset 0x00707A : /._SB_ATKDIANE...\/._SB_NPCFDBAC...\/._SB_NPCFDBDC...\/._SB_NPCFWM2M...\/._SB_NPCFATPP...\/._SB_NPCFDTPP...\/._SB_NPCFACBT...\._SB_ODV0...\._SB_IETM...\/._SB_PC00RP12DL23...\/._SB_PC00RP12POFF...\
+  Offset 0x00708C : /._SB_NPCFDBAC...\/._SB_NPCFDBDC...\/._SB_NPCFWM2M...\/._SB_NPCFATPP...\/._SB_NPCFDTPP...\/._SB_NPCFACBT...\._SB_ODV0...\._SB_IETM...\/._SB_PC00RP12DL23...\/._SB_PC00RP12POFF...\/._SB_PC00LPCBEC0_
+  Offset 0x00728E : /._SB_PC00RP12PXSXNLIM...\/._SB_PC00RP12PXSXTGPU...\/._SB_PC00RP12NCHK...\UMFG...\WOSR...\/._SB_NPCFCNPF...\/._SB_NPCFAMAT...\/._SB_NPCFACBT...\/._SB_NPCFWM2M...\/._SB_NPCFTPPL...\/._SB_NPCFARAT..
+  Offset 0x0072A0 : NLIM...\/._SB_PC00RP12PXSXTGPU...\/._SB_PC00RP12NCHK...\UMFG...\WOSR...\/._SB_NPCFCNPF...\/._SB_NPCFAMAT...\/._SB_NPCFACBT...\/._SB_NPCFWM2M...\/._SB_NPCFTPPL...\/._SB_NPCFARAT...\/._SB_PC00LPCBEC
+  Offset 0x0072B2 : RP12PXSXTGPU...\/._SB_PC00RP12NCHK...\UMFG...\WOSR...\/._SB_NPCFCNPF...\/._SB_NPCFAMAT...\/._SB_NPCFACBT...\/._SB_NPCFWM2M...\/._SB_NPCFTPPL...\/._SB_NPCFARAT...\/._SB_PC00LPCBEC0_TTT1...\/._SB_PC
+  Offset 0x0072C4 : _SB_PC00RP12NCHK...\UMFG...\WOSR...\/._SB_NPCFCNPF...\/._SB_NPCFAMAT...\/._SB_NPCFACBT...\/._SB_NPCFWM2M...\/._SB_NPCFTPPL...\/._SB_NPCFARAT...\/._SB_PC00LPCBEC0_TTT1...\/._SB_PC00LPCBEC0_TTT2...M
+  Offset 0x0072D6 : .\UMFG...\WOSR...\/._SB_NPCFCNPF...\/._SB_NPCFAMAT...\/._SB_NPCFACBT...\/._SB_NPCFWM2M...\/._SB_NPCFTPPL...\/._SB_NPCFARAT...\/._SB_PC00LPCBEC0_TTT1...\/._SB_PC00LPCBEC0_TTT2...MCHB......MCHL.....
+  Offset 0x0072E8 : /._SB_NPCFCNPF...\/._SB_NPCFAMAT...\/._SB_NPCFACBT...\/._SB_NPCFWM2M...\/._SB_NPCFTPPL...\/._SB_NPCFARAT...\/._SB_PC00LPCBEC0_TTT1...\/._SB_PC00LPCBEC0_TTT2...MCHB......MCHL......EGPB......EGPL...
+  Offset 0x063F02 : .O.%_QE6.p..P80B["....GFX0..["....GFX0...L._QD4.p.QD4F...TGSF.p.TGSFSDOFSFMN.H..>.FGWM..6.{^^^^.NPCFWM2M...p.^^^^.NPCFWM2M[#MUT0..p.NTWF['MUT0.A..>.FGWM..6.{^^^^.NPCFWM2M...p.^^^^.NPCFWM2M[#MUT0..
+  Offset 0x063F14 : ....GFX0..["....GFX0...L._QD4.p.QD4F...TGSF.p.TGSFSDOFSFMN.H..>.FGWM..6.{^^^^.NPCFWM2M...p.^^^^.NPCFWM2M[#MUT0..p.NTWF['MUT0.A..>.FGWM..6.{^^^^.NPCFWM2M...p.^^^^.NPCFWM2M[#MUT0..p.NTWF['MUT0.".NTW
+  Offset 0x063F44 : SFSDOFSFMN.H..>.FGWM..6.{^^^^.NPCFWM2M...p.^^^^.NPCFWM2M[#MUT0..p.NTWF['MUT0.A..>.FGWM..6.{^^^^.NPCFWM2M...p.^^^^.NPCFWM2M[#MUT0..p.NTWF['MUT0.".NTWF..NPCF..[#MUT0..p.NTWF['MUT0..."_QD7.p..P80B..A
+  Offset 0x063F56 : WM..6.{^^^^.NPCFWM2M...p.^^^^.NPCFWM2M[#MUT0..p.NTWF['MUT0.A..>.FGWM..6.{^^^^.NPCFWM2M...p.^^^^.NPCFWM2M[#MUT0..p.NTWF['MUT0.".NTWF..NPCF..[#MUT0..p.NTWF['MUT0..."_QD7.p..P80B..ATKP^^^^.ATKDIANE..
+  Offset 0x063F7B : M[#MUT0..p.NTWF['MUT0.A..>.FGWM..6.{^^^^.NPCFWM2M...p.^^^^.NPCFWM2M[#MUT0..p.NTWF['MUT0.".NTWF..NPCF..[#MUT0..p.NTWF['MUT0..."_QD7.p..P80B..ATKP^^^^.ATKDIANE...._QCF.p..P80B. ^^^^.HIDDBTLD.^^^^HID
+  Offset 0x0659DF : 0..............IIA0..........IIA0..............IIA0..............IIA0............*.IIA0.....p^^.NPCFACBT`px`....`}`.....`.`.".IIA0.....p^^.NPCFARAT`}`.....`.`...IIA0..............IIA0.............
+  Offset 0x065A0A : ....IIA0..............IIA0............*.IIA0.....p^^.NPCFACBT`px`....`}`.....`.`.".IIA0.....p^^.NPCFARAT`}`.....`.`...IIA0..............IIA0..............IIA0..............IIA0..............IIA0..
+  Offset 0x0661A5 : LPCBEC0_FMAE^^/.PC00LPCBEC0_SFTCIIA1IIA2IIA3IIA4^^/.PC00LPCBEC0_CPUP.@.^^/.PC00LPCBEC0_SMSM[".d.NPCF..[".d^^/.PC00LPCBEC0_WMSHp..ODV0.IETM.....1.IIA0.%...^^/.PC00LPCBEC0_SFTGIIA1IIA2IIA3IIA4.....I
+  ... (46 more omitted)
+
+------------------------------------------------------------------------
+2. NPCF REFERENCES IN DISASSEMBLED DSL (by enclosing method)
+------------------------------------------------------------------------
+Methods in DSDT that reference NPCF: 11
+
+--- Method _QD4 ---
+Method (_QD4, 0, NotSerialized)  // _Qxx: EC Query, xx=0x00-0xFF
+            {
+                QD4F = Zero
+                If ((TGSF == One))
+                {
+                    TGSF = Zero
+                    SDOF ()
+                    SFMN ()
+                }
+                Else
+                {
+                    If ((FGWM == One))
+                    {
+                        If (((^^^^NPCF.WM2M & One) == Zero))
+                        {
+                            ^^^^NPCF.WM2M = One
+                            Acquire (MUT0, 0x1000)
+                            NTWF = One
+                            Release (MUT0)
+                        }
+                    }
+                    ElseIf ((FGWM == Zero))
+                    {
+                        If (((^^^^NPCF.WM2M & One) == One))
+                        {
+                            ^^^^NPCF.WM2M = Zero
+                            Acquire (MUT0, 0x1000)
+                            NTWF = One
+                            Release (MUT0)
+                        }
+                    }
+
+                    If ((NTWF == One))
+                    {
+                        Notify (NPCF, 0xC1) // Hardware-Specific
+                        Acquire (MUT0, 0x1000)
+                        NTWF = Zero
+                        Release (MUT0)
+                    }
+
+                    Return (One)
+                }
+            }
+
+--- Method WMNB ---
+Method (WMNB, 3, Serialized)
+        {
+            P8XH (Zero, 0x11)
+            CreateDWordField (Arg2, Zero, IIA0)
+            CreateDWordField (Arg2, 0x04, IIA1)
+            CreateDWordField (Arg2, 0x08, IIA2)
+            CreateDWordField (Arg2, 0x0C, IIA3)
+            CreateDWordField (Arg2, 0x10, IIA4)
+            Local0 = (Arg1 & 0xFFFFFFFF)
+            If ((Local0 == 0x54494E49))
+            {
+                INIT (IIA0)
+                Return (One)
+            }
+
+            If ((Local0 == 0x53545342))
+            {
+                Return (BSTS ())
+            }
+
+            If ((Local0 == 0x4E554653))
+            {
+                Return (SFUN ())
+            }
+
+            If ((Local0 == 0x47444353))
+            {
+                Return (SCDG (IIA0, IIA1))
+            }
+
+            If ((Local0 == 0x53524556))
+            {
+                Return (VERS (IIA0, IIA1))
+            }
+
+            If ((Local0 == 0x4647574D))
+            {
+                Return (MWGF (IIA0, IIA1, Local0))
+            }
+
+            If ((Local0 == 0x44434C47))
+            {
+                Return (GLCD ())
+            }
+
+            If ((Local0 == 0x474F4457))
+            {
+                Return (WDOG (IIA0))
+            }
+
+            If ((Local0 == 0x5256534F))
+            {
+                Return (OSVR (IIA0))
+            }
+
+            If ((Local0 == 0x49564E41))
+            {
+                Return (ANVI (IIA0))
+            }
+
+            If ((Local0 == 0x53545344))
+            {
+  
+
+... [truncated] ...
+
+               If ((^^PC00.LPCB.EC0.WAT1 () == One))
+                        {
+                            GPCE = Zero
+                            Return (Zero)
+                        }
+
+                        GPCE = Zero
+                    }
+
+                    If ((IIA1 == Zero))
+                    {
+                        ^^PC00.LPCB.EC0.UMAF = Zero
+                        ^^PC00.LPCB.EC0.PWMD = One
+                        UMFG = Zero
+                        Notify (^^PC00.RP12.PXSX, Zero) // Bus Check
+                        ^^PC00.LPCB.EC0.FGA9 = One
+                        If ((^^PC00.LPCB.EC0.WAT2 () == One))
+                        {
+                            GPCE = Zero
+                            Return (Zero)
+                        }
+
+                        GPCE = Zero
+                    }
+
+                    Return (One)
+                }
+
+                If (WCHK (One, IIA0))
+                {
+                    WNVA = 0x9603
+                    WNVB = 0x03
+                    WNVC = IIA0 /* \_SB_.ATKD.WMNB.IIA0 */
+                    AII0 = IIA0 /* \_SB_.ATKD.WMNB.IIA0 */
+                    AII1 = IIA1 /* \_SB_.ATKD.WMNB.IIA1 */
+                    AII2 = IIA2 /* \_SB_.ATKD.WMNB.IIA2 */
+                    AII3 = IIA3 /* \_SB_.ATKD.WMNB.IIA3 */
+                    AII4 = IIA4 /* \_SB_.ATKD.WMNB.IIA4 */
+                    Return (W15H ())
+                }
+
+                Return (0xFFFFFFFE)
+            }
+
+            Return (0xFFFFFFFE)
+        }
+
+--- Method _QA8 ---
+Method (_QA8, 0, NotSerialized)  // _Qxx: EC Query, xx=0x00-0xFF
+        {
+            P80B = 0xA8
+            If ((DB2F == Zero))
+            {
+                ^^^^NPCF.DBAC = One
+                ^^^^NPCF.DBDC = One
+            }
+
+            If ((DB2F == One))
+            {
+                ^^^^NPCF.DBAC = Zero
+                ^^^^NPCF.DBDC = Zero
+            }
+
+            Notify (NPCF, 0xC0) // Hardware-Specific
+        }
+
+--- Method SFMN ---
+Method (SFMN, 0, Serialized)
+        {
+            If (CondRefOf (\_SB.NPCF))
+            {
+                Switch (ToInteger (FTBL))
+                {
+                    Case (0x02)
+                    {
+                        CPUP (0xF0)
+                        SSSM ()
+                        DGPS (0x02)
+                    }
+                    Case (One)
+                    {
+                        CPUP (0x0118)
+                        STDM ()
+                        DGPS (One)
+                    }
+                    Case (Zero)
+                    {
+                        CPUP (0xF0)
+                        SPDM ()
+                        DGPS (One)
+                    }
+
+                }
+
+                Sleep (0x64)
+                Notify (NPCF, 0xC0) // Hardware-Specific
+                Sleep (0x64)
+                WMSH ()
+                Sleep (0x64)
+                STPL ()
+                Sleep (0x64)
+                Notify (NPCF, 0xC0) // Hardware-Specific
+                TTT1 = ^^^^NPCF.AMAT /* External reference */
+                TTT2 = ^^^^NPCF.ACBT /* External reference */
+            }
+        }
+
+--- Method STDM ---
+Method (STDM, 0, NotSerialized)
+        {
+            If (CondRefOf (\_SB.NPCF))
+            {
+                ^^^^NPCF.AMAT = 0xA0
+                ^^^^NPCF.ACBT = 0x78
+                ^^^^NPCF.ATPP = 0x0118
+                SPAB (One)
+            }
+        }
+
+--- Method SPDM ---
+Method (SPDM, 0, NotSerialized)
+        {
+            If (CondRefOf (\_SB.NPCF))
+            {
+                ^^^^NPCF.AMAT = 0x50
+                ^^^^NPCF.ACBT = Zero
+                ^^^^NPCF.ATPP = 0xF0
+                If ((ACIN == One))
+                {
+                    SPAB (One)
+                }
+                Else
+                {
+                    SPAB (Zero)
+                }
+            }
+        }
+
+--- Method SSSM ---
+Method (SSSM, 0, NotSerialized)
+        {
+            If (CondRefOf (\_SB.NPCF))
+            {
+                ^^^^NPCF.AMAT = 0x50
+                ^^^^NPCF.ACBT = Zero
+                If ((ACIN == One))
+                {
+                    SPAB (One)
+                }
+                ElseIf ((RSOC > 0x32))
+                {
+                    SPAB (One)
+                }
+                Else
+                {
+                    SPAB (Zero)
+                }
+            }
+        }
+
+--- Method SMSM ---
+Method (SMSM, 0, NotSerialized)
+        {
+            If (CondRefOf (\_SB.NPCF))
+            {
+                ^^^^NPCF.AMAT = 0xA0
+                ^^^^NPCF.ACBT = 0xC8
+                ^^^^NPCF.ATPP = 0x0118
+                SPAB (One)
+                DGPS (One)
+            }
+        }
+
+--- Method STPL ---
+Method (STPL, 0, NotSerialized)
+        {
+            If ((FTBL == 0x02))
+            {
+                ^^^^NPCF.TPPL = 0x0001C138
+            }
+            ElseIf ((FTBL == Zero))
+            {
+                ^^^^NPCF.TPPL = 0x0001C138
+            }
+        }
+
+--- Method SPAB ---
+Method (SPAB, 1, NotSerialized)
+        {
+            If (CondRefOf (\_SB.NPCF))
+            {
+                If ((Arg0 == Zero))
+                {
+                    ^^^^NPCF.DBAC = One
+                    ^^^^NPCF.DBDC = One
+                }
+
+                If ((Arg0 == One))
+                {
+                    ^^^^NPCF.DBAC = Zero
+                    ^^^^NPCF.DBDC = Zero
+                }
+
+                Notify (NPCF, 0xC0) // Hardware-Specific
+            }
+        }
+
+--- Method CPUP ---
+Method (CPUP, 1, NotSerialized)
+        {
+            If (CondRefOf (\_SB.NPCF))
+            {
+                ^^^^NPCF.ATPP = Arg0
+                ^^^^NPCF.DTPP = Arg0
+            }
+        }
+
+------------------------------------------------------------------------
+3. ATKD SCOPE / PROFILE SWITCH HANDLERS CALLING NPCF
+------------------------------------------------------------------------
+ATKD scope size: 41880 chars
+ATKD methods referencing NPCF: 1
+  -> WMNB
+
+------------------------------------------------------------------------
+4. INTEGER CONSTANTS THAT LOOK LIKE GPU POWER LIMITS
+------------------------------------------------------------------------
+NOT FOUND 90 W (90000 mW) (0x00015F90)
+FOUND 100 W (100000 mW) -> hex 0x000186A0
+  Context:
+    Field (BUFF, 0x0C, DL)
+                    Acquire (RTCL, 0xFFFF)
+                    Local1 = Zero
+                    Name (TOUT, 0x000186A0)
+                    TOUT /= 0x0A
+                    While (((REGA & 0x80) && (Local1 < TOUT)))
+                    {
+                
+FOUND 115 W (115000 mW) -> hex 0x0001C138
+  Context:
+    Method (STPL, 0, NotSerialized)
+            {
+                If ((FTBL == 0x02))
+                {
+                    ^^^^NPCF.TPPL = 0x0001C138
+                }
+                ElseIf ((FTBL == Zero))
+                {
+                    ^^^^NPCF.TPPL = 0x0001C138
+                
+NOT FOUND 125 W (125000 mW) (0x0001E848)
+
+Decimal watt constants near NPCF/power methods:
+  No nearby hits for 90
+  100 (or 0x64) at offset 2798976: 0x64
+       }
+    
+                    If ((IIA0 == 0x00110024))
+                    {
+                        ^^PC00.LPCB.EC0.FMAE = One
+                        ^^PC00.LPCB.EC0.SFTC (IIA1, IIA2, IIA3, IIA4)
+                        ^^PC00.LPCB.EC0.CPUP (0x0140)
+                        ^^PC00.LPCB.EC0.SMSM ()
+                        Sleep (0x64)
+                        Notify (NPCF, 0xC0) // Hardware-Specif
+  100 (or 0x64) at offset 2799070: 0x64
+    PCB.EC0.FMAE = One
+                        ^^PC00.LPCB.EC0.SFTC (IIA1, IIA2, IIA3, IIA4)
+                        ^^PC00.LPCB.EC0.CPUP (0x0140)
+                        ^^PC00.LPCB.EC0.SMSM ()
+                        Sleep (0x64)
+                        Notify (NPCF, 0xC0) // Hardware-Specific
+                        Sleep (0x64)
+                        ^^PC00.LPCB.EC0.WMSH ()
+                      
+  100 (or 0x64) at offset 2910773: 0x64
+                 STDM ()
+                            DGPS (One)
+                        }
+                        Case (Zero)
+                        {
+                            CPUP (0xF0)
+                            SPDM ()
+                            DGPS (One)
+                        }
+    
+                    }
+    
+                    Sleep (0x64)
+                    Notify (NPCF, 0xC0) // Har
+  No nearby hits for 115
+  No nearby hits for 125
+
+------------------------------------------------------------------------
+5. GPU PROFILE TABLE (FMTG)
+------------------------------------------------------------------------
+Name (FMTG, Package (0x04)
+        {
+            Zero, 
+            0x57, 
+            0x4B, 
+            0x57
+        })
+
+Interpretation:
+  DGPS(Arg0) sets ^^^RP12.PXSX.TGPU = DerefOf(FMTG[Arg0])
+  FMTG indices map as follows (values in hex / decimal):
+    Index 0: 0x04 -> 4 decimal
+    Index 1: Zero -> 0 decimal
+    Index 2: 0x57 -> 87 decimal
+    Index 3: 0x4B -> 75 decimal
+    Index 4: 0x57 -> 87 decimal
+
+------------------------------------------------------------------------
+6. _DSM METHODS IN NPCF
+------------------------------------------------------------------------
+No _DSM methods defined under NPCF in this DSDT.
+(NPCF is only referenced via External declarations; its definition is likely in an SSDT.)
+
+------------------------------------------------------------------------
+7. POWER BUDGET TABLE FIELDS (GBD, CBD, CMB, GMB, PL1V, PL2V)
+------------------------------------------------------------------------
+Field block found (ERM2) containing budget tables.
+Relevant fields extracted:
+  PL1V,   8,
+  PL2V,   8,
+  CBD0,   8,
+  CBD1,   8,
+  CBD2,   8,
+  CBD3,   8,
+  CBD4,   8,
+  CBD5,   8,
+  CBD6,   8,
+  CBD7,   8,
+  GBD0,   8,
+  GBD1,   8,
+  GBD2,   8,
+  GBD3,   8,
+  GBD4,   8,
+  GBD5,   8,
+  GBD6,   8,
+  GBD7,   8,
+  CMB0,   8,
+  CMB1,   8,
+  CMB2,   8,
+  CMB3,   8,
+  CMB4,   8,
+  CMB5,   8,
+  CMB6,   8,
+  CMB7,   8,
+  CMB8,   8,
+  CMB9,   8,
+  CMBA,   8,
+  CMBB,   8,
+  CMBC,   8,
+  CMBD,   8,
+  CMBE,   8,
+  CMBF,   8,
+  GMB0,   8,
+  GMB1,   8,
+  GMB2,   8,
+  GMB3,   8,
+  GMB4,   8,
+  GMB5,   8,
+  GMB6,   8,
+  GMB7,   8,
+  GMB8,   8,
+  GMB9,   8,
+  GMBA,   8,
+  GMBB,   8,
+  GMBC,   8,
+  GMBD,   8,
+  GMBE,   8,
+  GMBF,   8,
+
+No direct assignments to GBD/CMB/GMB/CBD fields found in DSDT.
+(They may be written by EC firmware or by methods in an SSDT.)
+
+------------------------------------------------------------------------
+8. NVIDIA/NVPCF/NVAPI STRINGS
+------------------------------------------------------------------------
+'NVPCF' NOT found in DSL.
+'nvidia' NOT found in DSL.
+'NVAPI' NOT found in DSL.
+'smi' not found near NPCF in DSL.
+
+------------------------------------------------------------------------
+9. FTBL PROFILE SWITCH LOGIC
+------------------------------------------------------------------------
+SFMN method (profile switch handler):
+Method (SFMN, 0, Serialized)
+        {
+            If (CondRefOf (\_SB.NPCF))
+            {
+                Switch (ToInteger (FTBL))
+                {
+                    Case (0x02)
+                    {
+                        CPUP (0xF0)
+                        SSSM ()
+                        DGPS (0x02)
+                    }
+                    Case (One)
+                    {
+                        CPUP (0x0118)
+                        STDM ()
+                        DGPS (One)
+                    }
+                    Case (Zero)
+                    {
+                        CPUP (0xF0)
+                        SPDM ()
+                        DGPS (One)
+                    }
+
+                }
+
+                Sleep (0x64)
+                Notify (NPCF, 0xC0) // Hardware-Specific
+                Sleep (0x64)
+                WMSH ()
+                Sleep (0x64)
+                STPL ()
+                Sleep (0x64)
+                Notify (NPCF, 0xC0) // Hardware-Specific
+                TTT1 = ^^^^NPCF.AMAT /* External reference */
+                TTT2 = ^^^^NPCF.ACBT /* External reference */
+            }
+        }
+
+STPL method (GPU total power limit setter):
+Method (STPL, 0, NotSerialized)
+        {
+            If ((FTBL == 0x02))
+            {
+                ^^^^NPCF.TPPL = 0x0001C138
+            }
+            ElseIf ((FTBL == Zero))
+            {
+                ^^^^NPCF.TPPL = 0x0001C138
+            }
+        }
+
+------------------------------------------------------------------------
+10. SUMMARY – HOW GPU TGP IS CONTROLLED VIA ACPI (FROM DSDT)
+------------------------------------------------------------------------
+
+Key observations from the DSDT:
+
+1. NPCF device is NOT defined inside the DSDT; it is declared as External.
+   The actual implementation (methods, _DSM, power-limit packages) lives in
+   an SSDT that was not supplied. Therefore we can only see how the DSDT
+   *calls* into NPCF, not how NPCF internally applies the limits.
+
+2. The EC0 device exposes an OperationRegion ERM2 at SystemMemory
+   0xFE108B00 (256 bytes). Inside ERM2 are fields that look like power-
+   budget tables:
+   - PL1V, PL2V (CPU power limits?)
+   - CBD0-CBD7, GBD0-GBD7 ( possibly CPU/GPU budget tables )
+   - CMB0-CMBF, GMB0-GMBF ( possibly combined/GPU memory budget tables )
+   No DSDT methods write to these fields; writes likely come from the EC
+   firmware or from the missing SSDT.
+
+3. Profile-switch handlers inside ATKD / EC0 set NPCF registers before
+   notifying NPCF with Notify(NPCF, 0xC0). The relevant DSDT methods are:
+   - SFMN   : top-level switch on FTBL (0, 1, 2). Calls CPUP, STDM/SPDM/
+              SSSM/SMSM, DGPS, WMSH, STPL, then Notifies NPCF twice.
+   - STDM   : sets NPCF.AMAT=0xA0, NPCF.ACBT=0x78, NPCF.ATPP=0x0118
+   - SPDM   : sets NPCF.AMAT=0x50, NPCF.ACBT=0x00, NPCF.ATPP=0xF0
+   - SSSM   : sets NPCF.AMAT=0x50, NPCF.ACBT=0x00
+   - SMSM   : sets NPCF.AMAT=0xA0, NPCF.ACBT=0xC8, NPCF.ATPP=0x0118
+   - SPAB   : toggles NPCF.DBAC / NPCF.DBDC (enable/disable dynamic boost?)
+   - CPUP   : copies Arg0 into NPCF.ATPP and NPCF.DTPP
+   - STPL   : sets NPCF.TPPL = 0x0001C138 (115 000 decimal = 115 W) for
+              FTBL == 0x02 and FTBL == Zero. No other FTBL cases are handled
+              in the DSDT snippet.
+   - DGPS   : maps profile index Arg0 -> FMTG[Arg0] and writes the value to
+              ^^^RP12.PXSX.TGPU, then notifies the GPU device 0xC0.
+
+4. FMTG package (size 4) contains:
+      [0] = 0x00  -> likely default / unused
+      [1] = 0x57  (87 dec)
+      [2] = 0x4B  (75 dec)
+      [3] = 0x57  (87 dec)
+   These are passed to the dGPU (RP12.PXSX) as TGPU values. They are not
+   raw watt figures, but they are profile-dependent GPU indices/limits.
+
+5. The only literal TGP wattage found in the DSDT is 115 W (0x0001C138
+   milliwatts) written to NPCF.TPPL. The other intermediate limits
+   (90 W, 100 W, 125 W) do NOT appear in the DSDT; they are either:
+      a) stored in the missing SSDT that defines NPCF, or
+      b) applied by the NVIDIA driver (NVPCF) after reading tables from
+         the SSDT.
+
+6. No strings such as 'NVPCF', 'nvidia', or 'NVAPI' exist in the DSDT.
+   There is no direct ACPI invocation of nvidia-smi. The communication
+   path appears to be:
+      ASUS ATKD/EC firmware -> writes NPCF fields -> Notify(NPCF, 0xC0)
+      -> Windows ACPI driver -> NVIDIA GPU driver (via PCI/ACPI notify)
+   The NVIDIA Platform Controller Framework (NPCF) device in the SSDT
+   likely exposes a _DSM or custom method that the NVIDIA driver calls
+   to retrieve the power-limit packages.
+
+Conclusion:
+The DSDT is the "orchestrator": it sets profile-dependent parameters in
+NPCF and notifies it, but the actual power-limit tables and NVAPI bridging
+are implemented in the SSDT that defines the NPCF device.

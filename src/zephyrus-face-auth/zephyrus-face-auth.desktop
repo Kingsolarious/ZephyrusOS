@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Zephyrus Face Auth
+Comment=Manage Howdy face authentication
+Exec=/usr/local/bin/zephyrus-face-auth
+Icon=preferences-system-login
+Type=Application
+Categories=System;Settings;Security;
+Keywords=face;auth;howdy;biometric;login;
+Terminal=false
+X-KDE-SubstituteUID=false

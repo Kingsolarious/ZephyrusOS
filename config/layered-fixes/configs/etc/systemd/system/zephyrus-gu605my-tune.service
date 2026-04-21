@@ -1,0 +1,12 @@
+[Unit]
+Description=Zephyrus GU605MY OEM Profile Setup
+After=asusd.service
+Wants=asusd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/zephyrus-profile-sync sync
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

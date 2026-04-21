@@ -1,0 +1,72 @@
+#!/bin/bash
+# AI Model Manager for Ollama
+# Part of Zephyrus Crimson OS AI Environment
+
+MODEL=$2
+
+show_help() {
+    echo "Zephyrus AI Model Manager"
+    echo ""
+    echo "Usage: $0 {list|pull|run|rm|serve} [model-name]"
+    echo ""
+    echo "Commands:"
+    echo "  list              List installed models"
+    echo "  pull <model>      Download a model"
+    echo "  run <model>       Run a model interactively"
+    echo "  rm <model>        Remove a model"
+    echo "  serve             Start Ollama server"
+    echo ""
+    echo "Popular Models:"
+    echo "  llama3.2          Meta Llama 3.2 (general)"
+    echo "  codellama         Code Llama (coding)"
+    echo "  mistral           Mistral 7B (general)"
+    echo "  deepseek-coder    DeepSeek Coder"
+    echo "  qwen2.5-coder     Qwen 2.5 Coder"
+    echo ""
+    echo "Examples:"
+    echo "  $0 pull llama3.2"
+    echo "  $0 run codellama"
+    echo "  $0 list"
+}
+
+case $1 in
+    list)
+        distrobox enter ai-coder -- ollama list 2>/dev/null || echo "Error: Is the ai-coder container created?"
+        ;;
+    pull)
+        if [ -z "$MODEL" ]; then
+            echo "Error: Model name required"
+            show_help
+            exit 1
+        fi
+        distrobox enter ai-coder -- ollama pull "$MODEL"
+        ;;
+    run)
+        if [ -z "$MODEL" ]; then
+            echo "Error: Model name required"
+            show_help
+            exit 1
+        fi
+        distrobox enter ai-coder -- ollama run "$MODEL"
+        ;;
+    rm)
+        if [ -z "$MODEL" ]; then
+            echo "Error: Model name required"
+            show_help
+            exit 1
+        fi
+        distrobox enter ai-coder -- ollama rm "$MODEL"
+        ;;
+    serve)
+        echo "Starting Ollama server..."
+        echo "Access at: http://localhost:11434"
+        distrobox enter ai-coder -- ollama serve
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        show_help
+        exit 1
+        ;;
+esac

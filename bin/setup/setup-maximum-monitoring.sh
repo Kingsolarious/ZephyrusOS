@@ -1,0 +1,88 @@
+#!/bin/bash
+# Setup Maximum Monitoring for ROG Zephyrus
+# Run this to enable all monitoring systems
+
+echo "╔══════════════════════════════════════════════════════════════════════╗"
+echo "║        🚀 SETUP MAXIMUM MONITORING                                   ║"
+echo "╚══════════════════════════════════════════════════════════════════════╝"
+echo ""
+
+# 1. Enable autostart service
+echo "📦 Step 1: Enabling autostart service..."
+systemctl --user enable rog-monitoring.service
+echo "✓ Maximum monitoring will start on login"
+echo ""
+
+# 2. Instructions for KDE widget
+echo "🖥️  Step 2: KDE Panel Widget (MANUAL REQUIRED)"
+echo "───────────────────────────────────────────────────────────────────────"
+echo "The KDE widget is installed but needs to be added to your panel:"
+echo ""
+echo "  1. Right-click on your desktop panel"
+echo "  2. Click 'Enter Edit Mode' or 'Add Widgets...'"
+echo "  3. Search for 'ROG Monitor'"
+echo "  4. Drag it to your desired position on the panel"
+echo "  5. Click elsewhere to exit edit mode"
+echo ""
+echo "  Alternative command:"
+echo "    kpackagetool6 --upgrade ~/.local/share/plasma/plasmoids/com.zephyrus.monitor/"
+echo ""
+
+# 3. Start monitoring now
+echo "▶️  Step 3: Starting monitors now..."
+~/Desktop/Zephyrus\ OS/start-maximum-monitoring.sh
+echo ""
+
+# 4. Steam setup reminder
+echo "🎮 Step 4: Steam MangoHud Setup (MANUAL REQUIRED)"
+echo "───────────────────────────────────────────────────────────────────────"
+echo "For in-game monitoring, add this to each game's Launch Options in Steam:"
+echo ""
+echo "    mangohud %command%"
+echo ""
+echo "To set it automatically for all games:"
+echo "  Steam → Settings → In-Game → Check 'Enable Steam Overlay'"
+echo "  Then add 'mangohud %command%' to individual games"
+echo ""
+
+# 5. Summary
+echo "═══════════════════════════════════════════════════════════════════════"
+echo "✅ MAXIMUM MONITORING CONFIGURED!"
+echo "═══════════════════════════════════════════════════════════════════════"
+echo ""
+echo "📊 What You Now Have:"
+echo ""
+echo "1. 🖥️  KDE Panel Widget"
+echo "   - Shows CPU temp in panel (color-coded)"
+echo "   - Click for detailed popup"
+echo "   - Quick mode switch buttons"
+echo ""
+echo "2. 📟 Floating Terminal Monitor"
+echo "   - Full stats with visual bars"
+echo "   - Updates every 2 seconds"
+echo "   - Position: Top-left of screen"
+echo ""
+echo "3. 🔔 Thermal Watchdog (Background)"
+echo "   - Alerts when CPU > 80°C"
+echo "   - Critical alert at > 90°C"
+echo "   - Auto-switches to Silent mode on critical"
+echo ""
+echo "4. 🎮 MangoHud (In-Game)"
+echo "   - FPS, temps, power in overlay"
+echo "   - Toggle: Shift+F12"
+echo "   - Add to Steam: mangohud %command%"
+echo ""
+echo "5. 🛠️  Terminal Tools (Always Available)"
+echo "   - nvtop  → GPU monitor"
+echo "   - btop   → System monitor"
+echo "   - sensors → Hardware temps"
+echo ""
+echo "═══════════════════════════════════════════════════════════════════════"
+echo ""
+echo "🎯 Quick Commands:"
+echo "  ~/Desktop/Zephyrus\ OS/start-maximum-monitoring.sh  → Start all monitors"
+echo "  pkill -f rog-monitor-conky                          → Stop terminal monitor"
+echo "  pkill -f thermal-watchdog                           → Stop watchdog"
+echo "  systemctl --user disable rog-monitoring             → Disable autostart"
+echo ""
+echo "═══════════════════════════════════════════════════════════════════════"

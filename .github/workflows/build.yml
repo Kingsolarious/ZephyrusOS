@@ -1,0 +1,57 @@
+name: Build Zephyrus OS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: zephyrus-os
+  IMAGE_VENDOR: kingsolarious
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    name: Build Zephyrus OS
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Podman
+        uses: redhat-actions/podman-setup@v2
+        with:
+          podman-version: "4.x"
+
+      - name: Build image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          tags: latest ${{ github.sha }}
+          containerfiles: ./Containerfile
+          build-args: |
+            IMAGE_NAME=${{ env.IMAGE_NAME }}
+            IMAGE_VENDOR=${{ env.IMAGE_VENDOR }}
+
+      - name: Push to GHCR
+        id: push-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print image url
+        run: echo "Image pushed to ${{ steps.push-to-ghcr.outputs.registry-paths }}"

@@ -1,0 +1,10 @@
+# Zephyrus GU605MY USB autosuspend rules
+# Prevent problematic USB devices from auto-suspending
+
+
+# ASUS ROG keyboard (built-in)
+ATTR{idVendor}=="0b05", ATTR{idProduct}=="19b6", ATTR{power/control}="on"
+
+# Logitech unifying receivers
+ATTR{idVendor}=="046d", ATTR{idProduct}=="c52b", ATTR{power/control}="on"
+ATTR{idVendor}=="046d", ATTR{idProduct}=="c539", ATTR{power/control}="on"

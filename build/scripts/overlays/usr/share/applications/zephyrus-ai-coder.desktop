@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=AI Coder Environment
+Comment=Zephyrus AI Coder Container
+Exec=zephyrus-ai-coder distrobox
+Type=Application
+Terminal=true
+Icon=utilities-terminal
+Categories=Development;IDE;
+Keywords=ai;coder;distrobox;container;

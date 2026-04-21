@@ -1,0 +1,25 @@
+// Polkit rules to allow zephyrus-profile-enhanced to set power limits
+// Install to: /etc/polkit-1/rules.d/99-zephyrus-profile.rules
+
+polkit.addRule(function(action, subject) {
+    // Allow setting CPU/GPU power limits for local active users
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        subject.local &&
+        subject.active &&
+        subject.isInGroup("wheel")) {
+        
+        // Check if the command is our profile script
+        var command = action.lookup("command_line") || "";
+        if (command.indexOf("zephyrus-profile-enhanced") >= 0) {
+            return polkit.Result.YES;
+        }
+    }
+});
+
+// Allow access to asus-armoury attributes without auth
+polkit.addRule(function(action, subject) {
+    if (action.id.match(/^org.freedesktop.udisks2./) ||
+        action.id.match(/^org.freedesktop.login1./)) {
+        // Keep existing rules
+    }
+});

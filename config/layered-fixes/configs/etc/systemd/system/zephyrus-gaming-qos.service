@@ -1,0 +1,13 @@
+[Unit]
+Description=Zephyrus Gaming QoS (HTB Traffic Shaping)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/zephyrus-gaming-qos start
+ExecStop=/usr/local/bin/zephyrus-gaming-qos stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

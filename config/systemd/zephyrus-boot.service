@@ -1,0 +1,11 @@
+[Unit]
+Description=Zephyrus Profile - Boot to Silent Mode
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/solarious/.local/bin/zephyrus-profile quiet
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target

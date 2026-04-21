@@ -1,0 +1,109 @@
+/* ============================================================================
+   About This Zephyrus - GTK4 Stylesheet
+   
+   Dark theme with ROG Crimson red accents
+   Clean macOS-style hardware information panel
+   ============================================================================ */
+
+/* ----------------------------------------------------------------------------
+   Window
+   ---------------------------------------------------------------------------- */
+window {
+    background-color: #0d0d0d;
+    color: #ffffff;
+}
+
+/* ----------------------------------------------------------------------------
+   Typography
+   ---------------------------------------------------------------------------- */
+.title-label {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+.subtitle-label {
+    font-size: 14px;
+    color: #888888;
+    font-weight: 400;
+}
+
+.spec-label {
+    font-size: 14px;
+    color: #aaaaaa;
+    font-weight: 400;
+}
+
+.spec-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+/* ----------------------------------------------------------------------------
+   Separators
+   ---------------------------------------------------------------------------- */
+separator {
+    background-color: #2a0000;
+    min-height: 1px;
+}
+
+/* ----------------------------------------------------------------------------
+   Scrolled Window
+   ---------------------------------------------------------------------------- */
+scrolledwindow {
+    border: none;
+    background: transparent;
+}
+
+scrolledwindow scrollbar {
+    background: transparent;
+}
+
+scrolledwindow scrollbar slider {
+    background-color: #3a0000;
+    border-radius: 4px;
+    min-width: 8px;
+}
+
+scrolledwindow scrollbar slider:hover {
+    background-color: #ff1a1a;
+}
+
+/* ----------------------------------------------------------------------------
+   Grid
+   ---------------------------------------------------------------------------- */
+grid {
+    background: transparent;
+}
+
+/* ----------------------------------------------------------------------------
+   ROG Accent Elements (for future use)
+   ---------------------------------------------------------------------------- */
+.rog-accent {
+    color: #ff0033;
+}
+
+.rog-glow {
+    text-shadow: 0 0 8px rgba(255, 0, 51, 0.6);
+}
+
+/* ----------------------------------------------------------------------------
+   Animation (optional, for ROG logo)
+   ---------------------------------------------------------------------------- */
+@keyframes pulse-glow {
+    0% {
+        -gtk-icon-shadow: 0 0 8px rgba(255, 0, 51, 0.4);
+    }
+    50% {
+        -gtk-icon-shadow: 0 0 20px rgba(255, 0, 51, 0.8);
+    }
+    100% {
+        -gtk-icon-shadow: 0 0 8px rgba(255, 0, 51, 0.4);
+    }
+}
+
+.rog-animated-logo {
+    animation: pulse-glow 3s ease-in-out infinite;
+}

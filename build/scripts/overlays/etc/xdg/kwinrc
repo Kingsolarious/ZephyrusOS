@@ -1,0 +1,6 @@
+[org.kde.kdecoration2]
+library=com.github.vinceliuice.WhiteSur-dark
+theme=WhiteSur-dark
+ButtonsOnLeft=XIA
+ButtonsOnRight=none
+BorderSize=None

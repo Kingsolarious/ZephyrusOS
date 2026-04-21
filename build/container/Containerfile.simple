@@ -1,0 +1,33 @@
+# Zephyrus OS - Simple version without Flatpaks during build
+FROM ghcr.io/ublue-os/bazzite:stable
+
+LABEL name="zephyrus-os"
+LABEL pretty_name="Zephyrus OS"
+LABEL vendor="Zephyrus OS Project"
+LABEL summary="Custom Bazzite image optimized for ASUS ROG Zephyrus laptops"
+
+# Remove conflicting files
+RUN rm -f /usr/share/pixmaps/faces/*.jpg /usr/share/pixmaps/faces/*.png 2>/dev/null || true
+
+# Install ASUS tools - THIS IS THE KEY PART
+RUN curl -Lo /etc/yum.repos.d/_copr_lukenukem-asus-linux.repo \
+    https://copr.fedorainfracloud.org/coprs/lukenukem/asus-linux/repo/fedora-41/lukenukem-asus-linux-fedora-41.repo && \
+    rpm-ostree install \
+    asusctl \
+    asusctl-rog-gui && \
+    rm -f /etc/yum.repos.d/_copr_lukenukem-asus-linux.repo && \
+    rpm-ostree cleanup -m && \
+    ostree container commit
+
+# Create Zephyrus OS branding
+RUN echo "ZEPHYRUS_OS=true" > /etc/zephyrus-release && \
+    ostree container commit
+
+# Set default profile script
+RUN printf '%s\n' '#!/bin/bash' '# Zephyrus OS Default Settings' 'asusctl profile -P balanced 2>/dev/null || true' > /etc/profile.d/zephyrus.sh && \
+    chmod +x /etc/profile.d/zephyrus.sh && \
+    ostree container commit
+
+# Create About Zephyrus system-wide
+COPY --chmod=755 about-zephyrus.sh /usr/bin/about-zephyrus
+RUN ostree container commit

@@ -1,0 +1,13 @@
+[Unit]
+Description=Zephyrus OEM Profile Watcher (Auto-sync on profile change)
+After=asusd.service zephyrus-gu605my-tune.service
+Wants=asusd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/zephyrus-profile-watch
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

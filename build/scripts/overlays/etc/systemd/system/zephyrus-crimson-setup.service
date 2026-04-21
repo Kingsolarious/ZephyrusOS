@@ -1,0 +1,12 @@
+[Unit]
+Description=Zephyrus Crimson OS Setup
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/zephyrus-crimson-setup
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,50 @@
+From: Zephyrus OS Builder <builder@zephyrus-os.local>
+Date: Thu, 6 Mar 2025 00:00:00 +0000
+Subject: [PATCH] Remove screen lock toggle from Quick Settings
+
+This patch removes the screen lock/shield toggle from GNOME Shell's
+Quick Settings menu for Zephyrus OS.
+
+---
+ js/ui/status/system.js | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/js/ui/status/system.js b/js/ui/status/system.js
+index 1234567..abcdefg 100644
+--- a/js/ui/status/system.js
++++ b/js/ui/status/system.js
+@@ -100,7 +100,12 @@ class SystemIndicator extends PanelMenu.SystemIndicator {
+         // Screen shield / lock toggle - REMOVED FOR ZEPHYRUS OS
+-        this._screenShieldToggle = new ScreenShieldToggle(this._screenShield);
+-        this._addSettingsItem(this._screenShieldToggle);
++        // ZEPHYRUS OS: Screen lock toggle intentionally removed
++        // this._screenShieldToggle = new ScreenShieldToggle(this._screenShield);
++        // this._addSettingsItem(this._screenShieldToggle);
++        
++        // Keep the reference but hide it (alternative approach)
++        // this._screenShieldToggle = new ScreenShieldToggle(this._screenShield);
++        // this._screenShieldToggle.visible = false;
+ 
+         // Screen recording toggle - REMOVED FOR ZEPHYRUS OS
+-        this._screenRecordingToggle = new ScreenRecordingToggle();
+-        this.quickSettingsItems.push(this._screenRecordingToggle);
++        // ZEPHYRUS OS: Screen recording toggle intentionally removed
++        // this._screenRecordingToggle = new ScreenRecordingToggle();
++        // this.quickSettingsItems.push(this._screenRecordingToggle);
+ 
+         // Rest of initialization...
+         this._createDefaultItems();
+@@ -200,6 +205,11 @@ class SystemIndicator extends PanelMenu.SystemIndicator {
+         // Accessibility, network, bluetooth, etc.
+     }
+ }
++
++// ZEPHYRUS OS MARKER - This file has been patched
++// To verify: grep -r "ZEPHYRUS OS" /usr/share/gnome-shell/js/ui/status/system.js
++// Original toggle positions: _screenShieldToggle, _screenRecordingToggle
++
+ GObject.registerClass(SystemIndicator);
+ 
+ export { SystemIndicator };
+-- 
+2.40.0

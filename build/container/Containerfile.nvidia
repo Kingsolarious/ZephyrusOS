@@ -1,0 +1,54 @@
+# Zephyrus OS - Custom Bazzite for ASUS ROG Zephyrus (WITH NVIDIA SUPPORT)
+FROM ghcr.io/ublue-os/bazzite-nvidia:stable
+
+LABEL name="zephyrus-os-nvidia"
+LABEL pretty_name="Zephyrus OS (NVIDIA)"
+LABEL vendor="Zephyrus OS Project"
+LABEL summary="Custom Bazzite image with NVIDIA support for ASUS ROG Zephyrus laptops"
+
+# Remove all conflicting face images that cause hardlink issues
+RUN rm -f /usr/share/pixmaps/faces/*.jpg /usr/share/pixmaps/faces/*.png 2>/dev/null || true
+
+# Add ASUS Linux COPR repository and install tools
+RUN curl -Lo /etc/yum.repos.d/_copr_lukenukem-asus-linux.repo \
+    https://copr.fedorainfracloud.org/coprs/lukenukem/asus-linux/repo/fedora-41/lukenukem-asus-linux-fedora-41.repo && \
+    rpm-ostree install \
+    asusctl \
+    asusctl-rog-gui \
+    supergfxctl && \
+    rm -f /etc/yum.repos.d/_copr_lukenukem-asus-linux.repo && \
+    rpm-ostree cleanup -m && \
+    ostree container commit
+
+# Enable asusd and supergfxd services
+RUN systemctl enable asusd && \
+    systemctl enable supergfxd && \
+    ostree container commit
+
+# Create Zephyrus OS branding
+RUN echo "ZEPHYRUS_OS=true" > /etc/zephyrus-release && \
+    echo "NVIDIA_SUPPORT=true" >> /etc/zephyrus-release && \
+    ostree container commit
+
+# Set default profile script
+RUN printf '%s\n' '#!/bin/bash' '# Zephyrus OS Default Settings' 'asusctl profile -P performance 2>/dev/null || true' > /etc/profile.d/zephyrus.sh && \
+    chmod +x /etc/profile.d/zephyrus.sh && \
+    ostree container commit
+
+# Install Flatpaks for ROG experience
+COPY --chmod=755 install-flatpaks.sh /tmp/install-flatpaks.sh
+RUN /tmp/install-flatpaks.sh && \
+    rm /tmp/install-flatpaks.sh && \
+    ostree container commit
+
+# Copy the theme setup script to /usr/share for user access
+COPY --chmod=755 setup-rog-macos-theme.sh /usr/share/zephyrus-os/setup-rog-macos-theme.sh
+RUN ostree container commit
+
+# Create custom About Zephyrus system-wide script
+COPY --chmod=755 about-zephyrus.sh /usr/bin/about-zephyrus
+RUN ostree container commit
+
+# Create desktop entries for custom apps
+COPY --chmod=644 desktop-entries/*.desktop /usr/share/applications/ 2>/dev/null || true
+RUN ostree container commit || true

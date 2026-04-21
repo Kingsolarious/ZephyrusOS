@@ -1,0 +1,209 @@
+# Zephyrus Crimson OS - KDE FULL EDITION
+# Includes ALL packages from build plan (excluding conflicting KDE devel)
+
+ARG BASE_IMAGE=ghcr.io/ublue-os/bazzite
+ARG BASE_TAG=stable
+
+FROM ${BASE_IMAGE}:${BASE_TAG}
+
+LABEL org.opencontainers.image.title="Zephyrus Crimson OS - KDE Full"
+LABEL org.opencontainers.image.description="Complete ASUS ROG Zephyrus OS with all packages"
+LABEL org.opencontainers.image.version="2.2.0-kde-full"
+LABEL org.opencontainers.image.vendor="Solarious"
+
+ARG ZEPHYRUS_VERSION=2.2.0-kde-full
+ARG ZEPHYRUS_BUILD_DATE
+
+ENV ZEPHYRUS_VERSION=${ZEPHYRUS_VERSION}
+ENV ZEPHYRUS_BUILD_DATE=${ZEPHYRUS_BUILD_DATE}
+
+# =============================================================================
+# PHASE 2: ALL BUILD DEPENDENCIES
+# =============================================================================
+
+RUN rpm-ostree install \
+        git cmake gcc gcc-c++ make automake autoconf libtool pkgconfig \
+        meson ninja-build gtk3-devel gtk4-devel qt6-qtbase-devel qt6-qttools-devel \
+        sassc optipng inkscape libxml2 libxslt \
+        python3 python3-pip python3-lxml python3-psutil python3-devel python3-gobject \
+        wget curl unzip zip tar rsync && \
+    ostree container commit
+
+# =============================================================================
+# PHASE 2.3-2.4: KVANTUM + KDE COMPONENTS
+# =============================================================================
+
+RUN rpm-ostree install \
+        kvantum plasma-nm plasma-pa kde-gtk-config xdg-desktop-portal-kde qt6ct \
+        sddm sddm-kcm plymouth plymouth-theme-spinner && \
+    ostree container commit
+
+# =============================================================================
+# SYSTEM UTILITIES
+# =============================================================================
+
+RUN rpm-ostree install \
+        pciutils lm_sensors usbutils fastfetch htop btop \
+        google-roboto-fonts google-noto-sans-fonts google-noto-mono-fonts jetbrains-mono-fonts \
+        gnome-tweaks gnome-shell-extension-appindicator \
+        gamemode \
+        mangohud \
+        scx-scheds \
+        nvtop \
+        intel-gpu-tools && \
+    ostree container commit
+
+# =============================================================================
+# CUSTOM ASUSCTL BUILD
+# =============================================================================
+
+COPY custom-asusctl /tmp/asusctl-src
+RUN rpm-ostree install rust cargo gtk4-devel libadwaita-1-devel && \
+    cd /tmp/asusctl-src && \
+    make && \
+    make install && \
+    rm -rf /tmp/asusctl-src && \
+    ostree container commit
+
+# =============================================================================
+# HARDWARE PROBING TOOLS
+# =============================================================================
+
+# Install dptfxtract (static binary from Intel release)
+RUN cd /tmp && curl -L -o dptfxtract.tar.gz https://github.com/intel/dptfxtract/archive/refs/tags/v1.4.3.tar.gz && \
+    tar xzf dptfxtract.tar.gz && \
+    cp dptfxtract-*/dptfxtract-static /usr/local/bin/dptfxtract && \
+    chmod +x /usr/local/bin/dptfxtract && \
+    rm -rf dptfxtract* && \
+    ostree container commit
+
+# Build and install ectool (coreboot EC utility)
+RUN cd /tmp && mkdir ectool && cd ectool && \
+    curl -L -o Makefile https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/Makefile && \
+    curl -L -o ec.c https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ec.c && \
+    curl -L -o ec.h https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ec.h && \
+    curl -L -o ectool.c https://raw.githubusercontent.com/coreboot/coreboot/master/util/ectool/ectool.c && \
+    make && make install && cd /tmp && rm -rf ectool && \
+    ostree container commit
+
+# =============================================================================
+# PHASE 8: VIRTUALIZATION
+# =============================================================================
+
+RUN rpm-ostree install \
+        qemu-kvm qemu-img libvirt libvirt-daemon-kvm virt-install virt-manager virt-viewer \
+        bridge-utils edk2-ovmf spice-vdagent spice-webdavd guestfs-tools libguestfs-tools-c \
+        distrobox podman-compose && \
+    ostree container commit
+
+# =============================================================================
+# PHASE 3: WHITE SUR THEMES
+# =============================================================================
+
+RUN mkdir -p /usr/share/zephyrus-crimson/themes && \
+    cd /usr/share/zephyrus-crimson/themes && \
+    git clone --depth 1 https://github.com/vinceliuice/WhiteSur-kde.git && \
+    git clone --depth 1 https://github.com/vinceliuice/WhiteSur-gtk-theme.git && \
+    git clone --depth 1 https://github.com/vinceliuice/WhiteSur-icon-theme.git && \
+    git clone --depth 1 https://github.com/vinceliuice/WhiteSur-cursors.git && \
+    git clone --depth 1 https://github.com/vinceliuice/WhiteSur-wallpapers.git && \
+    ostree container commit
+
+# =============================================================================
+# PHASE 3.6: INTER FONT
+# =============================================================================
+
+RUN mkdir -p /usr/share/fonts/inter && cd /tmp && \
+    curl -L -o inter-4.0.zip "https://github.com/rsms/inter/releases/download/v4.0/inter-4.0.zip" && \
+    unzip -o inter-4.0.zip -d inter-fonts && \
+    cp inter-fonts/InterVariable*.ttf /usr/share/fonts/inter/ 2>/dev/null || true && \
+    cp inter-fonts/*.ttf /usr/share/fonts/inter/ 2>/dev/null || true && \
+    fc-cache -fv && rm -rf /tmp/inter* && \
+    ostree container commit
+
+# =============================================================================
+# PHASE 4: ROG CUSTOM ASSETS
+# =============================================================================
+
+COPY os-build/overlays/etc/ /etc/
+COPY os-build/overlays/usr/ /usr/
+
+# =============================================================================
+# CUSTOM ROG APPS
+# =============================================================================
+
+COPY zephyrus-about/ /usr/share/zephyrus-crimson/about/
+RUN cp /usr/share/zephyrus-crimson/about/zephyrus-about.desktop /usr/share/applications/ && \
+    ln -sf /usr/share/zephyrus-crimson/about/about.py /usr/bin/zephyrus-about && \
+    chmod +x /usr/share/zephyrus-crimson/about/about.py
+
+RUN mkdir -p /usr/share/zephyrus-crimson/assets && \
+    cp /usr/share/zephyrus-crimson/about/assets/* /usr/share/zephyrus-crimson/assets/ 2>/dev/null || true
+
+COPY zephyrus-desktop/dock/zephyrus-dock-styled.py /usr/share/zephyrus-crimson/dock/
+RUN chmod +x /usr/share/zephyrus-crimson/dock/zephyrus-dock-styled.py && \
+    ln -sf /usr/share/zephyrus-crimson/dock/zephyrus-dock-styled.py /usr/bin/zephyrus-dock
+
+COPY plymouth/ /usr/share/plymouth/themes/zephyrus-crimson/
+RUN ln -sf /usr/share/plymouth/themes/zephyrus-crimson/zephyrus-crimson.plymouth \
+    /usr/share/plymouth/themes/default.plymouth 2>/dev/null || true
+
+COPY theme/ /usr/share/themes/Zephyrus-Crimson/
+
+# =============================================================================
+# PHASE 8: VS CODE & NODE.JS
+# =============================================================================
+
+RUN echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo && \
+    rpm --import https://packages.microsoft.com/keys/microsoft.asc 2>/dev/null || true
+
+RUN rpm-ostree install \
+    rpm-ostree install code nodejs npm && \
+    ostree container commit
+
+# =============================================================================
+# PHASE 8: AI/ML PYTHON PACKAGES
+# =============================================================================
+
+# AI/ML packages installed via distrobox container instead to avoid conflicts
+RUN pip3 install --prefix=/usr --upgrade pip --break-system-packages && \
+    ostree container commit
+
+# =============================================================================
+# CONFIGURATION FILES
+# =============================================================================
+
+RUN mkdir -p /etc/xdg && printf '%s\n' '[General]' 'font=Inter,10,-1,5,50,0,0,0,0,0' 'fixed=JetBrains Mono,10,-1,5,50,0,0,0,0,0' 'menuFont=Inter,10,-1,5,50,0,0,0,0,0' 'toolBarFont=Inter,10,-1,5,50,0,0,0,0,0' 'activeFont=Inter,10,-1,5,75,0,0,0,0,0' > /etc/xdg/kcmfonts
+
+RUN mkdir -p /etc/xdg/gtk-3.0 && printf '%s\n' '[Settings]' 'gtk-theme-name=Adwaita-dark' 'gtk-icon-theme-name=hicolor' 'gtk-font-name=Inter 10' 'gtk-application-prefer-dark-theme=1' > /etc/xdg/gtk-3.0/settings.ini
+
+# =============================================================================
+# AI CODER SCRIPTS - will be created post-install to avoid build issues
+
+# =============================================================================
+# ENABLE SERVICES
+# =============================================================================
+
+RUN systemctl enable sddm && \
+    systemctl enable libvirtd && \
+    systemctl enable asusd && \
+    systemctl enable nvidia-power-limit && \
+    systemctl enable rapl-tune && \
+    systemctl enable zephyrus-gu605my-tune && \
+    systemctl enable scx && \
+    systemctl enable zephyrus-probe-hardware && \
+    ostree container commit
+
+# =============================================================================
+# METADATA
+# =============================================================================
+
+RUN echo "Zephyrus Crimson OS ${ZEPHYRUS_VERSION}" > /etc/zephyrus-release && \
+    echo "BUILD_DATE=${ZEPHYRUS_BUILD_DATE}" >> /etc/zephyrus-release && \
+    echo "DESKTOP_ENVIRONMENT=KDE Plasma 6" >> /etc/zephyrus-release && \
+    echo "THEME=WhiteSur macOS + ROG" >> /etc/zephyrus-release && \
+    echo "AI_ENVIRONMENT=Full" >> /etc/zephyrus-release && \
+    echo "zephyrus-crimson" > /etc/hostname && \
+    ostree container commit
+
+RUN echo "Build complete: Zephyrus Crimson OS ${ZEPHYRUS_VERSION}" && cat /etc/zephyrus-release

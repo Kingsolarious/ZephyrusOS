@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Zephyrus Dock
+Comment=ROG-themed macOS-style dock
+Exec=/usr/bin/zephyrus-dock
+Type=Application
+Terminal=false
+Icon=preferences-system
+Categories=System;Utility;
+X-GNOME-Autostart-enabled=true

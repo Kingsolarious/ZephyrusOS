@@ -1,0 +1,12 @@
+[Unit]
+Description=ASUS ROG Zephyrus Thermal Daemon
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/thermal-daemon.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

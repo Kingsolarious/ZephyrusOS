@@ -1,0 +1,239 @@
+#!/bin/bash
+# Gaming QoS Script for GU605MY on Bazzite
+# Replaces ASUS GameFirst with Linux-native traffic control
+# Provides better control than Windows QoS
+
+set -e
+
+INTERFACE="${INTERFACE:-wlan0}"
+RATE="${RATE:-1000mbit}"
+GAME_CLASS_RATE="${GAME_CLASS_RATE:-500mbit}"
+VOICE_CLASS_RATE="${VOICE_CLASS_RATE:-100mbit}"
+BULK_CLASS_RATE="${BULK_CLASS_RATE:-200mbit}"
+
+echo "=== GU605MY Gaming QoS ==="
+echo "Interface: $INTERFACE"
+echo "Total rate: $RATE"
+
+# Check if interface exists
+if ! ip link show "$INTERFACE" >/dev/null 2>&1; then
+    echo "Error: Interface $INTERFACE not found"
+    echo "Available interfaces:"
+    ip link show | grep "^[0-9]" | awk '{print $2}' | sed 's/://'
+    exit 1
+fi
+
+# Clean up existing qdisc
+echo "[1/4] Cleaning existing QoS..."
+sudo tc qdisc del dev "$INTERFACE" root 2>/dev/null || true
+
+# Create HTB root qdisc
+echo "[2/4] Creating HTB root qdisc..."
+sudo tc qdisc add dev "$INTERFACE" root handle 1: htb default 40
+
+# Root class
+sudo tc class add dev "$INTERFACE" parent 1: classid 1:1 htb rate "$RATE" ceil "$RATE"
+
+# Gaming class (highest priority) - 10
+# Handles: Steam, Valorant, CS2, Apex, Overwatch, CoD, etc.
+echo "[3/4] Creating game traffic class (prio 1)..."
+sudo tc class add dev "$INTERFACE" parent 1:1 classid 1:10 htb \
+    rate "$GAME_CLASS_RATE" ceil "$RATE" prio 1
+
+# Voice class (Discord, Zoom, VoIP) - 20
+echo "Creating voice traffic class (prio 2)..."
+sudo tc class add dev "$INTERFACE" parent 1:1 classid 1:20 htb \
+    rate "$VOICE_CLASS_RATE" ceil "${RATE}" prio 2
+
+# Interactive class (web, SSH) - 30
+echo "Creating interactive traffic class (prio 3)..."
+sudo tc class add dev "$INTERFACE" parent 1:1 classid 1:30 htb \
+    rate "100mbit" ceil "${RATE}" prio 3
+
+# Bulk class (downloads, updates, streaming) - 40 (default)
+echo "Creating bulk traffic class (prio 4, default)..."
+sudo tc class add dev "$INTERFACE" parent 1:1 classid 1:40 htb \
+    rate "$BULK_CLASS_RATE" ceil "${RATE}" prio 4
+
+# Add fq_codel to each class for AQM
+echo "[4/4] Adding fq_codel AQM to all classes..."
+sudo tc qdisc add dev "$INTERFACE" parent 1:10 fq_codel flows 1024 quantum 300
+sudo tc qdisc add dev "$INTERFACE" parent 1:20 fq_codel flows 1024 quantum 300
+sudo tc qdisc add dev "$INTERFACE" parent 1:30 fq_codel flows 1024 quantum 300
+sudo tc qdisc add dev "$INTERFACE" parent 1:40 fq_codel flows 1024 quantum 300
+
+# === FILTERS: Game Traffic ===
+echo ""
+echo "=== Adding game traffic filters ==="
+
+# Steam / Source Engine
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27015 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27016 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27017 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27018 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27019 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27020 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27021 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27022 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27023 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27024 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27025 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27026 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27027 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27028 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27029 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27030 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27031 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27032 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27033 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27034 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27035 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 27036 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip sport 27015 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip sport 27036 0xffff classid 1:10
+
+# Steam matchmaking / downloads (bulk, not game traffic)
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 2 u32 \
+    match ip dport 27050 0xffff classid 1:40
+
+# Valorant
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 5000 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 5001 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 5002 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 5003 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 5004 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 5005 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip sport 5000 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip sport 5005 0xffff classid 1:10
+
+# Apex Legends
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 37015 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 37016 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 37017 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 37018 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 37019 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 37020 0xffff classid 1:10
+
+# Call of Duty
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 3074 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 3075 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 3076 0xffff classid 1:10
+
+# Overwatch / Battle.net
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 1119 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 3724 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 6112 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 6113 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 6114 0xffff classid 1:10
+
+# Riot Games (LoL, TFT, Valorant)
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 5000 0xffff classid 1:10
+
+# Epic Games
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 5222 0xffff classid 1:10
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 5795 0xffff classid 1:10
+
+# === FILTERS: Voice Traffic ===
+echo "=== Adding voice traffic filters ==="
+
+# Discord
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 5000 0xffff classid 1:20
+
+# TeamSpeak
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 9987 0xffff classid 1:20
+
+# Mumble
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 64738 0xffff classid 1:20
+
+# Zoom
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 8801 0xffff classid 1:20
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 1 u32 \
+    match ip dport 8802 0xffff classid 1:20
+
+# === FILTERS: Bulk Traffic (low priority) ===
+echo "=== Adding bulk traffic filters ==="
+
+# HTTP/HTTPS downloads
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 3 u32 \
+    match ip dport 80 0xffff classid 1:40
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 3 u32 \
+    match ip dport 443 0xffff classid 1:40
+
+# Steam downloads (not game traffic)
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 3 u32 \
+    match ip dport 27050 0xffff classid 1:40
+
+# Torrent
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 3 u32 \
+    match ip dport 6881 0xffff classid 1:40
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 3 u32 \
+    match ip dport 6882 0xffff classid 1:40
+
+# Netflix / streaming
+sudo tc filter add dev "$INTERFACE" protocol ip parent 1:0 prio 3 u32 \
+    match ip dport 1935 0xffff classid 1:40
+
+# === Show results ===
+echo ""
+echo "=== QoS Configuration Applied ==="
+sudo tc qdisc show dev "$INTERFACE"
+echo ""
+sudo tc class show dev "$INTERFACE"
+echo ""
+sudo tc filter show dev "$INTERFACE"
+echo ""
+echo "Gaming traffic now has highest priority on $INTERFACE"
+echo "To verify: sudo tc -s qdisc show dev $INTERFACE"

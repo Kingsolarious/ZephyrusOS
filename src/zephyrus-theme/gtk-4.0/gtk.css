@@ -1,0 +1,281 @@
+/* Zephyrus Theme - Glass/Translucent Window Style */
+/* Inspired by macOS Big Sur + ROG aesthetic */
+
+/* Root window styling */
+window {
+    background: linear-gradient(
+        180deg,
+        rgba(40, 10, 15, 0.95) 0%,
+        rgba(25, 5, 8, 0.98) 100%
+    );
+    border-radius: 12px;
+    border: 1px solid rgba(255, 0, 51, 0.3);
+    box-shadow: 
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 40px rgba(255, 0, 51, 0.1);
+}
+
+/* Title bar / Header bar - Glass effect */
+headerbar,
+.titlebar {
+    background: linear-gradient(
+        180deg,
+        rgba(60, 15, 20, 0.85) 0%,
+        rgba(35, 8, 12, 0.9) 50%,
+        rgba(25, 5, 8, 0.95) 100%
+    );
+    border-bottom: 1px solid rgba(255, 0, 51, 0.2);
+    border-radius: 12px 12px 0 0;
+    min-height: 42px;
+    padding: 8px 16px;
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Window title */
+headerbar label.title,
+.titlebar label {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Window control buttons (close, minimize, maximize) */
+windowcontrols button {
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    min-width: 14px;
+    min-height: 14px;
+    margin: 0 6px;
+    padding: 0;
+}
+
+/* Close button - Red */
+windowcontrols button.close {
+    background: linear-gradient(180deg, #ff5f57 0%, #ff3b30 100%);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+windowcontrols button.close:hover {
+    background: linear-gradient(180deg, #ff7b73 0%, #ff5f57 100%);
+}
+
+/* Minimize button - Yellow */
+windowcontrols button.minimize {
+    background: linear-gradient(180deg, #ffbd2e 0%, #ff9500 100%);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+windowcontrols button.minimize:hover {
+    background: linear-gradient(180deg, #ffd54f 0%, #ffbd2e 100%);
+}
+
+/* Maximize button - Green */
+windowcontrols button.maximize {
+    background: linear-gradient(180deg, #28c840 0%, #27ae60 100%);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+windowcontrols button.maximize:hover {
+    background: linear-gradient(180deg, #4cd964 0%, #28c840 100%);
+}
+
+/* Content area */
+window > box,
+window > overlay > box {
+    background: transparent;
+}
+
+/* Buttons */
+button {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 0, 51, 0.9) 0%,
+        rgba(200, 0, 40, 0.95) 100%
+    );
+    border: 1px solid rgba(255, 0, 51, 0.5);
+    border-radius: 6px;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 8px 20px;
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 200ms ease;
+}
+
+button:hover {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 30, 81, 0.95) 0%,
+        rgba(230, 0, 50, 1) 100%
+    );
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 0 15px rgba(255, 0, 51, 0.4),
+        0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+    background: linear-gradient(
+        180deg,
+        rgba(180, 0, 36, 1) 0%,
+        rgba(150, 0, 30, 1) 100%
+    );
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Secondary buttons (non-ROG) */
+button.secondary,
+button.text-button {
+    background: linear-gradient(
+        180deg,
+        rgba(60, 60, 60, 0.9) 0%,
+        rgba(40, 40, 40, 0.95) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+button.secondary:hover,
+button.text-button:hover {
+    background: linear-gradient(
+        180deg,
+        rgba(80, 80, 80, 0.95) 0%,
+        rgba(60, 60, 60, 1) 100%
+    );
+}
+
+/* Tab buttons (like in the About window) */
+notebook header {
+    background: transparent;
+    border: none;
+    padding: 8px 16px;
+}
+
+notebook tab {
+    background: linear-gradient(
+        180deg,
+        rgba(60, 60, 60, 0.6) 0%,
+        rgba(40, 40, 40, 0.7) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #cccccc;
+    font-weight: 500;
+    padding: 8px 20px;
+    margin: 0 4px;
+}
+
+notebook tab:checked,
+notebook tab:hover {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 0, 51, 0.9) 0%,
+        rgba(200, 0, 40, 0.95) 100%
+    );
+    border-color: rgba(255, 0, 51, 0.5);
+    color: #ffffff;
+}
+
+/* Labels */
+label {
+    color: #ffffff;
+}
+
+label.dim-label,
+label.subtitle {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Large titles (like "ROG ZEPHYRUS G16 OS") */
+label.heading,
+label.title-1 {
+    color: #ff0033;
+    font-size: 24px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Links */
+link {
+    color: #ff0033;
+}
+
+link:visited {
+    color: #ff3366;
+}
+
+/* Lists and rows */
+row {
+    background: transparent;
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+row:hover {
+    background: rgba(255, 0, 51, 0.1);
+}
+
+row:selected {
+    background: rgba(255, 0, 51, 0.2);
+}
+
+/* Separators */
+separator {
+    background: rgba(255, 255, 255, 0.1);
+    min-height: 1px;
+    margin: 8px 16px;
+}
+
+/* Scrollbars */
+scrollbar slider {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    min-width: 8px;
+}
+
+scrollbar slider:hover {
+    background: rgba(255, 0, 51, 0.6);
+}
+
+/* Entry/text fields */
+entry {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #ffffff;
+    padding: 8px 12px;
+}
+
+entry:focus {
+    border-color: rgba(255, 0, 51, 0.5);
+    box-shadow: 0 0 0 2px rgba(255, 0, 51, 0.2);
+}
+
+/* Glass overlay effect for special windows */
+.glass-window {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 0, 51, 0.05) 0%,
+        rgba(40, 10, 15, 0.95) 50%,
+        rgba(25, 5, 8, 0.98) 100%
+    );
+}
+
+/* ROG Logo glow effect */
+.rog-logo-glow {
+    filter: drop-shadow(0 0 20px rgba(255, 0, 51, 0.5));
+}

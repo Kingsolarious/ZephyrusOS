@@ -1,0 +1,157 @@
+#!/bin/bash
+# Zephyrus AI Coder Environment Setup
+# Creates and configures the AI Coder Distrobox container
+
+set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+echo -e "${BLUE}Zephyrus AI Coder Environment Setup${NC}"
+echo "===================================="
+echo ""
+
+# Check if distrobox is installed
+if ! command -v distrobox &>/dev/null; then
+    echo -e "${RED}Error: distrobox is not installed${NC}"
+    exit 1
+fi
+
+# Check if container already exists
+if distrobox list | grep -q "ai-coder"; then
+    echo -e "${YELLOW}AI Coder container already exists${NC}"
+    echo ""
+    read -p "Recreate it? (y/N) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}Removing existing container...${NC}"
+        distrobox stop ai-coder 2>/dev/null || true
+        distrobox rm ai-coder --force 2>/dev/null || true
+        rm -rf ~/distrobox/ai-coder-home 2>/dev/null || true
+    else
+        echo "Keeping existing container."
+        exit 0
+    fi
+fi
+
+echo -e "${BLUE}Creating AI Coder container...${NC}"
+echo "This may take a few minutes..."
+echo ""
+
+# Create the container
+distrobox create \
+    --name ai-coder \
+    --image ubuntu:24.04 \
+    --home ~/distrobox/ai-coder-home \
+    --nvidia \
+    --additional-packages "python3,python3-pip,python3-venv,git,curl,wget,build-essential,nodejs,npm,ffmpeg,libsm6,libxext6,neovim,htop"
+
+echo -e "${GREEN}✓ Container created${NC}"
+echo ""
+
+echo -e "${BLUE}Installing AI/ML tools inside container...${NC}"
+
+# Install AI tools
+distrobox enter ai-coder -- bash -c '
+    # Update pip
+    pip3 install --upgrade pip
+    
+    # Install PyTorch (CPU version for compatibility, GPU detected at runtime)
+    pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+    
+    # Install ML/AI libraries
+    pip3 install \
+        transformers \
+        accelerate \
+        datasets \
+        huggingface-hub \
+        langchain \
+        langchain-community \
+        openai \
+        anthropic \
+        jupyterlab \
+        notebook \
+        ipywidgets \
+        numpy \
+        pandas \
+        matplotlib \
+        seaborn \
+        scikit-learn
+    
+    # Install Ollama
+    curl -fsSL https://ollama.com/install.sh | sh
+    
+    # Install Node.js tools
+    npm install -g @anthropic-ai/claude-cli 2>/dev/null || true
+    
+    echo "AI tools installation complete!"
+'
+
+echo -e "${GREEN}✓ AI tools installed${NC}"
+echo ""
+
+# Create workspace directory
+mkdir -p ~/ai-workspace
+cat > ~/ai-workspace/.vscode/settings.json << 'EOF'
+{
+    "terminal.integrated.profiles.linux": {
+        "distrobox-ai-coder": {
+            "path": "distrobox",
+            "args": ["enter", "ai-coder", "--", "bash"]
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "distrobox-ai-coder",
+    "python.defaultInterpreterPath": "/usr/bin/python3",
+    "python.analysis.extraPaths": [
+        "~/distrobox/ai-coder-home/.local/lib/python3.12/site-packages"
+    ]
+}
+EOF
+
+echo -e "${BLUE}Creating desktop entries...${NC}"
+
+mkdir -p ~/.local/share/applications
+
+cat > ~/.local/share/applications/ai-coder-distrobox.desktop << 'EOF'
+[Desktop Entry]
+Name=AI Coder (Distrobox)
+Comment=Enter AI Coder Container
+Exec=distrobox enter ai-coder
+Type=Application
+Terminal=true
+Icon=utilities-terminal
+Categories=Development;
+EOF
+
+cat > ~/.local/share/applications/ai-coder-jupyter.desktop << 'EOF'
+[Desktop Entry]
+Name=AI Coder (Jupyter Lab)
+Comment=Start Jupyter Lab
+Exec=distrobox enter ai-coder -- jupyter lab --ip=0.0.0.0 --port=8888
+Type=Application
+Terminal=true
+Icon=applications-science
+Categories=Development;Science;
+EOF
+
+update-desktop-database ~/.local/share/applications/ 2>/dev/null || true
+
+echo -e "${GREEN}✓ Desktop entries created${NC}"
+echo ""
+
+echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN}AI Coder Environment Ready!${NC}"
+echo -e "${GREEN}====================================${NC}"
+echo ""
+echo "Quick Commands:"
+echo "  distrobox enter ai-coder          # Enter container"
+echo "  zephyrus-ai-model-manager list    # List AI models"
+echo "  zephyrus-ai-model-manager pull llama3.2"
+echo "  zephyrus-ai-coder jupyter         # Start Jupyter"
+echo ""
+echo "Workspace: ~/ai-workspace"
+echo "Container Home: ~/distrobox/ai-coder-home"
+echo ""

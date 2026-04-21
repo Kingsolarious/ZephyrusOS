@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Zephyrus Dock
+Comment=ROG Styled macOS-like Dock
+Exec=/usr/bin/zephyrus-dock
+Icon=preferences-desktop-icons
+Type=Application
+Categories=System;Utility;
+Keywords=dock;zephyrus;rog;panel;

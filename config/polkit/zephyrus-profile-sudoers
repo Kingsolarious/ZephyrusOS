@@ -1,0 +1,13 @@
+# Sudoers rules for zephyrus-profile-enhanced
+# Install with: sudo visudo -f /etc/sudoers.d/zephyrus-profile
+
+# Allow user to run profile script without password
+solarious ALL=(ALL) NOPASSWD: /home/solarious/.local/bin/zephyrus-profile-enhanced
+
+# Allow specific power limit commands
+solarious ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/class/firmware-attributes/asus-armoury/attributes/*/current_value
+solarious ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+solarious ALL=(ALL) NOPASSWD: /usr/bin/nvidia-smi -pl *
+solarious ALL=(ALL) NOPASSWD: /usr/bin/asusctl profile *
+solarious ALL=(ALL) NOPASSWD: /usr/bin/asusctl fan-curve *
+solarious ALL=(ALL) NOPASSWD: /usr/bin/asusctl profile --boost-set *

@@ -1,0 +1,49 @@
+#!/bin/bash
+# Zephyrus Crimson OS - First Boot Setup Script
+# Configures system on first boot
+
+set -e
+
+LOG_FILE="/var/log/zephyrus-crimson-setup.log"
+CONFIG_FILE="/etc/zephyrus-crimson/config.conf"
+
+echo "$(date): Starting Zephyrus Crimson setup" >> "$LOG_FILE"
+
+# Check if already configured
+if [ -f "/var/lib/zephyrus-crimson/setup-complete" ]; then
+    echo "$(date): Setup already completed" >> "$LOG_FILE"
+    exit 0
+fi
+
+# Create marker directory
+mkdir -p /var/lib/zephyrus-crimson
+
+# GNOME-specific setup (only if GNOME is installed)
+if command -v gnome-shell &> /dev/null; then
+    echo "$(date): Enabling GNOME extension" >> "$LOG_FILE"
+    gsettings set org.gnome.shell enabled-extensions "['zephyrus-globalmenu@solarious']" || true
+
+    echo "$(date): Setting GNOME theme defaults" >> "$LOG_FILE"
+    gsettings set org.gnome.desktop.interface gtk-theme 'Zephyrus-Crimson' || true
+    gsettings set org.gnome.desktop.interface icon-theme 'Zephyrus-Crimson' || true
+    gsettings set org.gnome.shell.extensions.user-theme name 'Zephyrus-Crimson' || true
+fi
+
+# Set hostname if default
+CURRENT_HOSTNAME=$(hostname)
+if [ "$CURRENT_HOSTNAME" = "localhost" ] || [ "$CURRENT_HOSTNAME" = "fedora" ]; then
+    echo "$(date): Setting hostname to zephyrus-crimson" >> "$LOG_FILE"
+    hostnamectl set-hostname zephyrus-crimson
+fi
+
+# Enable Plymouth theme
+echo "$(date): Configuring Plymouth" >> "$LOG_FILE"
+if [ -f /usr/share/plymouth/themes/zephyrus-crimson/zephyrus-crimson.plymouth ]; then
+    plymouth-set-default-theme zephyrus-crimson || true
+fi
+
+# Mark setup complete
+touch /var/lib/zephyrus-crimson/setup-complete
+echo "$(date): Setup complete" >> "$LOG_FILE"
+
+exit 0

@@ -1,0 +1,68 @@
+# Zephyrus Crimson Plymouth Theme Script
+# Animated boot with ROG eye logo
+
+# Load assets
+logo = Image("rog-eye.png");
+
+# Calculate center position
+logo.x = Window.GetWidth() / 2 - logo.GetWidth() / 2;
+logo.y = Window.GetHeight() / 2 - logo.GetHeight() / 2;
+
+# Create sprite
+sprite = Sprite(logo);
+sprite.SetX(logo.x);
+sprite.SetY(logo.y);
+
+# Animation variables
+scale = 0.5;
+opacity = 0;
+time = 0;
+
+# Refresh function - called every frame
+fun refresh_callback() {
+    time = time + 0.02;
+    
+    # Fade in during first second
+    if (time < 1.0) {
+        opacity = time;
+    } else if (time < 2.0) {
+        # Hold
+        opacity = 1.0;
+    } else if (time < 3.0) {
+        # Subtle pulse
+        opacity = 0.8 + 0.2 * Math.Sin((time - 2.0) * 3.14159 * 2);
+    }
+    
+    # Scale up slightly
+    if (scale < 1.0) {
+        scale = scale + 0.01;
+    }
+    
+    # Apply transformations
+    sprite.SetOpacity(opacity);
+    sprite.SetScale(scale, scale);
+}
+
+# Set refresh callback
+Plymouth.SetRefreshFunction(refresh_callback);
+
+# Status update callback (for progress)
+fun progress_callback(duration, progress) {
+    # Could add progress indicator here
+}
+
+Plymouth.SetBootProgressFunction(progress_callback);
+
+# Message callback
+fun message_callback(text) {
+    # Could display boot messages
+}
+
+Plymouth.SetMessageFunction(message_callback);
+
+# Quit callback - fade out
+fun quit_callback() {
+    # Fade out animation could go here
+}
+
+Plymouth.SetQuitFunction(quit_callback);

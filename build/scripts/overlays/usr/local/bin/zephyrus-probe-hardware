@@ -1,0 +1,120 @@
+#!/bin/bash
+# Zephyrus OS - Hardware Probing Script for GU605MY
+# Reads DPTF tables and EC registers (read-only)
+
+set -e
+
+PROBE_DIR="/var/lib/zephyrus-crimson/probe"
+MARKER="/var/lib/zephyrus-crimson/probe-complete"
+LOG="$PROBE_DIR/probe.log"
+
+# Only run once
+if [ -f "$MARKER" ]; then
+    echo "Hardware probe already completed. See $PROBE_DIR"
+    exit 0
+fi
+
+mkdir -p "$PROBE_DIR"
+echo "$(date -Iseconds) Starting Zephyrus OS hardware probe..." >> "$LOG"
+
+# Try to load ec_sys for better EC access
+if modprobe ec_sys write_support=1 2>/dev/null; then
+    echo "$(date -Iseconds) ec_sys module loaded" >> "$LOG"
+else
+    echo "$(date -Iseconds) ec_sys module unavailable (ectool will use direct I/O)" >> "$LOG"
+fi
+
+# =====================================================================
+# DPTF EXTRACTION
+# =====================================================================
+echo "$(date -Iseconds) Running dptfxtract..." >> "$LOG"
+if command -v dptfxtract &>/dev/null; then
+    DPTF_TMP=$(mktemp -d)
+    cd "$DPTF_TMP"
+    dptfxtract /sys/firmware/acpi/tables/ >> "$LOG" 2>&1 || true
+    if ls *.dv 1>/dev/null 2>&1; then
+        cp *.dv "$PROBE_DIR/"
+        echo "$(date -Iseconds) DPTF .dv files extracted" >> "$LOG"
+    else
+        echo "$(date -Iseconds) No DPTF .dv files generated" >> "$LOG"
+    fi
+    cd -
+    rm -rf "$DPTF_TMP"
+else
+    echo "$(date -Iseconds) dptfxtract not found" >> "$LOG"
+fi
+
+# =====================================================================
+# EC PROBING WITH ECTOOL (simple port-I/O version)
+# =====================================================================
+echo "$(date -Iseconds) Probing EC with ectool..." >> "$LOG"
+ECTOOL_BIN=""
+for p in /usr/local/sbin/ectool /usr/bin/ectool; do
+    if [ -x "$p" ]; then
+        ECTOOL_BIN="$p"
+        break
+    fi
+done
+if [ -n "$ECTOOL_BIN" ]; then
+    "$ECTOOL_BIN" -d > "$PROBE_DIR/ec-dump.txt" 2>&1 || true
+    "$ECTOOL_BIN" -i > "$PROBE_DIR/ec-idx-dump.txt" 2>&1 || true
+    "$ECTOOL_BIN" -q > "$PROBE_DIR/ec-query.txt" 2>&1 || true
+    echo "$(date -Iseconds) EC probe complete" >> "$LOG"
+else
+    echo "$(date -Iseconds) ectool not found" >> "$LOG"
+fi
+
+# =====================================================================
+# ACPI TABLE LIST
+# =====================================================================
+ls -la /sys/firmware/acpi/tables/ > "$PROBE_DIR/acpi-tables-list.txt" 2>&1 || true
+
+# =====================================================================
+# ASUSCTL STATUS
+# =====================================================================
+if command -v /usr/local/bin/asusctl &>/dev/null; then
+    /usr/local/bin/asusctl leds get > "$PROBE_DIR/asusctl-kb-brightness.txt" 2>&1 || true
+    /usr/local/bin/asusctl profile get > "$PROBE_DIR/asusctl-profile.txt" 2>&1 || true
+    for prof in performance balanced quiet; do
+        /usr/local/bin/asusctl fan-curve --mod-profile "$prof" > "$PROBE_DIR/asusctl-fan-curve-${prof}.txt" 2>&1 || true
+    done
+    echo "$(date -Iseconds) asusctl probe complete" >> "$LOG"
+else
+    echo "$(date -Iseconds) asusctl not found" >> "$LOG"
+fi
+
+# =====================================================================
+# README
+# =====================================================================
+cat > "$PROBE_DIR/README.txt" << 'READMEEOF'
+Zephyrus OS Hardware Probe Results
+==================================
+
+This directory contains read-only dumps from your ASUS ROG Zephyrus G16 GU605MY.
+
+Files:
+- *.dv                          : Intel DPTF participant tables (from dptfxtract)
+- ec-dump.txt                   : EC RAM dump (ectool -d)
+- ec-idx-dump.txt               : EC RAM + IDX dump (ectool -i)
+- ec-query.txt                  : EC query byte (ectool -q)
+- acpi-tables-list.txt          : List of available ACPI tables
+- asusctl-profile.txt           : Current asusctl profile
+- asusctl-kb-brightness.txt     : Current keyboard LED brightness
+- asusctl-fan-curve-*.txt       : Fan curves for each profile
+- probe.log                     : Execution log with timestamps
+
+Usage:
+  sudo dptfxtract /sys/firmware/acpi/tables/
+  sudo ectool -d
+  sudo ectool -i
+  sudo asusctl profile get
+  sudo asusctl fan-curve --mod-profile performance
+
+Note:
+If ectool reports I/O errors, the EC may be locked on this model.
+Try adding acpi_enforce_resources=lax to your kernel cmdline and reboot.
+READMEEOF
+
+# Mark complete
+touch "$MARKER"
+echo "$(date -Iseconds) Hardware probe finished. Results in $PROBE_DIR" >> "$LOG"

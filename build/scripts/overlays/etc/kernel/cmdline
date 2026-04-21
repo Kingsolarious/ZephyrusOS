@@ -1,0 +1,1 @@
+mem_sleep_default=deep intel_pstate=active cpufreq.default_governor=performance split_lock_detect=off nvidia-drm.modeset=1 nvidia.NVreg_PreserveVideoMemoryAllocations=1 nvidia.NVreg_EnableGpuFirmware=1 nvidia.NVreg_DynamicPowerManagement=0x02 i915.enable_dpcd_backlight=1 nvidia.NVreg_EnableBacklightHandler=0 acpi_osi="Windows 2022" acpi_osi=Linux

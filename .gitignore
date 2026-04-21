@@ -1,0 +1,71 @@
+# ============================================================================
+# Zephyrus OS — .gitignore
+# ============================================================================
+
+# ── Build artifacts ──
+*.tar *.oci *.qcow2 *.raw *.iso *.img *.container *.box *.vmdk *.vdi
+build-output/ target/ **/target/
+Cargo.lock
+
+# ── Compiled binaries ──
+*.ko *.o *.so *.a *.dll *.exe *.out *.bin
+
+# ── Captures & dumps (research only, never commit) ──
+*.pcap *.pcapng *.cap *.wav
+*.log logs/
+
+# ── Large media ──
+*.mp4 *.mov *.avi *.mkv
+
+# ── Images (keep assets/, ignore root-level junk) ──
+/*.png /*.jpg /*.jpeg /*.gif /*.bmp /*.webp
+
+# ── Signing keys (NEVER commit) ──
+cosign.key cosign.pub *.pem *.key *.crt *.p12 *.pfx
+id_rsa* id_ed25519*
+
+# ── Local configuration ──
+.env *.local .localconfig
+
+# ── IDE ──
+.vscode/ .idea/ *.swp *.swo *~ *.bak *.tmp
+
+# ── Cache ──
+.cache/ __pycache__/ *.pyc *.pyo
+.mypy_cache/ *.egg-info/
+
+# ── Node ──
+node_modules/ package-lock.json yarn.lock
+
+# ── OS files ──
+.DS_Store .directory Thumbs.db desktop.ini
+
+# ── Fedora / Bazzite ──
+*.rpm *.srpm rpmbuild/
+
+# ── Development / Debug ──
+DEBUG .bashrc-container-check
+zephyrus-crimson.code-workspace
+build/scripts/custom-asusctl
+
+# ── Embedded repos ──
+build/scripts/custom-asusctl/
+
+# ── Research artifacts (never commit captures/binaries) ──
+*.pcap *.pcapng
+*.exe *.dll *.bin
+*.ico
+__pycache__/
+
+# ── Embedded repos ──
+build/scripts/custom-asusctl/
+
+# ── Research artifacts (never commit captures/binaries) ──
+*.pcap
+*.pcapng
+*.exe
+*.dll
+*.bin
+*.ico
+__pycache__/
+*.pwcfg

@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Zephyrus Crimson
+Description=ROG Zephyrus Crimson Edition Boot Theme
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/zephyrus-crimson
+ScriptFile=/usr/share/plymouth/themes/zephyrus-crimson/zephyrus.script

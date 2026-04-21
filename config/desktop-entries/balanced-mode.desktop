@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=ROG Balanced Mode
+Comment=Switch to balanced/cool mode
+Exec=/home/solarious/Desktop/Zephyrus%20OS/gaming-mode-gui.sh balanced
+Type=Application
+Terminal=false
+Icon=preferences-system-power
+Categories=Settings;

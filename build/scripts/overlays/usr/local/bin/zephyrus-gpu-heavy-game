@@ -1,0 +1,4 @@
+#!/bin/bash
+# Max GPU power for GPU-bound titles
+sudo nvidia-smi -pl 125
+gamemoderun "$@"
