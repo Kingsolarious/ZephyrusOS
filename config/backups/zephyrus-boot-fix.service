@@ -1,0 +1,12 @@
+[Unit]
+Description=Zephyrus Boot Fix - Restore ASUS configs on every boot
+Before=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/zephyrus-boot-fix.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target

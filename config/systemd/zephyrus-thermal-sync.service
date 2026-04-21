@@ -1,0 +1,12 @@
+[Unit]
+Description=Zephyrus Thermal Sync - Syncs Intel RAPL with ASUS profiles
+After=asusd.service power-profiles-daemon.service
+Wants=asusd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/zephyrus-thermal-sync.sh
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target

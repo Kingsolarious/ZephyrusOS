@@ -7,7 +7,6 @@
 Your current Bazzite system has extensive customizations:
 - Custom `asusctl`/`asusd`/`rog-control-center` binaries
 - Layered packages (code, nodejs, cargo, ckb-next, easyeffects, etc.)
-- Ollama AI server
 - Personal development tools
 
 **A full image rebuild would lose all of these.** Layering preserves everything.

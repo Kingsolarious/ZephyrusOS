@@ -1,13 +1,11 @@
 #!/bin/bash
 # Simple KDE rebase - bypass repo issues
 
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  ZEPHYRUS OS → KDE PLASMA (SIMPLE)                        ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 
 # Clean up any pending
-sudo rpm-ostree cleanup -p
+sudo rpm-ostree cleanup -p   
+
 
 # Rebase with fedora-kinoite
 echo "Rebasing to KDE Plasma (Kinoite)..."

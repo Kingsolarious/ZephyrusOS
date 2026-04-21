@@ -1,0 +1,8 @@
+[Unit]
+Description=Zephyrus Watchdog - Ensures ASUS shortcuts are always working
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/zephyrus-watchdog.py
+StandardOutput=journal
+StandardError=journal

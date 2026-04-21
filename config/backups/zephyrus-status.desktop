@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Zephyrus Status Check
+Exec=bash -c 'sleep 5 && ~/.local/bin/zephyrus-status-check.sh'
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true

@@ -1,0 +1,13 @@
+[Unit]
+Description=Zephyrus FN Key Handler
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/zephyrus-fn-handler.py
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

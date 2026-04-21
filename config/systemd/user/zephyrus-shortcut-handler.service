@@ -1,0 +1,12 @@
+[Unit]
+Description=Zephyrus Shortcut Handler
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/zephyrus-shortcut-handler.py
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

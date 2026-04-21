@@ -1,0 +1,12 @@
+[Unit]
+Description=Zephyrus Global Menu Service
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/solarious/.local/bin/zephyrus-menu-service.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

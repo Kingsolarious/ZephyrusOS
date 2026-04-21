@@ -1,0 +1,17 @@
+[Unit]
+Description=Zephyrus ALC285 Mic Levels
+After=pipewire.service wireplumber.service
+Wants=pipewire.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 2
+ExecStart=/bin/bash -c 'CARD=$(grep -m1 "PCH" /proc/asound/cards | awk "{print \$1}"); [ -n "$CARD" ] && amixer -c "$CARD" set "Capture" 44% && amixer -c "$CARD" set "Mic Boost" 0% && amixer -c "$CARD" set "Internal Mic Boost" 0%'
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=120
+StartLimitBurst=10
+
+[Install]
+WantedBy=default.target

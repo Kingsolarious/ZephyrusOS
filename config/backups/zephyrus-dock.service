@@ -1,0 +1,17 @@
+[Unit]
+Description=Zephyrus macOS Dock
+After=graphical-session.target
+
+[Service]
+Type=simple
+Environment=QT_QPA_PLATFORM=xcb
+Environment=QT_AUTO_SCREEN_SCALE_FACTOR=1
+Environment=DISPLAY=:1
+ExecStart=/usr/bin/python3 "/home/solarious/Desktop/Zephyrus OS/zephyrus-dock/macos-dock.py"
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

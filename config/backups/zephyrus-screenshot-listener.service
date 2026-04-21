@@ -1,0 +1,12 @@
+[Unit]
+Description=Zephyrus Screenshot Key Listener
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/zephyrus-screenshot-listener.py
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target
