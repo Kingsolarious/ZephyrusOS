@@ -38,7 +38,7 @@ jobs:
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: latest ${{ github.sha }}
-          containerfiles: ./Containerfile
+          containerfiles: ./build/container/Containerfile
           build-args: |
             IMAGE_NAME=${{ env.IMAGE_NAME }}
             IMAGE_VENDOR=${{ env.IMAGE_VENDOR }}
