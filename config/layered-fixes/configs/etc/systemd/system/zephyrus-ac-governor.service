@@ -1,0 +1,11 @@
+[Unit]
+Description=Zephyrus AC Governor (auto-switch CPU governor on AC/battery)
+After=systemd-udev-settle.service multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/zephyrus-ac-governor.sh
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target

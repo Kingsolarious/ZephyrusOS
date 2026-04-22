@@ -1,0 +1,6 @@
+# Zephyrus GU605MY — Prevent white noise bursts by keeping audio PCI controller powered on
+# The Intel HDA controller (8086:7e28, class 0x040300) powers down during PCI runtime PM,
+# causing digital mic noise bursts when it wakes back up.
+# This rule forces the controller to stay in D0.
+
+SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{class}=="0x040300", ATTR{power/control}="on"

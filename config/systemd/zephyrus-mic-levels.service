@@ -1,0 +1,12 @@
+[Unit]
+Description=Zephyrus ALC285 Mic Levels
+After=pipewire.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 3
+ExecStart=/bin/bash -c 'amixer -c 0 set "Capture" 44% && amixer -c 0 set "Mic Boost" 0% && amixer -c 0 set "Internal Mic Boost" 0%'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
