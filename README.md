@@ -42,10 +42,10 @@ Every setting, fan curve, and RGB protocol in this repository was **extracted fr
 | **CPU** | Intel Core Ultra 9 185H (Meteor Lake) |
 | **dGPU** | NVIDIA GeForce RTX 4090 Laptop GPU (16 GB GDDR6) |
 | **iGPU** | Intel Arc Graphics (MTL) |
-| **Display** | Samsung SDC41A3, 2560×1600, 240 Hz OLED |
+| **Display** | Samsung SDC41A3, 2560×1600, 240 Hz OLED, 10-bit, HDR 616 nits |
 | **RAM** | 32 GB LPDDR5X-7467 |
 | **Audio** | Realtek ALC285 + Cirrus Logic CS35L56 Smart Amp |
-| **Keyboard** | ASUS ITE 8910 HID, 1-zone per-key RGB |
+| **Keyboard** | ASUS ITE 8910 HID, 1-zone RGB |
 | **Slash LED** | ASUS AniMe Matrix-style LED array |
 | **WiFi** | Intel Wi-Fi 7 BE200 |
 | **Battery** | 90 Wh |
@@ -58,8 +58,6 @@ Every setting, fan curve, and RGB protocol in this repository was **extracted fr
 Zephyrus-OS/
 ├── README.md              # This file
 ├── LICENSE                # MIT License
-├── Makefile               # Build orchestration
-├── Justfile               # Alternative build tasks
 ├── .github/               # CI/CD workflows
 │
 ├── bin/                   # Executable scripts
@@ -71,7 +69,6 @@ Zephyrus-OS/
 │   └── theme/             # Theme application scripts
 │
 ├── src/                   # Source code
-│   ├── rog-control-center/   # Rust-based Armoury GUI
 │   ├── zephyrus-about/       # System info panel (PyQt6)
 │   ├── zephyrus-global-menu/ # GNOME Shell global menu
 │   ├── zephyrus-face-auth/   # IR face authentication
@@ -80,13 +77,11 @@ Zephyrus-OS/
 │
 ├── config/                # System configuration overlays
 │   ├── systemd/           # systemd services
-│   ├── udev/              # udev rules
-│   ├── modprobe.d/        # Kernel module options
-│   ├── desktop-entries/   # Application launchers
-│   ├── polkit/            # PolicyKit rules
+│   ├── scripts/           # Config helper scripts
 │   ├── layered-fixes/     # Bazzite layered fixes
 │   ├── kde-setup/         # KDE Plasma setup
-│   └── scripts/           # Config helper scripts
+│   ├── desktop-entries/   # Application launchers
+│   └── polkit/            # PolicyKit rules
 │
 ├── docs/                  # Documentation
 │   ├── hardware/          # Hardware tuning guides
@@ -94,7 +89,7 @@ Zephyrus-OS/
 │   └── research/          # Research findings
 │
 ├── themes/                # Visual themes
-│   ├── gtk/               # GTK 4.0 theme
+│   ├── gtk-4.0/           # GTK 4.0 theme
 │   ├── gnome-shell/       # GNOME Shell theme
 │   └── plymouth/          # Boot animation
 │
@@ -104,11 +99,10 @@ Zephyrus-OS/
 ├── build/                 # Build system
 │   ├── container/         # Containerfiles
 │   ├── rpm/               # RPM specs & patches
-│   └── scripts/           # Build scripts
+│   └── scripts/           # Build scripts & overlays
 │
 └── research/              # Reverse engineering
-    ├── acpi/              # ACPI table analysis
-    └── windows-extraction/# Windows data extraction
+    └── acpi/              # ACPI table analysis
 ```
 
 ---
@@ -119,8 +113,8 @@ Zephyrus-OS/
 
 ```bash
 # 1. Clone
-git clone http://localhost:3333/solarious/Zephyrus-OS.git
-cd Zephyrus-OS
+git clone https://github.com/Kingsolarious/ZephyrusOS.git
+cd ZephyrusOS
 
 # 2. Install dependencies
 ./bin/install/install-deps.sh
@@ -128,10 +122,7 @@ cd Zephyrus-OS
 # 3. Apply layered fixes
 sudo ./config/layered-fixes/apply-fixes.sh
 
-# 4. Install custom components
-sudo ./build/scripts/install.sh
-
-# 5. Reboot
+# 4. Reboot
 systemctl reboot
 ```
 
@@ -141,14 +132,14 @@ systemctl reboot
 # Set performance profile
 asusctl profile set performance
 
-# Verify GPU power limit (should show ~115W)
-nvidia-smi -q | grep "Default Power Limit"
+# Verify GPU power limit (should show 105W max configurable)
+nvidia-smi -q -d POWER | grep "Power Limit"
 
-# Test keyboard effects
-gu605my-keyboard-effects --rainbow-anim
+# Test keyboard backlight
+asusctl led-mode rainbow
 
 # Test Slash LED
-gu605my-slash-player --mode rainbow
+asusctl slash -e true
 ```
 
 ---
@@ -176,9 +167,28 @@ Decoded from Armoury Crate EC firmware via three independent methods:
 
 ### Power Profiles
 
-| Profile | CPU PL1 | CPU PL2 | GPU Base | Dynamic Boost | Effective TGP |
-|---------|---------|---------|----------|---------------|---------------|
-| Silent | 60W | 70W | — | — | ~55W |
-| Balanced | 45W | 65W | — | — | 90W |
-| Performance | 80W | 100W | 95W | 20W | **115W** |
+| Profile | CPU PL1 | CPU PL2 | GPU Sustained | GPU Peak | Notes |
+|---------|---------|---------|---------------|----------|-------|
+| Silent | 55W | 60W | 55W | 55W | Quiet fans, reduced power |
+| Balanced | 70W | 95W | 90W | 90W | Balanced thermals |
+| Performance | 95W | 115W | **105W** | 105W | VBIOS hard-cap; matches Windows base |
 
+> **Note:** Windows reports ~103W sustained with 115W Dynamic Boost peak. Linux reaches 105W sustained (VBIOS configurable max). Dynamic Boost (+10-12W peak) requires NVIDIA NVPCF driver support that does not exist on Linux.
+
+### Display
+
+- **Panel:** Samsung SDC ATNA60DL01-0 (SDC41A3)
+- **Native:** 2560×1600 @ 240 Hz
+- **Color:** 10-bit, DCI-P3 + BT.2020, HDR (616 nits peak)
+- **VRR:** Adaptive Sync 48–240 Hz
+- **Interface:** DisplayPort (eDP)
+
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+*Built with reverse engineering, hardware analysis, and too much coffee.*

@@ -94,9 +94,17 @@ echo
 # -----------------------------------------------------------------------------
 echo "[5/8] Updating udev rules..."
 cp "$CONFIGS_DIR/etc/udev/rules.d/50-zephyrus-gu605my-usb.rules" /etc/udev/rules.d/
+cp "$CONFIGS_DIR/etc/udev/rules.d/50-bluetooth-ax211.rules" /etc/udev/rules.d/
 cp "$CONFIGS_DIR/etc/udev/rules.d/99-audio-pci-pm.rules" /etc/udev/rules.d/
 udevadm control --reload-rules 2>/dev/null || true
 udevadm trigger 2>/dev/null || true
+
+# Update hwdb for keyboard scancodes
+mkdir -p /etc/udev/hwdb.d
+if [ -f "$CONFIGS_DIR/etc/udev/hwdb.d/90-asus-fnkeys.hwdb" ]; then
+    cp "$CONFIGS_DIR/etc/udev/hwdb.d/90-asus-fnkeys.hwdb" /etc/udev/hwdb.d/
+    systemd-hwdb update 2>/dev/null || true
+fi
 echo "✅ Udev rules updated"
 echo
 

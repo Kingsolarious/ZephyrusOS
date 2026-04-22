@@ -1,0 +1,21 @@
+# ASUS ROG Zephyrus G16 GU605MY — Fn Key Scancode Mappings
+# Place this file in /etc/udev/hwdb.d/ and run: systemd-hwdb update
+#
+# The Asus WMI hotkeys device (asus-nb-wmi) already exposes most Fn keys.
+# This hwdb maps any remaining unmapped scancodes.
+#
+# To discover scancodes for unmapped keys:
+#   sudo evtest /dev/input/event27
+#   Press the key and note the MSC_SCAN value
+#
+# Currently mapped keys on GU605MY:
+#   - ROG key (Armoury Crate): scancode 0x1d6 → xf86launch5
+#   - Fn+F10 (camera): already produces KEY_CAMERA (212) via WMI
+#   - Mic mute: may need mapping — check evtest for MSC_SCAN
+#   - Volume/brightness/media keys: handled by AT keyboard or HID
+#
+# TODO: Capture evtest output for Fn+F10, mic mute, and ROG key
+#       to verify scancodes and add any missing mappings.
+
+evdev:name:Asus WMI hotkeys:phys:asus-nb-wmi/input0
+ KEYBOARD_KEY_1d6=xf86launch5
