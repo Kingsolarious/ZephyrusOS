@@ -134,7 +134,7 @@ apply_profile() {
             ;;
         Performance|Turbo|performance|turbo)
             asus_profile="Performance"
-            gpu_pl=115
+            gpu_pl=105
             pl1=80
             pl2=100
             fppt=100
@@ -147,7 +147,7 @@ apply_profile() {
         *)
             log "Unknown profile: $profile, defaulting to Performance"
             asus_profile="Performance"
-            gpu_pl=115
+            gpu_pl=105
             pl1=80
             pl2=100
             fppt=100
