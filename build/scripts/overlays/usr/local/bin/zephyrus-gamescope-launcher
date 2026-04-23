@@ -1,0 +1,61 @@
+#!/bin/bash
+# Zephyrus Gamescope Launcher
+# Wrapper for running games through Gamescope with optimal settings
+# for the GU605MY 2560x1600 240Hz OLED panel.
+#
+# Usage: zephyrus-gamescope-launcher <game_executable> [args...]
+# Steam: Add as launch option: zephyrus-gamescope-launcher %command%
+
+# Panel native resolution and refresh
+PANEL_W=2560
+PANEL_H=1600
+PANEL_REFRESH=240
+
+# Gamescope options:
+# -W/-H: output resolution (panel native)
+# -w/-h: render resolution (can be lower for perf)
+# -r: max refresh rate (240Hz)
+# -o: output connector (auto)
+# -e: enable steam integration
+# --force-composition: enable VRR/composition
+# --adaptive-sync: enable adaptive sync (VRR)
+# --hdr-enabled: enable HDR (if game supports)
+# --framerate-limit: limit to panel refresh
+# --sharpness: FSR sharpness (0-20)
+
+# Default: native resolution, 240Hz, adaptive sync
+GAMESCOPE_OPTS=(
+    -W "$PANEL_W"
+    -H "$PANEL_H"
+    -r "$PANEL_REFRESH"
+    --adaptive-sync
+    --force-composition
+)
+
+# If user wants lower render resolution for performance, they can set:
+# ZEPHYRUS_RENDER_SCALE=0.75
+if [ -n "$ZEPHYRUS_RENDER_SCALE" ]; then
+    RENDER_W=$(echo "$PANEL_W * $ZEPHYRUS_RENDER_SCALE" | bc | cut -d. -f1)
+    RENDER_H=$(echo "$PANEL_H * $ZEPHYRUS_RENDER_SCALE" | bc | cut -d. -f1)
+    GAMESCOPE_OPTS+=(-w "$RENDER_W" -h "$RENDER_H" -f)
+    echo "[Gamescope] Render resolution: ${RENDER_W}x${RENDER_H} (scale: $ZEPHYRUS_RENDER_SCALE)"
+fi
+
+# HDR support (experimental)
+if [ "$ZEPHYRUS_HDR" = "1" ]; then
+    GAMESCOPE_OPTS+=(--hdr-enabled)
+    echo "[Gamescope] HDR enabled"
+fi
+
+# FSR upscaling sharpness
+if [ -n "$ZEPHYRUS_FSR_SHARPNESS" ]; then
+    GAMESCOPE_OPTS+=(--sharpness "$ZEPHYRUS_FSR_SHARPNESS")
+fi
+
+# MangoHud integration
+if [ "$ZEPHYRUS_MANGOHUD" != "0" ]; then
+    export MANGOHUD=1
+fi
+
+echo "[Gamescope] Launching with: ${GAMESCOPE_OPTS[@]}"
+exec gamescope "${GAMESCOPE_OPTS[@]}" -- "$@"

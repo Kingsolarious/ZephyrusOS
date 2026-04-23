@@ -1,0 +1,70 @@
+#!/bin/bash
+# Zephyrus GU605MY — Performance Verification
+# Run this after applying fixes and rebooting to verify all optimizations.
+
+PASS=0
+FAIL=0
+
+check() {
+    local name="$1"
+    local condition="$2"
+    if eval "$condition"; then
+        echo "  ✅ $name"
+        ((PASS++))
+    else
+        echo "  ❌ $name"
+        ((FAIL++))
+    fi
+}
+
+echo "========================================"
+echo "  Zephyrus GU605MY Performance Check"
+echo "========================================"
+echo
+
+echo "--- CPU ---"
+check "Governor = performance" "[ \$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor) = 'performance' ]"
+check "EPP = performance" "[ \$(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null) = 'performance' ]"
+check "Turbo enabled" "[ \$(cat /sys/devices/system/cpu/intel_pstate/no_turbo) = '0' ]"
+check "C-state limit (C6 max)" "grep -q 'intel_idle.max_cstate=6' /proc/cmdline"
+check "PL1 >= 95W" "[ \$(( \$(cat /sys/class/powercap/intel-rapl/intel-rapl:0/constraint_0_power_limit_uw 2>/dev/null || echo 0) / 1000000 )) -ge 95 ]"
+check "PL2 >= 115W" "[ \$(( \$(cat /sys/class/powercap/intel-rapl/intel-rapl:0/constraint_1_power_limit_uw 2>/dev/null || echo 0) / 1000000 )) -ge 115 ]"
+check "irqbalance active" "systemctl is-active irqbalance >/dev/null 2>&1"
+check "split_lock disabled" "grep -q 'split_lock_detect=off' /proc/cmdline"
+
+echo
+echo "--- GPU ---"
+check "nvidia-smi available" "command -v nvidia-smi >/dev/null"
+check "GPU PL = 105W" "nvidia-smi --query-gpu=power.limit --format=csv,noheader 2>/dev/null | grep -q '105.00'"
+check "NVIDIA modeset" "grep -q 'nvidia-drm.modeset=1' /proc/cmdline"
+check "DynamicPowerManagement=0x02" "grep -q 'nvidia.NVreg_DynamicPowerManagement=0x02' /proc/cmdline"
+
+echo
+echo "--- System ---"
+check "S3 deep sleep" "grep -q 'mem_sleep_default=deep' /proc/cmdline"
+check "ACPI OSI Windows 2022" "grep -q 'acpi_osi=\"Windows 2022\"' /proc/cmdline"
+check "Gaming sysctl applied" "[ \$(cat /proc/sys/vm/dirty_ratio) -le 5 ]"
+check "BBR TCP" "[ \$(sysctl -n net.ipv4.tcp_congestion_control) = 'bbr' ]"
+check "zram active" "[ \$(swapon --show=NAME,TYPE | grep -c zram) -ge 1 ]"
+
+echo
+echo "--- Audio ---"
+check "PipeWire active" "systemctl --user is-active pipewire >/dev/null 2>&1"
+check "ALC285 modprobe" "[ -f /etc/modprobe.d/zephyrus-gu605my-audio.conf ]"
+
+echo
+echo "--- Services ---"
+check "zephyrus-profile-watch" "systemctl is-active zephyrus-profile-watch >/dev/null 2>&1"
+check "zephyrus-ac-governor" "systemctl is-active zephyrus-ac-governor >/dev/null 2>&1"
+
+echo
+echo "========================================"
+echo "  Results: $PASS passed, $FAIL failed"
+echo "========================================"
+if [ $FAIL -eq 0 ]; then
+    echo "  🎉 All performance optimizations are active!"
+elif [ $FAIL -le 3 ]; then
+    echo "  ⚠️  Most optimizations active. Review failures above."
+else
+    echo "  ❌ Many optimizations missing. Run: sudo ./apply-fixes.sh"
+fi
