@@ -1,96 +1,94 @@
 #!/bin/bash
 # Zephyrus GU605MY OEM Profile Sync
-# Replicates Armoury Crate behavior on Linux using ASUS firmware-attributes
-# Updated: 2026-04-20 — Uses ASUS WMI PPT controls instead of nvidia-smi/RAPL
+# Replicates Armoury Crate behavior on Linux
+# Called automatically when ASUS profile changes
 #
-# OEM Values (estimated from firmware ranges, pending Windows verification):
-#   Silent:  CPU PL1=55W PL2=60W,  dGPU=25W boost=5W,  Boost=OFF, Governor=powersave
-#   Balanced:CPU PL1=70W PL2=95W,  dGPU=55W boost=10W, Boost=ON,  Governor=performance
-#   Performance: CPU PL1=80W PL2=100W, dGPU=70W boost=20W, Boost=ON, Governor=performance
+# OEM Values from decoded DSDT + UltrabookReview validation:
+#   Silent:      CPU PL1=55W PL2=60W,  GPU=55W,  Boost=OFF, Governor=powersave
+#   Balanced:    CPU PL1=70W PL2=95W,  GPU=90W,  Boost=ON,  Governor=performance
+#   Performance: CPU PL1=95W PL2=115W, GPU=105W, Boost=ON,  Governor=performance
 
 LOGFILE="/var/log/zephyrus-profile.log"
-FIRMWARE_ATTRS="/sys/devices/virtual/firmware-attributes/asus-armoury/attributes"
+RAPL_PATH="/sys/class/powercap/intel-rapl/intel-rapl:0"
+NO_TURBO="/sys/devices/system/cpu/intel_pstate/no_turbo"
 
 log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') $1" | tee -a "$LOGFILE" >/dev/null
 }
 
-# Write a firmware attribute and verify
-set_fw_attr() {
-    local attr=$1
-    local val=$2
-    local path="$FIRMWARE_ATTRS/$attr/current_value"
-    
-    if [ ! -f "$path" ]; then
-        log "WARN: $attr not found"
-        return 1
-    fi
-    
-    if ! echo "$val" > "$path" 2>/dev/null; then
-        log "WARN: $attr=$val rejected by firmware (may be read-only or invalid)"
-        return 1
-    fi
-    
-    local actual
-    actual=$(cat "$path" 2>/dev/null)
-    if [ "$actual" = "$val" ]; then
-        log "$attr: $val"
-        return 0
-    else
-        log "WARN: $attr wrote $val but reads $actual"
-        return 1
-    fi
+# Set Intel RAPL power limits (microWatts)
+set_rapl() {
+    local pl1_w=$1
+    local pl2_w=$2
+    local rapl="$RAPL_PATH"
+    test -d "$rapl" || return
+
+    local pl1_uw=$((pl1_w * 1000000))
+    local pl2_uw=$((pl2_w * 1000000))
+
+    echo "$pl1_uw" > "$rapl/constraint_0_power_limit_uw" 2>/dev/null || true
+    echo "$pl2_uw" > "$rapl/constraint_1_power_limit_uw" 2>/dev/null || true
+    echo "28000000" > "$rapl/constraint_0_time_window_us" 2>/dev/null || true
+
+    log "RAPL set: PL1=${pl1_w}W PL2=${pl2_w}W"
 }
 
 # Set CPU governor
 set_governor() {
     local gov=$1
-    local count=0
     for cpu in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_governor; do
-        echo "$gov" > "$cpu" 2>/dev/null && ((count++))
+        echo "$gov" > "$cpu" 2>/dev/null || true
     done
-    log "Governor: $gov ($count cores)"
+    log "Governor: $gov"
 }
 
-# Set CPU boost via intel_pstate
+# Set CPU Energy Performance Preference (EPP)
+set_epp() {
+    local epp=$1
+    for cpu in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do
+        [ -w "$cpu" ] && echo "$epp" > "$cpu" 2>/dev/null || true
+    done
+    log "EPP: $epp"
+}
+
+# Set CPU boost (turbo) — use kernel interface directly
 set_boost() {
-    local boost=$1
-    local path="/sys/devices/system/cpu/intel_pstate/no_turbo"
-    
-    if [ ! -f "$path" ]; then
-        log "WARN: no_turbo not found"
-        return 1
-    fi
-    
-    if [ "$boost" = "true" ]; then
-        echo "0" > "$path" 2>/dev/null
-        log "Boost: ON (no_turbo=0)"
+    local enable=$1
+    if [ -w "$NO_TURBO" ]; then
+        if [ "$enable" = "true" ]; then
+            echo 0 > "$NO_TURBO" 2>/dev/null || true
+            log "Boost: ON"
+        else
+            echo 1 > "$NO_TURBO" 2>/dev/null || true
+            log "Boost: OFF"
+        fi
     else
-        echo "1" > "$path" 2>/dev/null
-        log "Boost: OFF (no_turbo=1)"
+        # Fallback: try asusctl (newer versions)
+        asusctl profile --boost-set "$enable" >/dev/null 2>&1 || true
+        log "Boost: $enable (via asusctl fallback)"
     fi
 }
 
-# Set RAPL as fallback
-set_rapl() {
-    local pl1_w=$1 pl2_w=$2
-    local rapl="/sys/class/powercap/intel-rapl/intel-rapl:0"
-    test -d "$rapl" || return
-    
-    local pl1_uw=$((pl1_w * 1000000))
-    local pl2_uw=$((pl2_w * 1000000))
-    
-    echo "$pl1_uw" > "$rapl/constraint_0_power_limit_uw" 2>/dev/null || true
-    echo "$pl2_uw" > "$rapl/constraint_1_power_limit_uw" 2>/dev/null || true
-    echo "28000000" > "$rapl/constraint_0_time_window_us" 2>/dev/null || true
-    log "RAPL: PL1=${pl1_w}W PL2=${pl2_w}W"
+# Set NVIDIA GPU power limit
+set_gpu_pl() {
+    local pl=$1
+    command -v nvidia-smi &>/dev/null || return
+    nvidia-smi -pl "$pl" >/dev/null 2>&1 || true
+    log "GPU PL: ${pl}W"
 }
 
-# Persist GPU settings for sleep/resume hook
-persist_gpu_pl() {
-    local pl=$1
-    mkdir -p /etc/zephyrus-crimson 2>/dev/null
-    echo "$pl" > /etc/zephyrus-crimson/gpu-power-limit 2>/dev/null || true
+# Manage irqbalance
+set_irqbalance() {
+    local enable=$1
+    if [ "$enable" = "true" ]; then
+        systemctl start irqbalance 2>/dev/null || true
+        systemctl enable irqbalance 2>/dev/null || true
+        log "irqbalance: ON"
+    else
+        systemctl stop irqbalance 2>/dev/null || true
+        systemctl disable irqbalance 2>/dev/null || true
+        log "irqbalance: OFF"
+    fi
 }
 
 # Apply complete OEM profile
@@ -100,12 +98,10 @@ apply_profile() {
     local gpu_pl=""
     local pl1=""
     local pl2=""
-    local fppt=""
-    local dgpu_tgp=""
-    local nv_boost=""
-    local nv_temp=""
     local governor=""
     local boost=""
+    local epp=""
+    local irqbal=""
 
     case "$profile" in
         Quiet|Silent|quiet|silent)
@@ -113,79 +109,69 @@ apply_profile() {
             gpu_pl=55
             pl1=55
             pl2=60
-            fppt=60
-            dgpu_tgp=25
-            nv_boost=5
-            nv_temp=75
             governor="powersave"
             boost="false"
+            epp="power"
+            irqbal="false"
             ;;
         Balanced|balanced)
             asus_profile="Balanced"
             gpu_pl=90
             pl1=70
             pl2=95
-            fppt=95
-            dgpu_tgp=55
-            nv_boost=10
-            nv_temp=80
             governor="performance"
             boost="true"
+            epp="balance_performance"
+            irqbal="true"
             ;;
         Performance|Turbo|performance|turbo)
             asus_profile="Performance"
             gpu_pl=105
-            pl1=80
-            pl2=100
-            fppt=100
-            dgpu_tgp=70
-            nv_boost=20
-            nv_temp=87
+            pl1=95
+            pl2=115
             governor="performance"
             boost="true"
+            epp="performance"
+            irqbal="true"
             ;;
         *)
             log "Unknown profile: $profile, defaulting to Performance"
             asus_profile="Performance"
             gpu_pl=105
-            pl1=80
-            pl2=100
-            fppt=100
-            dgpu_tgp=70
-            nv_boost=20
-            nv_temp=87
+            pl1=95
+            pl2=115
             governor="performance"
             boost="true"
+            epp="performance"
+            irqbal="true"
             ;;
     esac
 
     log "=== Applying OEM profile: $asus_profile ==="
 
-    # 1. ASUS platform profile (controls EC: fans, throttle policy, display refresh)
-    asusctl profile set "$asus_profile" >/dev/null 2>&1 || true
+    # 1. ASUS platform profile (tells EC which mode — EC handles fans automatically)
+    asusctl profile -P "$asus_profile" >/dev/null 2>&1 || true
 
-    # 2. CPU boost
+    # 2. CPU boost (turbo) — direct kernel control
     set_boost "$boost"
 
-    # 3. ASUS firmware power limits (PPT) — more OEM-accurate than RAPL
-    set_fw_attr "ppt_pl1_spl" "$pl1"
-    set_fw_attr "ppt_pl2_sppt" "$pl2"
-    # ppt_pl3_fppt is read-only on GU605MY firmware, skip if it fails
-    set_fw_attr "ppt_pl3_fppt" "$fppt" || true
+    # 3. Intel RAPL CPU power limits
+    set_rapl "$pl1" "$pl2"
 
-    # 4. GPU power via ASUS firmware (nvidia-smi -pl not supported on this VBIOS)
-    set_fw_attr "dgpu_tgp" "$dgpu_tgp"
-    set_fw_attr "nv_dynamic_boost" "$nv_boost"
-    set_fw_attr "nv_temp_target" "$nv_temp"
+    # 4. GPU power limit
+    set_gpu_pl "$gpu_pl"
 
     # 5. CPU governor
     set_governor "$governor"
 
-    # 6. RAPL fallback (ASUS PPT typically overrides this, but belt-and-suspenders)
-    set_rapl "$pl1" "$pl2"
+    # 6. Energy Performance Preference
+    set_epp "$epp"
 
-    # 7. Persist for sleep/resume
-    persist_gpu_pl "$gpu_pl"
+    # 7. IRQ balance
+    set_irqbalance "$irqbal"
+
+    # 8. Persist for sleep/resume
+    echo "$gpu_pl" > /etc/zephyrus-crimson/gpu-power-limit 2>/dev/null || true
 
     log "=== Profile $asus_profile applied ==="
 }
@@ -213,13 +199,21 @@ case "${1:-sync}" in
     status|st)
         CURRENT=$(detect_profile)
         echo "Active ASUS profile: $CURRENT"
-        echo "throttle_thermal_policy: $(cat /sys/devices/platform/asus-nb-wmi/throttle_thermal_policy 2>/dev/null)"
-        for attr in ppt_pl1_spl ppt_pl2_sppt ppt_pl3_fppt dgpu_tgp nv_dynamic_boost nv_temp_target; do
-            path="$FIRMWARE_ATTRS/$attr/current_value"
-            [ -f "$path" ] && echo "$attr: $(cat $path)"
-        done
-        echo "no_turbo: $(cat /sys/devices/system/cpu/intel_pstate/no_turbo 2>/dev/null)"
-        echo "Governor: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null)"
+        if command -v nvidia-smi &>/dev/null; then
+            echo "GPU Power Limit: $(nvidia-smi --query-gpu=power.limit --format=csv,noheader 2>/dev/null | tr -d ' ')"
+        fi
+        if [ -r "$NO_TURBO" ]; then
+            turbo=$(cat "$NO_TURBO" 2>/dev/null)
+            [ "$turbo" = "0" ] && echo "CPU Boost: ON" || echo "CPU Boost: OFF"
+        fi
+        if [ -d "$RAPL_PATH" ]; then
+            echo "CPU PL1: $(( $(cat "$RAPL_PATH/constraint_0_power_limit_uw" 2>/dev/null || echo 0) / 1000000 ))W"
+            echo "CPU PL2: $(( $(cat "$RAPL_PATH/constraint_1_power_limit_uw" 2>/dev/null || echo 0) / 1000000 ))W"
+        fi
+        if [ -r /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference ]; then
+            echo "EPP: $(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null)"
+        fi
+        systemctl is-active irqbalance >/dev/null 2>&1 && echo "irqbalance: ON" || echo "irqbalance: OFF"
         ;;
     *)
         echo "Usage: $0 [sync|quiet|balanced|performance|status]"

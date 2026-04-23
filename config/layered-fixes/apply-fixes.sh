@@ -23,25 +23,25 @@ echo
 # -----------------------------------------------------------------------------
 # 1. KERNEL CMDLINE FIXES
 # -----------------------------------------------------------------------------
-echo "[1/8] Fixing kernel cmdline..."
+echo "[1/9] Fixing kernel cmdline..."
 bash "$SCRIPT_DIR/scripts/01-fix-kernel-cmdline.sh"
 echo
 
 # -----------------------------------------------------------------------------
 # 2. SYSTEMD SERVICES
 # -----------------------------------------------------------------------------
-echo "[2/8] Updating systemd services..."
+echo "[2/9] Updating systemd services..."
 
 # Fix fan curve service (remove 100% fan override)
 cp "$CONFIGS_DIR/etc/systemd/system/zephyrus-gu605my-tune.service" /etc/systemd/system/
 
-# OEM profile watcher (auto-syncs GPU/RAPL on profile change)
+# OEM profile watcher (auto-syncs GPU/RAPL/EPP on profile change)
 cp "$CONFIGS_DIR/etc/systemd/system/zephyrus-profile-watch.service" /etc/systemd/system/
 
 # Gaming QoS service
 cp "$CONFIGS_DIR/etc/systemd/system/zephyrus-gaming-qos.service" /etc/systemd/system/
 
-# AC governor (switches CPU governor on AC/battery events)
+# AC governor (switches CPU governor + EPP on AC/battery events)
 cp "$CONFIGS_DIR/etc/systemd/system/zephyrus-ac-governor.service" /etc/systemd/system/
 
 # Sleep/resume hook
@@ -69,7 +69,7 @@ echo
 # -----------------------------------------------------------------------------
 # 3. LOCAL BIN SCRIPTS
 # -----------------------------------------------------------------------------
-echo "[3/8] Installing local scripts..."
+echo "[3/9] Installing local scripts..."
 cp "$CONFIGS_DIR/usr/local/bin/zephyrus-profile-sync" /usr/local/bin/
 cp "$CONFIGS_DIR/usr/local/bin/zephyrus-profile-watch" /usr/local/bin/
 cp "$CONFIGS_DIR/usr/local/bin/zephyrus-gaming-qos" /usr/local/bin/
@@ -84,7 +84,7 @@ echo
 # -----------------------------------------------------------------------------
 # 4. MODPROBE CONFIGS
 # -----------------------------------------------------------------------------
-echo "[4/8] Updating modprobe configs..."
+echo "[4/9] Updating modprobe configs..."
 cp "$CONFIGS_DIR/etc/modprobe.d/zephyrus-gu605my-audio.conf" /etc/modprobe.d/
 echo "✅ Modprobe configs updated"
 echo
@@ -92,7 +92,7 @@ echo
 # -----------------------------------------------------------------------------
 # 5. UDEV RULES
 # -----------------------------------------------------------------------------
-echo "[5/8] Updating udev rules..."
+echo "[5/9] Updating udev rules..."
 cp "$CONFIGS_DIR/etc/udev/rules.d/50-zephyrus-gu605my-usb.rules" /etc/udev/rules.d/
 cp "$CONFIGS_DIR/etc/udev/rules.d/50-bluetooth-ax211.rules" /etc/udev/rules.d/
 cp "$CONFIGS_DIR/etc/udev/rules.d/99-audio-pci-pm.rules" /etc/udev/rules.d/
@@ -109,22 +109,32 @@ echo "✅ Udev rules updated"
 echo
 
 # -----------------------------------------------------------------------------
-# 6. GPU POWER LIMIT PERSISTENCE DIR
+# 6. SYSCTL PERFORMANCE TUNING
 # -----------------------------------------------------------------------------
-echo "[6/8] Creating GPU power limit persistence dir..."
+echo "[6/9] Applying gaming sysctl tuning..."
+if [ -f "$CONFIGS_DIR/etc/sysctl.d/99-gaming-performance.conf" ]; then
+    cp "$CONFIGS_DIR/etc/sysctl.d/99-gaming-performance.conf" /etc/sysctl.d/
+    sysctl --system 2>/dev/null | grep -E "gaming|dirty|tcp_fastopen" || true
+fi
+echo "✅ Sysctl tuning applied"
+echo
+
+# -----------------------------------------------------------------------------
+# 7. GPU POWER LIMIT PERSISTENCE DIR
+# -----------------------------------------------------------------------------
+echo "[7/9] Creating GPU power limit persistence dir..."
 mkdir -p /etc/zephyrus-crimson
 echo "105" > /etc/zephyrus-crimson/gpu-power-limit
 echo "✅ Persistence dir ready"
 echo
 
 # -----------------------------------------------------------------------------
-# 7. USER SERVICES (mic levels)
+# 8. USER SERVICES (mic levels)
 # -----------------------------------------------------------------------------
-echo "[7/8] Installing user services..."
-# The mic-levels service is a user service — install it system-wide so all users can enable it
-if [ -f "$CONFIGS_DIR/../systemd/zephyrus-mic-levels.service" ]; then
+echo "[8/9] Installing user services..."
+if [ -f "$SCRIPT_DIR/../systemd/zephyrus-mic-levels.service" ]; then
     mkdir -p /usr/lib/systemd/user
-    cp "$CONFIGS_DIR/../systemd/zephyrus-mic-levels.service" /usr/lib/systemd/user/
+    cp "$SCRIPT_DIR/../systemd/zephyrus-mic-levels.service" /usr/lib/systemd/user/
     echo "✅ User service installed: zephyrus-mic-levels.service"
     echo "   Enable with: systemctl --user enable zephyrus-mic-levels.service"
 else
@@ -133,15 +143,12 @@ fi
 echo
 
 # -----------------------------------------------------------------------------
-# 8. CLEANUP OLD/WRONG CONFIGS
+# 9. IRQBALANCE
 # -----------------------------------------------------------------------------
-echo "[8/8] Cleaning up old configs..."
-# Remove the old aggressive fan curve if it was in a script
-if [ -f /usr/local/bin/zephyrus-gu605my-tune ]; then
-    echo "Note: Old tune script exists at /usr/local/bin/zephyrus-gu605my-tune"
-    echo "      The service now uses inline commands instead."
-fi
-echo "✅ Cleanup done"
+echo "[9/9] Enabling irqbalance..."
+systemctl enable irqbalance 2>/dev/null || true
+systemctl start irqbalance 2>/dev/null || true
+echo "✅ irqbalance enabled"
 echo
 
 # -----------------------------------------------------------------------------
@@ -154,11 +161,13 @@ echo
 echo "Changes made:"
 echo "  • Kernel cmdline: Fixed for S3 deep sleep + optimal GPU/CPU params"
 echo "  • Fan curve: Removed 100% override, now just profile + boost"
-echo "  • OEM Profile Sync: Auto-syncs GPU PL + RAPL + governor on profile change"
-echo "  • AC Governor: Switches CPU governor on AC plug/unplug"
+echo "  • OEM Profile Sync: Auto-syncs GPU PL + RAPL + EPP + governor + irqbalance"
+echo "  • AC Governor: Switches CPU governor + EPP on AC plug/unplug"
 echo "  • Sleep hooks: TBT wakeup disabled pre-suspend, restore post-resume"
-echo "  • USB autosuspend: Rules for ASUS keyboard, Logitech"
+echo "  • USB autosuspend: Rules for ASUS keyboard, Logitech, Bluetooth"
 echo "  • Audio PCI PM: Prevents white noise by keeping HDA controller powered"
+echo "  • Gaming sysctl: Lower dirty ratios, faster TCP, better scheduling"
+echo "  • irqbalance: Distributes interrupts across all CPU cores"
 echo "  • Mic levels: User service available (enable manually)"
 echo "  • Audio: ALC285 modprobe config"
 echo
@@ -168,8 +177,12 @@ echo "Post-reboot, verify with:"
 echo "  cat /proc/cmdline | grep mem_sleep_default"
 echo "  systemctl status zephyrus-profile-watch"
 echo "  systemctl status zephyrus-ac-governor"
+echo "  zephyrus-profile-sync status"
 echo "  asusctl profile get"
 echo
 echo "Enable mic levels for your user:"
 echo "  systemctl --user enable zephyrus-mic-levels.service"
+echo
+echo "Optional: Set battery charge limit:"
+echo "  asusctl battery limit 80"
 echo

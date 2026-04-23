@@ -1,7 +1,7 @@
 #!/bin/bash
-# Zephyrus AC Governor — Auto-switch CPU governor based on AC power state
-# AC plugged in  → performance
-# On battery     → powersave
+# Zephyrus AC Governor — Auto-switch CPU governor and EPP based on AC power state
+# AC plugged in  → performance governor + performance EPP
+# On battery     → powersave governor + power EPP
 #
 # Run as root. Triggered by systemd service + udev on AC events.
 
@@ -21,21 +21,23 @@ fi
 AC_STATE=$(cat "$AC_PATH")
 
 if [ "$AC_STATE" = "1" ]; then
-    TARGET="performance"
+    TARGET_GOV="performance"
+    TARGET_EPP="performance"
     REASON="AC power connected"
 else
-    TARGET="powersave"
+    TARGET_GOV="powersave"
+    TARGET_EPP="power"
     REASON="Running on battery"
 fi
 
-# Apply to all CPUs
+# Apply governor to all CPUs
 for cpu in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_governor; do
-    [ -w "$cpu" ] && echo "$TARGET" > "$cpu" 2>/dev/null
+    [ -w "$cpu" ] && echo "$TARGET_GOV" > "$cpu" 2>/dev/null
 done
 
-# Also set energy_performance_preference if available
+# Apply EPP to all CPUs
 for epp in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do
-    [ -w "$epp" ] && echo "$TARGET" > "$epp" 2>/dev/null
+    [ -w "$epp" ] && echo "$TARGET_EPP" > "$epp" 2>/dev/null
 done
 
-logger -t "$LOG_TAG" "Governor set to $TARGET ($REASON)"
+logger -t "$LOG_TAG" "Governor=$TARGET_GOV EPP=$TARGET_EPP ($REASON)"

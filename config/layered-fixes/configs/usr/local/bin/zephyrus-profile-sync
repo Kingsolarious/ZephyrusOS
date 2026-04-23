@@ -6,7 +6,7 @@
 # OEM Values from decoded DSDT + UltrabookReview validation:
 #   Silent:      CPU PL1=55W PL2=60W,  GPU=55W,  Boost=OFF, Governor=powersave
 #   Balanced:    CPU PL1=70W PL2=95W,  GPU=90W,  Boost=ON,  Governor=performance
-#   Performance: CPU PL1=80W PL2=100W, GPU=115W, Boost=ON,  Governor=performance
+#   Performance: CPU PL1=95W PL2=115W, GPU=105W, Boost=ON,  Governor=performance
 
 LOGFILE="/var/log/zephyrus-profile.log"
 RAPL_PATH="/sys/class/powercap/intel-rapl/intel-rapl:0"
@@ -42,6 +42,15 @@ set_governor() {
     log "Governor: $gov"
 }
 
+# Set CPU Energy Performance Preference (EPP)
+set_epp() {
+    local epp=$1
+    for cpu in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do
+        [ -w "$cpu" ] && echo "$epp" > "$cpu" 2>/dev/null || true
+    done
+    log "EPP: $epp"
+}
+
 # Set CPU boost (turbo) — use kernel interface directly
 set_boost() {
     local enable=$1
@@ -68,6 +77,20 @@ set_gpu_pl() {
     log "GPU PL: ${pl}W"
 }
 
+# Manage irqbalance
+set_irqbalance() {
+    local enable=$1
+    if [ "$enable" = "true" ]; then
+        systemctl start irqbalance 2>/dev/null || true
+        systemctl enable irqbalance 2>/dev/null || true
+        log "irqbalance: ON"
+    else
+        systemctl stop irqbalance 2>/dev/null || true
+        systemctl disable irqbalance 2>/dev/null || true
+        log "irqbalance: OFF"
+    fi
+}
+
 # Apply complete OEM profile
 apply_profile() {
     local profile=$1
@@ -77,6 +100,8 @@ apply_profile() {
     local pl2=""
     local governor=""
     local boost=""
+    local epp=""
+    local irqbal=""
 
     case "$profile" in
         Quiet|Silent|quiet|silent)
@@ -86,6 +111,8 @@ apply_profile() {
             pl2=60
             governor="powersave"
             boost="false"
+            epp="power"
+            irqbal="false"
             ;;
         Balanced|balanced)
             asus_profile="Balanced"
@@ -94,23 +121,29 @@ apply_profile() {
             pl2=95
             governor="performance"
             boost="true"
+            epp="balance_performance"
+            irqbal="true"
             ;;
         Performance|Turbo|performance|turbo)
             asus_profile="Performance"
             gpu_pl=105
-            pl1=80
-            pl2=100
+            pl1=95
+            pl2=115
             governor="performance"
             boost="true"
+            epp="performance"
+            irqbal="true"
             ;;
         *)
             log "Unknown profile: $profile, defaulting to Performance"
             asus_profile="Performance"
             gpu_pl=105
-            pl1=80
-            pl2=100
+            pl1=95
+            pl2=115
             governor="performance"
             boost="true"
+            epp="performance"
+            irqbal="true"
             ;;
     esac
 
@@ -131,7 +164,13 @@ apply_profile() {
     # 5. CPU governor
     set_governor "$governor"
 
-    # 6. Persist for sleep/resume
+    # 6. Energy Performance Preference
+    set_epp "$epp"
+
+    # 7. IRQ balance
+    set_irqbalance "$irqbal"
+
+    # 8. Persist for sleep/resume
     echo "$gpu_pl" > /etc/zephyrus-crimson/gpu-power-limit 2>/dev/null || true
 
     log "=== Profile $asus_profile applied ==="
@@ -167,11 +206,14 @@ case "${1:-sync}" in
             turbo=$(cat "$NO_TURBO" 2>/dev/null)
             [ "$turbo" = "0" ] && echo "CPU Boost: ON" || echo "CPU Boost: OFF"
         fi
-        RAPL=$(find_rapl)
-        if [ -n "$RAPL" ]; then
-            echo "CPU PL1: $(( $(cat "$RAPL/constraint_0_power_limit_uw" 2>/dev/null || echo 0) / 1000000 ))W"
-            echo "CPU PL2: $(( $(cat "$RAPL/constraint_1_power_limit_uw" 2>/dev/null || echo 0) / 1000000 ))W"
+        if [ -d "$RAPL_PATH" ]; then
+            echo "CPU PL1: $(( $(cat "$RAPL_PATH/constraint_0_power_limit_uw" 2>/dev/null || echo 0) / 1000000 ))W"
+            echo "CPU PL2: $(( $(cat "$RAPL_PATH/constraint_1_power_limit_uw" 2>/dev/null || echo 0) / 1000000 ))W"
         fi
+        if [ -r /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference ]; then
+            echo "EPP: $(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null)"
+        fi
+        systemctl is-active irqbalance >/dev/null 2>&1 && echo "irqbalance: ON" || echo "irqbalance: OFF"
         ;;
     *)
         echo "Usage: $0 [sync|quiet|balanced|performance|status]"
