@@ -21,7 +21,6 @@ rpm-ostree kargs --append-if-missing="cpufreq.default_governor=performance"
 # Stability
 rpm-ostree kargs --append-if-missing="split_lock_detect=off"
 # Limit C-states to C6 (disable C10) for lower wake latency in gaming
-rpm-ostree kargs --append-if-missing="intel_idle.max_cstate=6"
 # NVIDIA settings
 rpm-ostree kargs --append-if-missing="nvidia-drm.modeset=1"
 rpm-ostree kargs --append-if-missing="nvidia.NVreg_PreserveVideoMemoryAllocations=1"
