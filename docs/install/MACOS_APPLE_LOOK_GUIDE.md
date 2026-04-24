@@ -2,22 +2,22 @@
 
 Your KDE Plasma desktop now has an authentic **macOS-style Apple look** with a top menu bar and bottom dock!
 
-## 🍎 What You See Now
+## What You See Now
 
 ### Top Menu Bar (like macOS menu bar)
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ 🍎 File  Edit  View  Window  Help       🔊 🔋  Sat 9:40 PM  │
+│  File  Edit  View  Window  Help          Sat 9:40 PM  │
 └─────────────────────────────────────────────────────────────┘
 ```
-- **Left**: Application Menu (🍎 icon) + Global Menu
+- **Left**: Application Menu ( icon) + Global Menu
 - **Center**: Panel spacer (empty)
 - **Right**: System tray + Digital clock (macOS format)
 
 ### Bottom Dock (like macOS dock)
 ```
 ┌──────────────────────────────────────────┐
-│  🗂️  🌐  💻  📄  📝          🗑️          │
+│                    Trash          │
 │ Files Web Term Edit Text        Trash    │
 └──────────────────────────────────────────┘
 ```
@@ -35,7 +35,7 @@ Your KDE Plasma desktop now has an authentic **macOS-style Apple look** with a t
 - Buttons on **LEFT** side
 - Red/Yellow/Green dots (ROG crimson style)
 
-## 🎨 Theme Details
+## Theme Details
 
 | Feature | Setting |
 |---------|---------|
@@ -45,7 +45,7 @@ Your KDE Plasma desktop now has an authentic **macOS-style Apple look** with a t
 | **Fonts** | Noto Sans |
 | **Effects** | Blur enabled, transparency on |
 
-## 🚀 Quick Commands
+## Quick Commands
 
 ```bash
 # Add app to dock
@@ -62,7 +62,7 @@ zephyrus-about
 zephyrus-os-tool performance  # or balanced/quiet
 ```
 
-## 🛠️ Customization
+## Customization
 
 ### Change Icon Size in Dock
 1. Right-click dock → **Configure Icon Tasks**
@@ -97,7 +97,7 @@ zephyrus-add-dock-icon org.kde.dolphin.desktop
 # Then set in System Settings → Icons
 ```
 
-## ⌨️ Keyboard Shortcuts
+## Keyboard Shortcuts
 
 | Shortcut | Action |
 |----------|--------|
@@ -112,7 +112,7 @@ zephyrus-add-dock-icon org.kde.dolphin.desktop
 | `Meta+Up` | Maximize Window |
 | `Meta+Down` | Minimize Window |
 
-## 🎮 ROG Integration
+## ROG Integration
 
 Your ROG-specific features still work:
 
@@ -129,7 +129,7 @@ sudo asusctl profile quiet        # Silent
 zephyrus-about
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Dock Not Centered
 ```bash
@@ -154,7 +154,7 @@ rm ~/.config/plasma-org.kde.plasma.desktop-appletsrc
 # Then restart Plasma
 ```
 
-## 📸 Screenshot Tips
+## Screenshot Tips
 
 To capture your new macOS-style desktop:
 ```bash
@@ -168,7 +168,7 @@ spectacle -a
 spectacle -r
 ```
 
-## 🎯 Next Steps
+## Next Steps
 
 1. ✅ **Add your favorite apps** to the dock
 2. ✅ **Customize icon size** to your preference
@@ -176,6 +176,5 @@ spectacle -r
 4. ✅ **Set up ROG keyboard shortcuts** for gaming
 5. ✅ **Enjoy the factory experience!**
 
----
 
-**Your Zephyrus OS now looks like a high-end Apple machine with ROG gaming power!** 🍎🎮
+**Your Zephyrus OS now looks like a high-end Apple machine with ROG gaming power!** 

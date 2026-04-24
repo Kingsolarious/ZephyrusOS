@@ -1,10 +1,10 @@
 # Zephyrus OS - KDE Plasma Complete Setup
 
-## ✅ Setup Complete!
+## Setup Complete!
 
 Your KDE Plasma desktop has been configured with ROG Zephyrus branding and macOS-style features.
 
-## 🎨 What's Configured
+## What's Configured
 
 ### 1. Visual Theme
 - **Color Scheme**: Zephyrus Crimson (Dark with ROG Red accents)
@@ -34,7 +34,7 @@ Your KDE Plasma desktop has been configured with ROG Zephyrus branding and macOS
 - **Zephyrus Settings**: System settings shortcut
 - **Armoury Crate**: Performance profile switcher
 
-## 🚀 Quick Commands
+## Quick Commands
 
 ```bash
 # Run About app
@@ -55,7 +55,7 @@ sudo asusctl profile quiet
 kquitapp6 plasmashell && plasmashell &
 ```
 
-## 🎮 Gaming Features
+## Gaming Features
 
 ### Performance Modes
 - **Performance**: Maximum CPU/GPU performance
@@ -69,7 +69,7 @@ kquitapp6 plasmashell && plasmashell &
 >
 > A community replacement tool that works *with* the NVIDIA driver is in development.
 
-## 🔧 Customization
+## Customization
 
 ### Change Color Scheme
 1. Open **System Settings**
@@ -86,7 +86,7 @@ kquitapp6 plasmashell && plasmashell &
 1. Open Application Menu
 2. Right-click app → **Pin to Task Manager**
 
-## 📁 File Locations
+## File Locations
 
 | Component | Location |
 |-----------|----------|
@@ -96,7 +96,7 @@ kquitapp6 plasmashell && plasmashell &
 | Application Entries | `~/.local/share/applications/` |
 | KDE Config | `~/.config/` |
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Panel Disappeared
 ```bash
@@ -117,13 +117,13 @@ kwriteconfig6 --file kglobalshortcutsrc --group kwin --key ReloadConfig "true"
 lookandfeeltool --apply ZephyrusCrimson
 ```
 
-## 📚 Documentation
+## Documentation
 
 - **KDE User Guide**: https://userbase.kde.org/
 - **ASUS Linux**: https://asus-linux.org/
 - **Bazzite Docs**: https://docs.bazzite.gg/
 
-## 🎯 Next Steps
+## Next Steps
 
 1. ✅ Explore the new layout
 2. ✅ Customize your dock with favorite apps
@@ -131,6 +131,5 @@ lookandfeeltool --apply ZephyrusCrimson
 4. ✅ Install games via Steam (pre-installed)
 5. ✅ Enjoy your ROG-themed KDE Plasma!
 
----
 
-**Welcome to Zephyrus OS on KDE Plasma!** 🎮
+**Welcome to Zephyrus OS on KDE Plasma!** 

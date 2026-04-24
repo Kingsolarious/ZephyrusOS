@@ -4,7 +4,6 @@
 **Date:** 2026-04-16  
 **Status:** Phase 1 Complete — 4 of 5 missing hardware categories resolved via static analysis.
 
----
 
 ## Quick Summary
 
@@ -23,7 +22,6 @@ This directory contains the complete artifact set from a deep reverse-engineerin
 - Decryption of Armoury Crate XML/enc files (key is runtime-derived via DPAPI)
 - Live confirmation of S0ix wake sources (requires Linux runtime trace)
 
----
 
 ## 1. Primary Documentation (Start Here)
 
@@ -39,7 +37,6 @@ These Markdown files are the human-readable deliverables. Transfer all of them t
 | `ASUS_GU605MY_LED_Mapping_Capture.md` | Pre-existing LED mapping documentation. | Firmware/LED developers | MEDIUM |
 | `Audio_Dropout_Diagnosis_Report.md` | Pre-existing audio issue diagnosis. | Audio driver developers | LOW |
 
----
 
 ## 2. Executable Artifacts & Scripts
 
@@ -52,7 +49,6 @@ Transfer these to the master project's `scripts/` or `tools/` directory.
 | `elevate_and_run.ps1` | Pre-existing Windows elevation helper. | Windows | Utility script. |
 | `validate_script.py` | Python heredoc validator used to check `setup_gu605my.sh` syntax. | Any | Optional; can be discarded. |
 
----
 
 ## 3. Analysis Scripts (Methodology Artifacts)
 
@@ -64,7 +60,6 @@ These Python scripts generated the raw analysis text files. Transfer them to the
 | `parse_dptf_aml.py` | Heuristic parser for DPTF SSDTs. Extracts strings, UUIDs, thermal names, packages, and temperature-like integers. | `dptf_analysis.txt` |
 | `parse_dptf_aml_enhanced.py` | Extended version of the DPTF parser with additional name detection. | (intermediate) |
 
----
 
 ## 4. Raw Analysis Outputs
 
@@ -75,7 +70,6 @@ These are the machine-generated reports from the scripts above. They are large b
 | `npcf_gpu_power_analysis.txt` | ~24 KB | Full `NPCF` AML scan from DSDT: offsets, method bodies (`STPL`, `SFMN`, `SPAB`, `CPUP`), `FMTG` decode, power-limit constant search results. |
 | `dptf_analysis.txt` | ~100 KB | Heuristic parse of SSD9, SSDA, and DSDT. Strings, UUIDs, thermal names, package sizes, deci-K temperatures, ACPI name segments. |
 
----
 
 ## 5. Hardware Dumps & Source Artifacts
 
@@ -127,7 +121,6 @@ These are the original binary artifacts extracted from the Windows host. They ar
 | `iasl.exe` | 1,011.5 KB | Intel ACPI Source Language compiler/disassembler (used to decompile SSDN/DSDT) |
 | `LatencyMon.exe` | 3,396.8 KB | Audio latency monitor (pre-existing) |
 
----
 
 ## 6. Recommended Directory Structure for Master Project
 
@@ -174,7 +167,6 @@ GU605MY-Linux-Support/
 └── README.md
 ```
 
----
 
 ## 7. Key Findings Summary for README.md
 
@@ -182,7 +174,6 @@ Use this blurb as the project summary:
 
 > This repository contains the most complete public hardware analysis of the ASUS ROG Zephyrus G16 GU605MY for Linux support. Through static reverse-engineering of 27 ACPI tables from Windows, we recovered the hidden NVIDIA NVPCF `_DSM` (GPU TGP control), DPTF thermal participant tables, fan curve index buffers, and a full map of 44 EC query methods. We also determined that Armoury Crate's encrypted thermal configs use a runtime-derived AES-256-CBC key (not statically extractable), and that the EC firmware itself holds the final PWM duty tables. A ready-to-run CachyOS setup script is included.
 
----
 
 ## 8. Checklist for Transfer
 
@@ -196,7 +187,6 @@ Use this blurb as the project summary:
 - [ ] Write top-level `README.md` summarizing findings and linking to the 3 critical docs
 - [ ] (Optional) Generate SHA-256 manifest for all binary artifacts to ensure integrity
 
----
 
 ## 9. Contacts & Attribution
 

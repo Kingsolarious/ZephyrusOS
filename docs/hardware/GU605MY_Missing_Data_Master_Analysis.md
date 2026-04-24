@@ -3,7 +3,6 @@
 **Date:** 2026-04-16  
 **Status:** Major breakthrough on 4 of 5 missing categories. EC firmware tables remain blocked.
 
----
 
 ## Executive Summary
 
@@ -17,7 +16,6 @@ Through disassembly of the missing `SSDN` ACPI table (`SSDN_OptRf2_Opt2Tabl_0000
 | 4 | **NVIDIA VBIOS intermediate TGP steps** | **Fully resolved via SSDN/NPCF** | Complete NVPCF `_DSM` decoded, including default `TPPL = 115W`, dynamic boost flags (`DBAC`/`DBDC`), and the TGP transition table. |
 | 5 | **S3/S0ix ACPI quirks** | Deeply mapped | `_PTS`, `_WAK`, `_REG`, `_LID`, `_S3`/`_S4`/`_S5` state packages, and 44 `_Qxx` EC methods documented. Actual Linux traces still needed. |
 
----
 
 ## 1. Encrypted Armoury Crate Configs — Encryption Analysis Complete
 
@@ -71,7 +69,6 @@ Interesting method names extracted:
 
 > **Linux Impact:** Without decrypting these, the **exact** stock fan curves and per-profile GPU offsets remain Armoury Crate–specific secrets. However, the ACPI/NVPCF data (Section 4) provides functionally equivalent power-limit mappings.
 
----
 
 ## 2. EC Firmware Fan Curve Tables — Still Unavailable
 
@@ -146,7 +143,6 @@ sudo ectool -d dump_ec.bin
 # Community configs for Zephyrus G16 (2024/2025) exist and are close enough.
 ```
 
----
 
 ## 3. DPTF Participant Tables — Recovered from SSD9 + SSDA
 
@@ -216,7 +212,6 @@ sudo dptfxtract /sys/firmware/acpi/tables/
 
 The extracted files can then be fed into `thermald` for custom Linux thermal policy.
 
----
 
 ## 4. NVIDIA VBIOS / NPCF Power Limits — FULLY RESOLVED
 
@@ -341,7 +336,6 @@ acpi_osi=! acpi_osi="Windows 2022"
 
 This makes the ACPI interpreter expose `NPCF` to the NVIDIA driver just as it would on Windows.
 
----
 
 ## 5. S3/S0ix Suspend/Resume ACPI Quirks — Deeply Mapped
 
@@ -430,7 +424,6 @@ Common ASUS S0ix fixes that may apply to GU605MY:
 - Ensure `NVME_APST` is enabled so the SSD doesn't block S0ix
 - Use `pcie_aspm=force` if PCIe links don't enter L1.2
 
----
 
 ## 6. File Hashes & Reproducibility
 
@@ -441,7 +434,6 @@ Common ASUS S0ix fixes that may apply to GU605MY:
 | `SSDN_OptRf2_Opt2Tabl_00001000_00000000.dsl` | *(newly generated)* |
 | `ThrottleGearXMLHelper.dll` | *(see file)* |
 
----
 
 ## 7. Summary: What Is Still Missing
 
@@ -451,6 +443,5 @@ Common ASUS S0ix fixes that may apply to GU605MY:
 | **Exact stock fan duty percentages** | Encrypted in `AC_Config.FanAcoustic.GU605MY.cfg` | Runtime memory dump of Armoury Crate Service to extract AES key |
 | **Linux S0ix wake-event confirmation** | Needs actual Linux suspend/resume trace | Run `acpidump` + `dmesg` + `/sys/firmware/acpi/interrupts/` on a CachyOS install |
 
----
 
 *Document generated from deep AML disassembly of DSDT + 27 SSDT tables, static analysis of ASUS Armoury Crate crypto DLLs, and heuristic ACPI parsing.*

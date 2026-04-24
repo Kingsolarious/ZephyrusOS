@@ -2,9 +2,8 @@
 
 These are the **actual decoded fan curves** from the ASUS Armoury Crate service logs for the GU605MY, extracted on 2026-04-19.
 
-> ⚠️ **Note:** The exact duty percentages are encrypted in `AC_Config.FanAcoustic.GU605MY.cfg` (AES-256-CBC). The values below are decoded from the service log plaintext and NVPCF ACPI table index buffers. They represent the best-available approximation of factory behavior.
+> Warning: **Note:** The exact duty percentages are encrypted in `AC_Config.FanAcoustic.GU605MY.cfg` (AES-256-CBC). The values below are decoded from the service log plaintext and NVPCF ACPI table index buffers. They represent the best-available approximation of factory behavior.
 
----
 
 ## Performance (Turbo) Profile
 
@@ -32,7 +31,6 @@ These are the **actual decoded fan curves** from the ASUS Armoury Crate service 
 | 90        | 40          | 85               |
 | 100       | 56          | 85               |
 
----
 
 ## Balanced Profile
 
@@ -43,7 +41,6 @@ CPU: pwm=(15,15,48,61,94,114,147,163) temp=(59,64,68,72,75,78,81,84) enabled=fal
 GPU: pwm=(25,40,40,48,76,94,117,140) temp=(51,54,57,60,63,67,72,77) enabled=false
 ```
 
----
 
 ## Quiet (Silent) Profile
 
@@ -54,7 +51,6 @@ CPU: pwm=(2,15,15,48,81,102,102,102) temp=(58,62,66,70,74,78,78,78) enabled=fals
 GPU: pwm=(2,25,40,40,66,76,76,76) temp=(53,57,61,65,69,73,73,73) enabled=false
 ```
 
----
 
 ## Fan Specifications
 
@@ -67,7 +63,6 @@ GPU: pwm=(2,25,40,40,66,76,76,76) temp=(53,57,61,65,69,73,73,73) enabled=false
 | Noise @ Turbo | ~45–46 dBA |
 | Hysteresis | 0 (Up: 0, Down: 0) |
 
----
 
 ## Restore to Factory
 
@@ -81,7 +76,6 @@ Or via control center:
 asusctl fan-curve --set-default
 ```
 
----
 
 ## Reference: PWM Conversion
 

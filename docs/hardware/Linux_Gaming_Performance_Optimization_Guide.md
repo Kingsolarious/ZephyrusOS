@@ -11,7 +11,6 @@
 **Audio:** Realtek ALC285 (`10EC:0285`), Intel SST  
 **Display:** 16" Samsung OLED SDC41A3 (2560×1600, 240Hz, HDR, VRR capable)  
 
----
 
 ## The Core Problem: This Laptop Is Thermally Constrained
 
@@ -32,7 +31,6 @@ You have a **desktop-class RTX 4090** crammed into a **16mm-thin chassis**. The 
 3. **Raise GPU power only when the game is GPU-bound**
 4. **Maximize physical cooling** (fans, stand, repaste)
 
----
 
 ## 1. Recommended Linux Distribution
 
@@ -55,7 +53,6 @@ You have a **desktop-class RTX 4090** crammed into a **16mm-thin chassis**. The 
 - **Vanilla Debian** — same kernel issue, missing `asusctl` packages
 - **Vanilla Ubuntu/Debian** — kernel often too old for latest hardware; ASUS support via backports only
 
----
 
 ## 2. Pre-Installation BIOS Setup
 
@@ -75,7 +72,6 @@ Enter BIOS (spam `F2` during boot) and configure:
 
 **Save & Exit.**
 
----
 
 ## 3. ASUS Linux Stack Installation
 
@@ -160,7 +156,6 @@ asusctl profile -P performance
 
 > **Critical:** The `performance` profile on this laptop sets the GPU power target to **90W**, not 125W. Only `turbo` (115W) and `manual` (125W) raise the GPU ceiling. Use `performance` for CPU-bound games, `turbo` for GPU-bound games, and `quiet` on battery. See Section 3.1 for the full profile specification.
 
----
 
 ## 4. MUX Switch & GPU Mode Configuration
 
@@ -196,7 +191,6 @@ Section "Monitor"
 EndSection
 ```
 
----
 
 ## 5. NVIDIA RTX 4090 Laptop Optimization
 
@@ -288,7 +282,6 @@ In Steam, set launch options:
 /usr/local/bin/cpu-heavy-game.sh %command%
 ```
 
----
 
 ## 6. Intel Core Ultra 9 185H Optimization (The Big One)
 
@@ -478,7 +471,6 @@ sudo systemctl restart thermald
 
 This tells `thermald` to **only start RAPL throttling at 95°C**, letting the CPU run at its BIOS/VRM limits up to that point.
 
----
 
 ## 7. The Cooling Maximization Protocol
 
@@ -538,7 +530,6 @@ The GU605MY uses standard thermal paste from the factory. In thin laptops, paste
 #### Step 4: VRM Thermal Pads
 The VRMs on the GU605MY run hot when PL1 is raised to 75W. Replace the stock VRM pads with **1.5mm Thermalright Extreme Odyssey** or **Fujipoly Ultra Extreme**.
 
----
 
 ## 8. Gaming Performance Stack on Linux
 
@@ -636,7 +627,6 @@ For **competitive FPS** (Valorant, CS2, Apex):
 sudo nvidia-smi -pl 90; taskset -c 0-11 gamemoderun mangohud %command%
 ```
 
----
 
 ## 9. OLED Display Optimization & Care
 
@@ -670,7 +660,6 @@ For KDE Plasma:
 kwriteconfig5 --file kwinrc --group Compositing --key MaxFPS 60
 ```
 
----
 
 ## 10. Complete Kernel Parameter String for GRUB
 
@@ -687,7 +676,6 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 > **Warning:** `mitigations=off` is a security risk. Only use it for a dedicated gaming install. For daily driver use, remove it.
 
----
 
 ## 11. Monitoring & Benchmarking
 
@@ -716,7 +704,6 @@ Test these titles to verify CPU tuning:
 
 If the CPU still drops to 35W in these titles, lower the GPU power cap further (try 80W) and verify fan speeds are at 100%.
 
----
 
 ## 12. One-Shot Setup Script for Linux
 
@@ -777,7 +764,6 @@ sudo systemctl enable --now rapl-tune.service
 echo "=== Done. Reboot and verify with: s-tui, nvtop, nvidia-smi ==="
 ```
 
----
 
 ## Bottom Line
 

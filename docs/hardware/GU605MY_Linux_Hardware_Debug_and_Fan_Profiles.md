@@ -7,7 +7,6 @@
 **RAM:** 32GB LPDDR5X-7467 (soldered)  
 **Display:** 16" Samsung OLED SDC41A3 (2560×1600, 240Hz, HDR)  
 
----
 
 ## 1. Critical Hardware IDs for Linux
 
@@ -53,7 +52,6 @@ These IDs are required for writing udev rules, custom kernel modules, or debuggi
 | EC0 (Embedded Controller) | `\_SB_.PC00.LPCB.EC0_` | Handles fan RPMs (`_FRMS`), temps, power |
 | NPCF (NVIDIA Platform Ctrl) | `\_SB_.NPCF` | ACPI interface for GPU TGP switching (`NVDA0820`) |
 
----
 
 ## 2. DSDT / ACPI Findings
 
@@ -310,7 +308,6 @@ sudo dptfxtract /sys/firmware/acpi/tables/
 
 This will generate `dptf.dv` files with the decoded participant tables for use with `thermald`.
 
----
 
 ## 3. Fan Specifications
 
@@ -397,7 +394,6 @@ MID: enabled: true, 40c:8%,44c:12%,55c:17%,64c:25%,68c:29%,72c:40%,76c:52%,80c:6
 
 - **Warning from upstream**: Custom fan curves on some ASUS laptops can cause "stuttering, videos dropping frames or other seemingly power related issues." If this occurs, disable custom curves and fall back to BIOS/EC defaults.
 
----
 
 ## 4. Performance Profiles — Detailed Specifications
 
@@ -525,7 +521,6 @@ sudo nvidia-smi -pl 115
 sudo nvidia-smi -pl 125
 ```
 
----
 
 ## 5. Missing Data That Is Still Needed for Linux
 
@@ -577,7 +572,6 @@ Key candidates:
 - `_Q76` / `_Q77` (charger / power events)
 - `_Q0D` / `_Q0E` (lid events)
 
----
 
 ## 6. Recommendations for Linux Users
 
@@ -600,7 +594,6 @@ Key candidates:
 
 8. **Keep the DSDT dump** (`dsdt_aml.bin`) and the **SSDN disassembly** (`SSDN_OptRf2_Opt2Tabl_00001000_00000000.dsl`) for future reference. If you need to write a custom ACPI override or report a bug to `asus-linux`, these are the first files maintainers will ask for.
 
----
 
 ## 7. File Checksum Reference
 

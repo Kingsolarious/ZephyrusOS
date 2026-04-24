@@ -2,24 +2,21 @@
 
 **ROG-themed macOS-style Linux distribution for ASUS Zephyrus laptops**
 
-![KDE Plasma 6](https://img.shields.io/badge/KDE-Plasma%206-blue)
-![Based on Bazzite](https://img.shields.io/badge/Based%20On-Bazzite-orange)
-![macOS Style](https://img.shields.io/badge/Style-macOS%20Like-silver)
 
-## 🎮 Overview
+## Overview
 
 Zephyrus OS transforms your ASUS ROG laptop into a sleek, macOS-inspired powerhouse running KDE Plasma 6 with full ROG hardware integration.
 
 ### Key Features
 
-- 🍎 **macOS-style interface** with top menu bar and centered dock
-- 🎨 **ROG Crimson theme** with custom color schemes
-- ⚡ **Full hardware control** - Fan curves, GPU switching, LED effects
-- 🖥️ **Global Menu** support for native macOS-like app menus
-- 🎮 **Custom macOS Dock** with magnification and animations
-- 🔧 **ASUS Linux integration** - asusctl, anime matrix (supergfxctl deprecated)
+- macOS **macOS-style interface** with top menu bar and centered dock
+-  **ROG Crimson theme** with custom color schemes
+-  **Full hardware control** - Fan curves, GPU switching, LED effects
+-  **Global Menu** support for native macOS-like app menus
+-  **Custom macOS Dock** with magnification and animations
+-  **ASUS Linux integration** - asusctl, anime matrix (supergfxctl deprecated)
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Check system status
@@ -35,7 +32,7 @@ zephyrus-about
 rog-control-center
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Zephyrus OS/
@@ -53,7 +50,7 @@ Zephyrus OS/
 └── docs/                   # Documentation
 ```
 
-## 🛠️ Management Tools
+## Management Tools
 
 ### zephyrus-os-tool
 
@@ -90,7 +87,7 @@ asusctl slash --enable         # Enable slash LED
 asusctl fan-curve --help       # Fan control
 ```
 
-## 🎨 Customization
+## Customization
 
 ### macOS Dock
 
@@ -109,7 +106,7 @@ System Settings → Appearance:
 - **Color Scheme**: ZephyrusCrimson (included)
 - **Window Decorations**: Breeze with left-side buttons
 
-## 📚 Documentation
+## Documentation
 
 | Document | Description |
 |----------|-------------|
@@ -118,28 +115,27 @@ System Settings → Appearance:
 | [KDE_SETUP_GUIDE.md](KDE_SETUP_GUIDE.md) | Quick start guide |
 | [ZEPHYRUS_CRIMSON_SPEC.md](ZEPHYRUS_CRIMSON_SPEC.md) | Technical specifications |
 
-## 🖥️ Requirements
+## Requirements
 
 - ASUS ROG Zephyrus laptop (G14/G16/M16 series)
 - Bazzite (Fedora Kinoite-based)
 - KDE Plasma 6
 - Wayland session
 
-## 🐛 Known Issues
+## Known Issues
 
 - **ROG Control Center dark mode**: Bug in Slint framework, `dark_mode: true` is ignored
 - **Workaround**: Use `asusctl` CLI in dark terminal
 
-## 🤝 Credits
+## Credits
 
 - [ASUS Linux](https://asus-linux.org/) - Hardware support
 - [Bazzite](https://bazzite.gg/) - Base distribution
 - [KDE Plasma](https://kde.org/plasma-desktop) - Desktop environment
 
-## 📜 License
+## License
 
 This project is provided as-is for ROG laptop users. See LICENSE file for details.
 
----
 
-**Enjoy your Zephyrus OS experience!** 🎮
+**Enjoy your Zephyrus OS experience!** 

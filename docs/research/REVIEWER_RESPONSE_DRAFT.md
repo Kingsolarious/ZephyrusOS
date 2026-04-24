@@ -2,7 +2,6 @@
 
 > Use this as a starting point for your response. Post it as a reply to their review.
 
----
 
 Thank you for taking the time to look through the repo and for the detailed, constructive feedback. You're absolutely right on several fronts, and I appreciate the corrections from someone who knows this codebase far better than I do.
 
@@ -70,7 +69,6 @@ If any of these fixes overlap with work you already have in a branch, I'm happy 
 
 I'd absolutely love that resource on microphone calibration via PipeWire. The Focusrite Scarlett 18i8 routing in this repo is held together with duct tape and `module-remap-source`. A proper calibration/linearization pipeline would be a huge improvement.
 
----
 
 Thanks again for the thorough review. This project exists because your upstream work made it possible — the goal was never to replace asus-linux, but to fill in the model-specific gaps for the GU605MY. I'm happy to upstream whatever is useful and collaborate where it makes sense.
 

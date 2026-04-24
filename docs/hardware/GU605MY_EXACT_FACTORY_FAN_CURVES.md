@@ -5,7 +5,6 @@
 > **Date:** 2026-04-20
 > **Validation:** Values match `asusctl fan-curve --mod-profile <profile>` exactly
 
----
 
 ## Quiet (Silent) Profile
 
@@ -33,7 +32,6 @@
 | 7     | 73        | 76  | 29.8%       | ~3400          |
 | 8     | 73        | 76  | 29.8%       | ~3400          |
 
----
 
 ## Balanced Profile
 
@@ -61,7 +59,6 @@
 | 7     | 72        | 117 | 45.9%       | ~4300          |
 | 8     | 77        | 140 | 54.9%       | ~4700          |
 
----
 
 ## Performance (Turbo) Profile
 
@@ -89,7 +86,6 @@
 | 7     | 80        | 242 | 94.9%       | ~6400          |
 | 8     | 85        | 255 | 100.0%      | ~6500          |
 
----
 
 ## Hardware Specs
 

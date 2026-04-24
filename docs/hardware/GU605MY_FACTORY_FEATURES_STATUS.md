@@ -5,7 +5,6 @@
 > **Kernel:** 6.17.7-ba28.fc43.x86_64  
 > **Base:** Fedora Silverblue 43
 
----
 
 ## Legend
 
@@ -13,10 +12,9 @@
 |------|---------|
 | ✅ | Fully working — matches or exceeds factory |
 | 🟡 | Partial — approximated or limited |
-| 🔴 | Not possible — hardware/firmware limitation |
-| 📝 | Documented — research complete, implementation pending |
+| No | Not possible — hardware/firmware limitation |
+| Docs | Documented — research complete, implementation pending |
 
----
 
 ## Power & Thermal
 
@@ -36,21 +34,19 @@
 | **Thermald** | ✅ | Running in adaptive mode with DPTF ACPI tables |
 | **Tuned** | ✅ | **Disabled** — was conflicting with profile sync |
 
----
 
 ## Display & Graphics
 
 | Feature | Status | Details |
 |---------|--------|---------|
 | **MUX Switch** | 🟡 | `supergfxctl` — **deprecated**. NVIDIA driver power management preferred. See notes below. |
-| **Dynamic MUX** | 🔴 | **Impossible.** ASUS firmware requires reboot for MUX state change. No Linux NVAPI support for Advanced Optimus |
+| **Dynamic MUX** | No | **Impossible.** ASUS firmware requires reboot for MUX state change. No Linux NVAPI support for Advanced Optimus |
 | **OLED Backlight** | ✅ | `i915.enable_dpcd_backlight=1` |
 | **NVIDIA DRM Modeset** | ✅ | `nvidia-drm.modeset=1` |
-| **Panel Overdrive** | 📝 | Not yet configured. Need to check if exposed via DDC/CI or ASUS WMI |
-| **HDR** | 📝 | KDE Plasma supports HDR. Need calibration/ICC profile |
+| **Panel Overdrive** | Docs | Not yet configured. Need to check if exposed via DDC/CI or ASUS WMI |
+| **HDR** | Docs | KDE Plasma supports HDR. Need calibration/ICC profile |
 | **VRR (240Hz)** | ✅ | Panel supports 240Hz, VRR enabled in kwinrc |
 
----
 
 ## Audio
 
@@ -59,9 +55,8 @@
 | **Internal Speakers** | ✅ | Realtek ALC285 + CS35L41 smart amp. Firmware: `CS35L56_Rev3.11.16.wmfw` |
 | **PipeWire** | ✅ | Full 0-100% volume control (volume limiter removed) |
 | **Dolby Atmos** | 🟡 | Not replicated. Can approximate with EasyEffects HRTF convolver |
-| **Spatial Audio** | 📝 | Research complete. Need EasyEffects preset implementation |
+| **Spatial Audio** | Docs | Research complete. Need EasyEffects preset implementation |
 
----
 
 ## Input
 
@@ -69,11 +64,10 @@
 |---------|--------|---------|
 | **Touchpad** | ✅ | ASUS Precision Touchpad (ASUF1207) fully functional |
 | **Keyboard Backlight** | ✅ | 1-zone RGB via `asusd`. Static/breathing/rainbow supported |
-| **Advanced Keyboard RGB** | 📝 | Protocol decoded (`0B05:19B6`, report ID `0x5D`). Reactive/music/temp effects need daemon implementation |
-| **Slash LED** | 📝 | `asusctl` supports basic modes. Custom `.slashlighting` animations need player daemon (`0B05:193B`) |
+| **Advanced Keyboard RGB** | Docs | Protocol decoded (`0B05:19B6`, report ID `0x5D`). Reactive/music/temp effects need daemon implementation |
+| **Slash LED** | Docs | `asusctl` supports basic modes. Custom `.slashlighting` animations need player daemon (`0B05:193B`) |
 | **ROG Key / Hotkeys** | ✅ | Mapped via udev hwdb |
 
----
 
 ## Power Management
 
@@ -85,7 +79,6 @@
 | **USB Autosuspend** | ✅ | Rules for ASUS devices, Logitech |
 | **GPU Power Management** | ✅ | `nvidia.NVreg_DynamicPowerManagement=0x02` |
 
----
 
 ## Networking
 
@@ -96,39 +89,35 @@
 | **USB4 / Thunderbolt** | ✅ | Security level: `user`. Controller present at `domain0` |
 | **Gaming QoS** | ✅ | `zephyrus-gaming-qos` HTB traffic shaping |
 
----
 
 ## Security & Encryption
 
 | Feature | Status | Details |
 |---------|--------|---------|
 | **TPM 2.0** | ✅ | Available |
-| **LUKS2 + TPM2** | 📝 | Can be configured with `systemd-cryptenroll` |
-| **Secure Boot** | 📝 | Check with `mokutil --sb-state` |
-| **Face Auth** | 📝 | `howdy` can approximate Windows Hello |
+| **LUKS2 + TPM2** | Docs | Can be configured with `systemd-cryptenroll` |
+| **Secure Boot** | Docs | Check with `mokutil --sb-state` |
+| **Face Auth** | Docs | `howdy` can approximate Windows Hello |
 
----
 
 ## GPU Overclocking
 
 | Feature | Status | Details |
 |---------|--------|---------|
-| **Clock Offset** | 🔴 | **VBIOS locked.** `nvidia-smi --lock-gpu-clocks` returns permission denied. `nvidia-settings --query GPUClockOffset` not available |
-| **Application Clocks** | 🔴 | `nvidia-smi -ac` returns "not supported" |
-| **Voltage Curve** | 🔴 | **VBIOS locked.** No Linux tool can unlock |
+| **Clock Offset** | No | **VBIOS locked.** `nvidia-smi --lock-gpu-clocks` returns permission denied. `nvidia-settings --query GPUClockOffset` not available |
+| **Application Clocks** | No | `nvidia-smi -ac` returns "not supported" |
+| **Voltage Curve** | No | **VBIOS locked.** No Linux tool can unlock |
 | **Performance Levels** | ✅ | 6 P-states visible via `nvidia-settings --query GPUPerfModes`. Dynamic clock switching works |
 
 > **Note:** The RTX 4090 Laptop VBIOS on the GU605MY explicitly disables overclocking. This is a **hardware/firmware lock**, not a driver limitation. On Windows, Armoury Crate's "Manual" mode allows only pre-configured profiles from the encrypted `AC_Config.VgaOc.GU605MY.enc` — the GPU is not actually user-overclockable even on Windows.
 
----
 
 ## Deprecated / Pending Replacement
 
 | Feature | Status | Details |
 |---------|--------|---------|
-| **supergfxctl dGPU disable** | 🔴 | **Deprecated.** Disabling dGPU via supergfxctl leaves the GPU powered-on but inaccessible, consuming power without benefit. NVIDIA driver's native power management is preferred. Community replacement tool in development. |
+| **supergfxctl dGPU disable** | No | **Deprecated.** Disabling dGPU via supergfxctl leaves the GPU powered-on but inaccessible, consuming power without benefit. NVIDIA driver's native power management is preferred. Community replacement tool in development. |
 
----
 
 ## What Was Fixed in This Session
 
@@ -141,7 +130,6 @@
 7. **Extracted exact factory fan curves** — From `asus_custom_fan_curve` hwmon device
 8. **Verified DPTF is working** — `INT3400 Thermal` + `SEN1/2/3` zones active with correct trip points
 
----
 
 ## Remaining Research Gaps
 
@@ -154,7 +142,6 @@
 | Complete PCIe config space | Low | `lspci -xxx` dump |
 | IR camera stream formats | Low | `v4l2-ctl --list-formats-ext` |
 
----
 
 ## OS Build Updates Applied
 

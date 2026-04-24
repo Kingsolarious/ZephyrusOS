@@ -4,7 +4,6 @@
 **Panel:** Samsung SDC ATNA60DL01-0 (SDC41A3)
 **Interface:** eDP (DisplayPort)
 
----
 
 ## Summary
 
@@ -29,7 +28,6 @@ The internal OLED panel is fully decoded. Key findings:
 | **Max Dotclock** | 1125.275 MHz |
 | **eDP Version** | DisplayID 2.0 extension |
 
----
 
 ## Colorimetry
 
@@ -42,7 +40,6 @@ White: (0.3127, 0.3291) — D65
 
 This exceeds DCI-P3 and approaches BT.2020 in green coverage.
 
----
 
 ## VRR / Adaptive Sync
 
@@ -58,7 +55,6 @@ Both support:
 
 **Linux implication:** VRR should work out-of-the-box with `amdgpu`/`i915` + `nvidia-drm` modeset. Use `vrr_enabled=1` in games or enable in desktop compositor (KWin/GNOME Mutter).
 
----
 
 ## HDR
 
@@ -74,7 +70,6 @@ The panel advertises:
 
 The 616-nit peak brightness makes this a solid HDR400+ class display.
 
----
 
 ## DSC (Display Stream Compression)
 
@@ -85,7 +80,6 @@ The 616-nit peak brightness makes this a solid HDR400+ class display.
 
 At 240 Hz, this is within eDP HBR3 bandwidth (≈25.92 Gbit/s). No DSC compression needed.
 
----
 
 ## Linux Tuning Recommendations
 
@@ -107,7 +101,6 @@ gsettings set org.gnome.mutter experimental-features "['variable-refresh-rate']"
 ### Panel Overdrive
 The EDID does **not** contain explicit overdrive/response time data. The 240 Hz native refresh + OLED pixel response makes overdrive largely unnecessary. ASUS likely handles any overshoot in the panel firmware.
 
----
 
 ## Verification Commands
 

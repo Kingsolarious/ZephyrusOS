@@ -1,6 +1,6 @@
 # Zephyrus OS - KDE Plasma Setup Guide
 
-## ✅ What's Already Done
+## What's Already Done
 
 - [x] Rebased to KDE Plasma 6
 - [x] Window buttons moved to LEFT side (macOS style)
@@ -8,7 +8,7 @@
 - [x] ROG Wallpaper set
 - [x] ROG-themed dock script installed (needs manual fix for GTK4)
 
-## 🔧 Manual Setup Steps
+## Manual Setup Steps
 
 ### 1. Add Global Menu (macOS-style menu bar)
 
@@ -66,7 +66,7 @@ KDE's native dock is better than our Python script for Plasma.
 3. Set **Accent color** to: `#FF3333` (ROG Crimson)
 4. Click **Apply**
 
-## 🚀 Quick Commands
+## Quick Commands
 
 ```bash
 # Run About app
@@ -79,7 +79,7 @@ kquitapp5 plasmashell && kstart5 plasmashell
 qdbus org.kde.KWin /KWin reconfigure
 ```
 
-## 🎮 ROG-Specific Features
+## ROG-Specific Features
 
 ### ASUS Linux Integration
 ```bash
@@ -99,16 +99,16 @@ Set up ROG-specific shortcuts in **System Settings** → **Shortcuts**:
 - **Fn+F5**: Performance mode toggle
 - **ROG Key**: Launch Armoury Crate (or custom app)
 
-## 📁 What's Installed
+## What's Installed
 
 | Component | Location | Status |
 |-----------|----------|--------|
 | About App | `~/.local/bin/zephyrus-about` | ✅ Working |
-| Dock Script | `~/.local/bin/zephyrus-dock` | ⚠️ Needs GTK4 fix |
+| Dock Script | `~/.local/bin/zephyrus-dock` | Warning: Needs GTK4 fix |
 | ROG Wallpaper | `~/Desktop/Zephyrus OS/Rog Logo2.png` | ✅ Set |
 | Desktop Config | `~/.config/` | ✅ Configured |
 
-## 🐛 Known Issues & Fixes
+## Known Issues & Fixes
 
 ### Python GTK Apps Use Wrong Python
 **Fix:** Scripts have been updated to use `/usr/bin/python3`
@@ -120,18 +120,17 @@ Set up ROG-specific shortcuts in **System Settings** → **Shortcuts**:
 **Issue:** `set_type_hint`, `set_keep_above` not available in GTK4
 **Fix:** Use KDE's native panel/dock instead
 
-## 🎯 Next Steps
+## Next Steps
 
 1. ✅ Complete the manual setup above
 2. ✅ Customize your dock with favorite apps
 3. ✅ Set up ROG keyboard shortcuts
 4. ✅ Install additional software via Discover (app store)
 
-## 📞 Need Help?
+## Need Help?
 
 - **KDE User Guide:** https://userbase.kde.org/
 - **Zephyrus Project:** Check `~/Desktop/Zephyrus OS/` for docs
 
----
 
-**Enjoy your ROG-themed KDE Plasma! 🎮**
+**Enjoy your ROG-themed KDE Plasma! **

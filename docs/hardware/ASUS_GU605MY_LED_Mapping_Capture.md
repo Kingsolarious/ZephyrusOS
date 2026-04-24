@@ -7,7 +7,6 @@
 **Device ID:** `3F49AD29-52D9-46A5-A608-203D54E7D12A`  
 **Physical Layout:** 1-Zone RGB (all keys share color simultaneously)
 
----
 
 ## 1. Keyboard LED Key Naming Map
 
@@ -59,7 +58,6 @@ The following keys exist physically but were **never referenced** in any `.keyli
 
 > **Note:** Absence from animation files does **not** mean these keys lack LEDs. It simply means the pre-packaged festival effects didn't animate them. The 1-zone controller illuminates all keys simultaneously.
 
----
 
 ## 2. KeyLight File Format Specification
 
@@ -103,7 +101,6 @@ SPACE=255,66,160,66
 
 This script lights the `H` key red at 724ms, then `SPACE` yellow at 1448ms, then `1` red at 2172ms, then `SPACE` teal at 2896ms. On a **1-zone keyboard**, the entire keyboard changes to each color in sequence (not just the named key).
 
----
 
 ## 3. Slash Lighting (Lid LED) Mapping
 
@@ -194,7 +191,6 @@ FrameCount=1
 
 This sets all 7 slash segments to full brightness (white).
 
----
 
 ## 4. Device Capability & Status XML Data
 
@@ -231,7 +227,6 @@ Even though ASUS software reports `WDL_NB_KB_4ZONE_RGB_LIGHTING`, the **GU605MY 
 - Effects like Reactive and Ripple animate the **entire keyboard at once**
 - You cannot set different colors for WASD vs. the rest of the keyboard
 
----
 
 ## 5. Matrix LED Configuration
 
@@ -275,7 +270,6 @@ This configures the **Slash/AniMe Matrix** behavior:
 
 This is a template used by Armoury Crate to push custom matrix animations to the EC. The actual animation data is injected into the `<effectList/>` node at runtime.
 
----
 
 ## 6. Festival Effect Binary Matrix Files
 
@@ -311,7 +305,6 @@ Based on file sizes and the `.keylight` text format, `.MATRIX` files likely cont
 
 These files cannot be directly edited without reverse engineering, but they are not needed for Linux control since `rogauracore` and `asusctl` handle the protocol directly.
 
----
 
 ## 7. Slash Light Content State (`SlashLightContent.ini`)
 
@@ -356,7 +349,6 @@ This shows the current Slash LED state on this machine:
 - `Brightness=0` — Currently at 0% brightness
 - `ThemeID=1` — Default theme is Theme 1 (Glitch)
 
----
 
 ## 8. LED Control Paths on Linux
 
@@ -407,7 +399,6 @@ asusctl slash -m <mode_name>
 
 The slash LED is controlled via the same `asus-nb-wmi` kernel module but uses a different WMI method ID than the keyboard backlight.
 
----
 
 ## 9. Complete LED Ecosystem Summary
 
@@ -417,7 +408,6 @@ The slash LED is controlled via the same `asus-nb-wmi` kernel module but uses a 
 | **Slash Lid** | 7 segments | ITE 8910 `0B05:193B` | ✅ Partial | `asusctl` (basic on/off/brightness) |
 | **Logo (ROG Eye)** | None on G16 | N/A | N/A | N/A |
 
----
 
 ## 10. Key Takeaways for Custom Control
 

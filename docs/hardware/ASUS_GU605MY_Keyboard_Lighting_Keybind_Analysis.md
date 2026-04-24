@@ -5,7 +5,6 @@
 **Keyboard Layout:** US English (centered, no numpad)  
 **Keyboard Type:** Backlit Chiclet Keyboard — **1-Zone RGB**
 
----
 
 ## Executive Summary
 
@@ -13,7 +12,6 @@ The GU605MY uses a **single-zone RGB keyboard** controlled by the **ASUS ITE 891
 
 **Good news for Linux:** this exact controller (`0b05:19b6`) is supported by the open-source Linux tool `rogauracore`, and basic brightness/color control works through `asusctl` / `rog-control-center`.
 
----
 
 ## 1. Physical Keyboard Layout
 
@@ -34,7 +32,6 @@ The GU605MY uses a **single-zone RGB keyboard** controlled by the **ASUS ITE 891
 ### Why the "4keys" / "5keys" images exist in Armoury Crate
 Armoury Crate's `AC_CustomHotkey` module contains UI assets for `asus_ac_hotkey_4keys_illustration_bg` and `asus_ac_hotkey_5keys_illustration_bg`. These are for **other ASUS laptop models** (e.g., ROG Strix SCAR, Flow) that physically have 4 or 5 macro keys on the left side of the deck. The GU605MY uses the standard `asus_ac_hotkey_illustration_bg` asset.
 
----
 
 ## 2. RGB Lighting Hardware
 
@@ -80,7 +77,6 @@ The following effects are exposed in Armoury Crate's `Aura.ini` and `Plugin_Stat
 ### Brightness Levels
 The keyboard supports **4 brightness levels** (0 = off, 1–3 = increasing brightness). This is controlled via the `asus::kbd_backlight` WMI interface on Linux.
 
----
 
 ## 3. Key Binding & Macro Programming
 
@@ -101,7 +97,6 @@ Armoury Crate provides a **"Custom Hotkey"** and **"Macro"** module, but on the 
 ### Macro Files Status
 Probe of `C:\Users\kings\AppData\Local\Packages\B9ECED6F.ArmouryCrate_qmba6cd70vzyy\LocalState\MacroFiles` showed **only an empty `Temp` folder**, meaning no custom macros are currently saved.
 
----
 
 ## 4. Linux Compatibility & How to Control It
 
@@ -189,7 +184,6 @@ The Slash lighting content files are stored at:
 
 These are proprietary `.slashlighting` binary files and cannot be directly imported into Linux tools, but `rog-control-center` supports basic animations for the slash LED.
 
----
 
 ## 5. Summary Table
 
@@ -207,7 +201,6 @@ These are proprietary `.slashlighting` binary files and cannot be directly impor
 | **Macro keys** | ❌ No physical macro keys | ❌ No physical macro keys |
 | **Slash lighting** | ✅ Yes | ✅ `rog-control-center` basic support |
 
----
 
 ## 6. Bottom Line
 

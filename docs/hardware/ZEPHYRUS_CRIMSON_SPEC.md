@@ -8,7 +8,6 @@ Transform Bazzite (GNOME 49) into a fully branded ASUS ROG Zephyrus Crimson Edit
 **Hardware Target:** ASUS ROG Zephyrus G16 (2024)  
 **Status:** Multi-module system architecture specification
 
----
 
 ## Module 1: Global Menu Bar Extension
 
@@ -140,7 +139,6 @@ Gio.DBus.session.call(
 - Electron apps support varies
 - Some modern apps (GTK4/libadwaita) use headerbars instead of menus
 
----
 
 ## Module 2: About This Zephyrus (GTK4 Application)
 
@@ -239,7 +237,6 @@ separator {
 - Launch from global menu ROG button
 - Bind to keyboard shortcut (optional)
 
----
 
 ## Module 3: ROG Crimson Theme
 
@@ -300,7 +297,6 @@ Complete visual identity layer with red-black ASUS industrial aesthetic.
 }
 ```
 
----
 
 ## Module 4: GDM Login Screen Theme
 
@@ -349,7 +345,6 @@ Replace GNOME branding with Zephyrus Crimson identity on login screen.
 - Update gresource binary with custom assets
 - Ensure SELinux contexts are correct (Fedora)
 
----
 
 ## Module 5: Plymouth Boot Splash
 
@@ -392,7 +387,6 @@ sudo plymouth-set-default-theme zephyrus-crimson -R
 dracut -f  # Regenerate initramfs
 ```
 
----
 
 ## Implementation Phases
 
@@ -431,7 +425,6 @@ dracut -f  # Regenerate initramfs
 3. Prepare assets
 4. Install and test boot animation
 
----
 
 ## Dependencies
 
@@ -458,7 +451,6 @@ sudo rpm-ostree install psutil lm_sensors pciutils
 pip install --user psutil pygobject
 ```
 
----
 
 ## File References
 
@@ -474,7 +466,6 @@ pip install --user psutil pygobject
 | `gdm/gdm-theme.css` | Login screen theme |
 | `plymouth/zephyrus.script` | Boot animation |
 
----
 
 ## Testing Checklist
 
@@ -492,7 +483,6 @@ pip install --user psutil pygobject
 - [ ] No SELinux denials
 - [ ] System remains bootable
 
----
 
 ## Rollback Plan
 
@@ -501,7 +491,6 @@ pip install --user psutil pygobject
 3. **GDM:** Restore from backup gresource
 4. **Plymouth:** `sudo plymouth-set-default-theme spinner -R`
 
----
 
 ## Notes
 
@@ -511,7 +500,6 @@ pip install --user psutil pygobject
 - Plymouth theme requires initramfs regeneration
 - Test each module independently before integration
 
----
 
 **Document Version:** 1.0  
 **Last Updated:** 2026-03-04  

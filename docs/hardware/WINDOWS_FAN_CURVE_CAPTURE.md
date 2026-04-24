@@ -8,7 +8,6 @@ Use this to record exact Armoury Crate fan curves so they can be replicated on L
 2. Open **Armoury Crate** → **System** → **Fan Xpert** (or the fan curve tab)
 3. For each profile below, select it and record every point on the curve
 
----
 
 ## Data to Capture
 
@@ -54,7 +53,6 @@ There are two fans: **CPU** and **GPU** (some models have a third **Mid** fan).
 | 7     |           |           |           |           |
 | 8     |           |           |           |           |
 
----
 
 ## Conversion Formula
 
@@ -80,7 +78,6 @@ Quick reference:
 | 90  | 230 |
 | 100 | 255 |
 
----
 
 ## Apply on Linux
 
@@ -102,7 +99,6 @@ Or use the control center reset to go back to firmware defaults:
 asusctl fan-curve --set-default
 ```
 
----
 
 ## Notes
 

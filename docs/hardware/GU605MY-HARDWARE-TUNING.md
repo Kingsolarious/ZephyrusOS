@@ -7,9 +7,8 @@
 **Audio:** Realtek ALC285 + Cirrus Logic CS35L56 smart amp  
 **Keyboard:** ASUS ITE 8910 HID (0B05:19B6), 1-zone RGB  
 
----
 
-## 🔴 Critical Fixes Applied (2026-04-20)
+## Critical Fixes Applied (2026-04-20)
 
 ### 1. S3 Sleep (NOT S0ix)
 
@@ -67,9 +66,8 @@ acpi_osi=! acpi_osi="Windows 2022"
 - Restores GPU power limit after resume
 - Restores asusctl profile after resume
 
----
 
-## ⚡ Power Profiles (Hardware-Validated)
+## Power Profiles (Hardware-Validated)
 
 From decoded Armoury Crate service logs:
 
@@ -98,9 +96,8 @@ PL2  = 115W turbo burst
 Tau  = 28s
 ```
 
----
 
-## 🎮 GPU Power Wrappers
+## GPU Power Wrappers
 
 | Script | Power | Use Case |
 |--------|-------|----------|
@@ -108,9 +105,8 @@ Tau  = 28s
 | `zephyrus-gpu-heavy-game` | 125W | GPU-bound titles |
 | `zephyrus-gpu-profile-sync` | Auto | Syncs with asusctl profile (55W/90W/115W) |
 
----
 
-## ⚠️ supergfxctl Deprecation
+## supergfxctl Deprecation
 
 **`supergfxctl` is deprecated for GPU power management.**
 
@@ -121,9 +117,8 @@ Disabling the dGPU via `supergfxctl --mode integrated` does **not** power off th
 - Use `asusctl` performance profiles for thermal/power tuning
 - A community replacement tool that properly blocks the dGPU via the NVIDIA driver (rather than fighting it) is in development
 
----
 
-## 🌙 Sleep Configuration
+## Sleep Configuration
 
 ### Kernel Parameters
 
@@ -161,9 +156,8 @@ acpi_osi=! acpi_osi="Windows 2022"
 - Disables TBT wakeup
 - Restores GPU PL and ASUS profile on resume
 
----
 
-## 🔊 Audio
+## Audio
 
 ### Hardware IDs
 
@@ -189,9 +183,8 @@ acpi_osi=! acpi_osi="Windows 2022"
 - Disables audio power management to prevent dropouts
 - Points DSP firmware to CS35L56 blob
 
----
 
-## 🎮 Gaming QoS
+## Gaming QoS
 
 `zephyrus-gaming-qos` (enabled via systemd) applies HTB traffic shaping:
 
@@ -202,17 +195,15 @@ acpi_osi=! acpi_osi="Windows 2022"
 | Interactive | 3 | 100mbit | SSH, DNS |
 | Bulk | 4 | 200mbit | HTTP, torrents, streaming |
 
----
 
-## ⌨️ Keyboard RGB
+## Keyboard RGB
 
 - **Device:** `0B05:19B6`
 - **Interface:** `UsagePage=0xFF31, Usage=0x0079`
 - **Control:** `asusctl` handles brightness; custom daemon available at `gu605my_keyboard_effects.py`
 
----
 
-## 🖥️ Display
+## Display
 
 | Property | Value |
 |----------|-------|
@@ -235,9 +226,8 @@ kwriteconfig6 --file kwinrc --group OrgKdeKwinCompositor --key VRRPolicy 2
 kwriteconfig6 --file kwinrc --group Compositing --key AllowTearing false
 ```
 
----
 
-## 🔄 Services Enabled in Image
+## Services Enabled in Image
 
 | Service | Purpose |
 |---------|---------|
@@ -252,9 +242,8 @@ kwriteconfig6 --file kwinrc --group Compositing --key AllowTearing false
 | `scx` | Scheduler extensibility |
 | `zephyrus-probe-hardware` | One-time DPTF/EC probe |
 
----
 
-## 🛠️ Build Verification
+## Build Verification
 
 After building the image, verify:
 
@@ -278,9 +267,8 @@ asusctl fan-curve --mod-profile performance
 cat /proc/cmdline
 ```
 
----
 
-## 📋 Change Log
+## Change Log
 
 | Date | Change |
 |------|--------|

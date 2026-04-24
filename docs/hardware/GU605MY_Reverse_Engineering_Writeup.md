@@ -4,7 +4,6 @@
 **Target:** ASUS ROG Zephyrus G16 GU605MY (Intel Core Ultra 9 185H, RTX 4090 Laptop)  
 **Goal:** Recover the 5 categories of missing Linux hardware data that were previously unobtainable from Windows.
 
----
 
 ## 0. The Starting Point — Five Missing Pieces
 
@@ -18,7 +17,6 @@ When this project began, the following data was identified as **critical but mis
 
 This writeup documents the methodology, tools, dead-ends, and breakthroughs that resolved 4 out of 5 categories.
 
----
 
 ## 1. Phase 1 — ACPI Table Extraction from Windows
 
@@ -45,7 +43,6 @@ We also found:
 - `GBD0-GBD7`, `CBD0-CBD7`, `CMB0-CMBF`, `GMB0-GMBF` budget tables in an `ERM2` operation region.
 - **44 `_Qxx` EC query methods** handling everything from lid events to GPU power state changes.
 
----
 
 ## 2. Phase 2 — The Missing NPCF Device
 
@@ -83,7 +80,6 @@ Device (NPCF)
 
 This was the single most important discovery. The `NPCF` device was not in the DSDT — it was in **`SSDN`**.
 
----
 
 ## 3. Phase 3 — Decoding the NVPCF _DSM (GPU Power Limits)
 
@@ -130,7 +126,6 @@ The 106-byte buffer contains 6 entries of 17 bytes each, indexed by utilization 
 
 The exact semantics of columns A–D are not publicly documented by NVIDIA, but the structure confirms that NVPCF manages a **platform-wide power budget table** shared between CPU and GPU.
 
----
 
 ## 4. Phase 4 — Fan Curve Index Buffers (SCFI & SGFI)
 
@@ -160,7 +155,6 @@ These return an index that the NVIDIA driver consumes via NVPCF sub-function 5. 
 
 > **Bottom line:** We now know the exact temperature thresholds the firmware uses to decide when to increase fan speed. The actual duty percentages remain the only missing piece.
 
----
 
 ## 5. Phase 5 — DPTF Participant Decode
 
@@ -212,7 +206,6 @@ Several WORD constants were found at SSDA offsets that correspond to thermal tri
 
 Because DPTF computes Celsius values at runtime via `CTOK()` and `_DSM`, these deci-K values are the closest we can get without running `dptfxtract` on a live Linux system.
 
----
 
 ## 6. Phase 6 — Encryption Analysis of Armoury Crate Configs
 
@@ -259,7 +252,6 @@ The decryption key is **not statically extractable**. It is likely:
 
 > **Only viable next step:** Attach a debugger to the Armoury Crate Service process, set a breakpoint on `AesCryptoServiceProvider.set_Key()`, and dump the key from memory at runtime. This is invasive and outside the scope of safe static analysis.
 
----
 
 ## 7. Phase 7 — Suspend/Resume ACPI Quirks
 
@@ -316,7 +308,6 @@ sudo bash -c 'echo disable > /sys/firmware/acpi/interrupts/gpeXX'
 
 A full trace during actual suspend/resume is the only way to confirm the exact quirk sources, but the candidate list is now comprehensive.
 
----
 
 ## 8. Phase 8 — Validation of the Setup Script
 
@@ -325,7 +316,6 @@ A `setup_gu605my.sh` script was written to automate CachyOS/Arch Linux configura
 - No obvious bash syntax errors.
 - The script correctly creates systemd services for NVIDIA power limits (115W) and RAPL tuning (75W/115W).
 
----
 
 ## 9. Summary of Results
 
@@ -337,7 +327,6 @@ A `setup_gu605my.sh` script was written to automate CachyOS/Arch Linux configura
 | 4 | **NVIDIA intermediate TGP steps** | **Fully resolved** | Complete NVPCF `_DSM` decoded from SSDN. Default `TPPL = 115 W`. TGP transition table mapped. VBIOS 80W is just the uninitialized fallback. |
 | 5 | **S3/S0ix ACPI quirks** | Deeply mapped | All sleep methods and 44 `_Qxx` EC queries catalogued. High-risk wake sources identified. Live Linux trace still needed for final confirmation. |
 
----
 
 ## 10. What Remains Blocked & Next Steps
 
@@ -365,7 +354,6 @@ i915.enable_dpcd_backlight=1 nvidia.NVreg_EnableBacklightHandler=0
 acpi_osi=! acpi_osi="Windows 2022"
 ```
 
----
 
 ## 11. Artifacts Generated
 
@@ -380,6 +368,5 @@ acpi_osi=! acpi_osi="Windows 2022"
 | `dptf_analysis.txt` | Heuristic DPTF parse output | 102,373 bytes |
 | `setup_gu605my.sh` | CachyOS/Arch Linux auto-setup script | 3,009 bytes |
 
----
 
 *This reverse-engineering effort was conducted entirely through static analysis of Windows registry dumps, ACPI AML disassembly, and .NET DLL string extraction.*
