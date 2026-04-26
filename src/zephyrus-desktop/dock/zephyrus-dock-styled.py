@@ -1,9 +1,6 @@
-#!/usr/bin/env python3
-"""
-Zephyrus Dock - STYLED VERSION
-Matches the photo with ROG styling + working apps
-"""
+#!/bin/env python3
 
+# TODO: fix this later
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Gdk', '4.0')
@@ -16,7 +13,7 @@ class ZephyrusDock(Gtk.Application):
     def __init__(self):
         super().__init__(application_id='org.zephyrus.Dock')
         
-    def do_activate(self):
+    def _activate(self):
         if not self.get_windows():
             window = DockWindow(application=self)
             window.present()
@@ -212,17 +209,16 @@ class DockWindow(Gtk.Window):
         except Exception as e:
             print(f"Error: {e}")
 
-def main():
-    app = ZephyrusDock()
-    
-    def on_activate(app):
-        if not app.get_windows():
-            win = DockWindow(application=app)
-            app.add_window(win)
-            win.present()
-    
-    app.connect('activate', on_activate)
-    app.run(None)
+app = ZephyrusDock()
+
+def on_activate(app):
+    if not app.get_windows():
+        win = DockWindow(application=app)
+        app.add_window(win)
+        win.present()
+
+app.connect('activate', on_activate)
+app.run(None)
 
 if __name__ == '__main__':
     main()

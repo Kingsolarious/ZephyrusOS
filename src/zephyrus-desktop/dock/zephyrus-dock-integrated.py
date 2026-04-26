@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-"""
-Zephyrus Dock - Panel-integrated version
-Replaces the need for a separate dock extension
-"""
 
+# TODO: fix this later
 import gi
-gi.require_version('Gtk', '4.0')
+#gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, GLib
 import subprocess
-import os
 
 class ZephyrusDockWindow(Gtk.Window):
     """Dock window that docks at the bottom"""

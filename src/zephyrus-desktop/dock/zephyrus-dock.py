@@ -1,12 +1,8 @@
-#!/usr/bin/env python3
-"""
-Zephyrus Dock - Custom ROG-themed dock
-Hardcoded, no extensions required
-"""
+#!/bin/env python3
 
 import gi
-gi.require_version('Gtk', '4.0')
-gi.require_version('Gdk', '4.0')
+#gi.require_version('Gtk', '4.0')
+#gi.require_version('Gdk', '4.0')
 from gi.repository import Gtk, Gdk, GLib, Gio
 import subprocess
 import os
@@ -15,7 +11,7 @@ class ZephyrusDock(Gtk.Application):
     def __init__(self):
         super().__init__(application_id='org.zephyrus.Dock')
         
-    def do_activate(self):
+    def _activate(self):
         if not self.get_windows():
             window = DockWindow(application=self)
             window.present()

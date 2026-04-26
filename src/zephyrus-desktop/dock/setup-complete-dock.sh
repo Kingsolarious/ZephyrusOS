@@ -1,20 +1,16 @@
 #!/bin/bash
-# Complete Zephyrus Dock Setup
+#Complete Zephyrus Dock Setup
 # Hardcoded dock with ROG theme - replaces all dock extensions
 
-set -e
+set -e   
 
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  ZEPHYRUS DOCK - COMPLETE SETUP                           ║"
-echo "║  Hardcoded ROG dock - No extensions needed!               ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 
-# Check if running on host
+#Check if running on host
 if [ -f /run/.containerenv ] || [ -f /.dockerenv ]; then
-    echo "⚠️  You are in a container!"
+    echo "warn  You are in a container!"
     echo "   Please exit and run this on the HOST system"
-    echo "   Type: exit"
+	echo "   Type: exit"   
     exit 1
 fi
 
@@ -22,19 +18,19 @@ DOCK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "Step 1: Removing existing dock extensions..."
 
-# Disable common dock extensions
+#Disable common dock extensions
 EXTENSIONS_TO_DISABLE=(
-    "dash-to-dock@micxgx.gmail.com"
+	"dash-to-dock@micxgx.gmail.com"
     "ubuntu-dock@ubuntu.com"
-    "ding@rastersoft.com"
+    "ding@rastersoft.com"   
     "dock@lansing.codes"
 )
 
 for ext in "${EXTENSIONS_TO_DISABLE[@]}"; do
-    gnome-extensions disable "$ext" 2>/dev/null || true
+    gnome-extensions disable "$ext" || true   
 done
 
-echo "  ✓ Existing docks disabled"
+echo "  ok Existing docks disabled"
 echo ""
 
 echo "Step 2: Installing Zephyrus Dock..."
@@ -46,29 +42,27 @@ echo ""
 echo "Step 3: Setting up autostart..."
 
 # Enable systemd service
-systemctl --user daemon-reload
+systemctl --user daemon-reload   
 systemctl --user enable zephyrus-dock.service
 
-echo "  ✓ Dock will auto-start on login"
+echo "  ok Dock will auto-start on login"
 echo ""
 
 echo "Step 4: Starting dock now..."
 
 # Kill any existing dock process
-pkill -f "zephyrus-dock" 2>/dev/null || true
+pkill -f "zephyrus-dock" ||:
 
-# Start the dock
-systemctl --user start zephyrus-dock.service || {
-    echo "  Starting manually..."
-    zephyrus-dock &
+#Start the dock
+systemctl --user start zephyrus-dock.service || {   
+	echo "  Starting manually..."
+	zephyrus-dock &
 }
 
-echo "  ✓ Dock started!"
+echo "  ok Dock started!"
 echo ""
 
-echo "═══════════════════════════════════════════════════════════"
 echo "SETUP COMPLETE!"
-echo "═══════════════════════════════════════════════════════════"
 echo ""
 echo "Your ROG dock is now running at the bottom of the screen!"
 echo ""
@@ -81,11 +75,10 @@ echo "  • NO EXTENSIONS REQUIRED"
 echo ""
 echo "The dock will automatically start every time you log in."
 echo ""
-echo "═══════════════════════════════════════════════════════════"
 echo "MANAGEMENT COMMANDS:"
-echo "═══════════════════════════════════════════════════════════"
 echo ""
-echo "Start dock:"
+
+echo "Start dock:"   
 echo "  systemctl --user start zephyrus-dock.service"
 echo ""
 echo "Stop dock:"
@@ -97,5 +90,4 @@ echo ""
 echo "Disable autostart:"
 echo "  systemctl --user disable zephyrus-dock.service"
 echo ""
-echo "═══════════════════════════════════════════════════════════"
 echo ""

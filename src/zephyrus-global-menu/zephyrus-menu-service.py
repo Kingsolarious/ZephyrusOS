@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Zephyrus Global Menu Service
-Central service that collects and serves application menus
-"""
 
 import dbus
 import dbus.service

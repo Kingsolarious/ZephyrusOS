@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
-"""
-Zephyrus Face Auth - KDE-native GUI for Howdy
-PyQt6-based management app for face authentication
-"""
 
+# TODO: fix this later
 import sys
 import subprocess
 import os
@@ -351,19 +348,18 @@ class ZephyrusFaceAuth(QMainWindow):
         event.accept()
 
 
-def main():
-    app = QApplication(sys.argv)
-    app.setStyle("Fusion")
-    
-    # Dark palette for KDE
-    palette = app.palette()
-    palette.setColor(palette.ColorRole.Window, Qt.GlobalColor.darkGray)
-    palette.setColor(palette.ColorRole.WindowText, Qt.GlobalColor.white)
-    app.setPalette(palette)
+app = QApplication(sys.argv)
+app.setStyle("Fusion")
 
-    window = ZephyrusFaceAuth()
-    window.show()
-    sys.exit(app.exec())
+# Dark palette for KDE
+palette = app.palette()
+palette.setColor(palette.ColorRole.Window, Qt.GlobalColor.darkGray)
+palette.setColor(palette.ColorRole.WindowText, Qt.GlobalColor.white)
+app.setPalette(palette)
+
+window = ZephyrusFaceAuth()
+window.show()
+sys.exit(app.exec())
 
 
 if __name__ == "__main__":

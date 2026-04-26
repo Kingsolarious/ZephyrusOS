@@ -1,39 +1,33 @@
 #!/bin/bash
 # Setup Zephyrus Global Menu System
 
-set -e
 
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  Zephyrus Global Menu System Setup                        ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 echo "This will build and install a custom global menu for GNOME 49"
 echo ""
 
-# Check dependencies
 echo "Checking dependencies..."
 
 if ! command -v python3 &> /dev/null; then
-    echo "❌ Python3 not found"
-    exit 1
+	echo "fail Python3 not found"
+	exit 1
 fi
 
 if ! pkg-config --exists dbus-1; then
-    echo "⚠️  D-Bus development headers not found"
-    echo "   Install with: sudo rpm-ostree install dbus-devel"
-    exit 1
+	echo "warn  D-Bus development headers not found"
+	echo "   Install with: sudo rpm-ostree install dbus-devel"
+	exit 1
 fi
 
 if ! pkg-config --exists gtk4; then
-    echo "⚠️  GTK4 development headers not found"
-    echo "   Install with: sudo rpm-ostree install gtk4-devel"
-    exit 1
+	echo "warn  GTK4 development headers not found"
+	echo "   Install with: sudo rpm-ostree install gtk4-devel"
+	exit 1
 fi
 
-echo "✓ Dependencies OK"
+echo "ok Dependencies OK"
 echo ""
 
-# Build
 echo "Building GTK module..."
 make clean
 make
@@ -51,14 +45,12 @@ systemctl --user enable zephyrus-menu.service
 
 echo ""
 echo "Enabling GNOME Shell extension..."
-CURRENT=$(gsettings get org.gnome.shell enabled-extensions 2>/dev/null || echo "[]")
+CURRENT=$(gsettings get org.gnome.shell enabled-extensions || true || echo "[]")
 NEW=$(echo "$CURRENT" | sed 's/\]$/, "zephyrus-global-menu@zephyrus-os"]/')
 gsettings set org.gnome.shell enabled-extensions "$NEW"
 
 echo ""
-echo "═══════════════════════════════════════════════════════════"
 echo "SETUP COMPLETE"
-echo "═══════════════════════════════════════════════════════════"
 echo ""
 echo "Usage:"
 echo ""

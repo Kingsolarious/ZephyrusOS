@@ -1,25 +1,18 @@
 #!/usr/bin/env python3
-"""
-Zephyrus Dock - WORKING VERSION
-Actually launches apps when clicked
-"""
 
 import gi
-gi.require_version('Gtk', '4.0')
-gi.require_version('Gdk', '4.0')
 from gi.repository import Gtk, Gdk, GLib, Gio
 import subprocess
-import os
 import sys
 
 class ZephyrusDock(Gtk.Application):
     def __init__(self):
         super().__init__(application_id='org.zephyrus.Dock')
         
-    def do_activate(self):
+    def on_startup(self):
         if not self.get_windows():
             window = DockWindow(application=self)
-            window.present()
+            self.add_window(window)
         else:
             self.get_windows()[0].present()
 
@@ -216,9 +209,8 @@ class DockWindow(Gtk.Window):
         self.move(screen_width // 2 - 300, screen_height - 120)
         return False
 
-def main():
-    app = ZephyrusDock()
-    app.run(None)
+app = ZephyrusDock()
+app.run(None)
 
 if __name__ == '__main__':
     main()

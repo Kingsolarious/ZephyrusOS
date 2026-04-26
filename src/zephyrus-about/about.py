@@ -1,23 +1,18 @@
-#!/usr/bin/env python3
-"""
-About This Zephyrus
-macOS-style About window with glass/translucent theme
-"""
+#!/usr/bin/python3
 
 import gi
-gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
+#gi.require_version('Gtk', '4.0')
+#gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw, GLib, GdkPixbuf, Gdk
 import subprocess
-import os
 
 class AboutZephyrus(Adw.Application):
     def __init__(self):
         super().__init__(application_id='org.zephyrus.About')
         
-    def do_activate(self):
+    def on_startup(self):
         window = AboutWindow(application=self)
-        window.present()
+        self.add_window(window)
 
 class AboutWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
@@ -298,9 +293,8 @@ class AboutWindow(Adw.ApplicationWindow):
         except:
             subprocess.Popen(['zenity', '--info', '--text=Software Update'])
 
-def main():
-    app = AboutZephyrus()
-    app.run(None)
+app = AboutZephyrus()
+app.run(None)
 
 if __name__ == '__main__':
     main()
