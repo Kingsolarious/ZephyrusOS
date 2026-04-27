@@ -518,19 +518,21 @@ pub async fn set_config_or_default(
                     .ok();
             } else {
                 let default = attr.default_value();
-                attr.set_current_value(default)
-                    .map_err(|e| {
-                        error!("Failed to set {}: {e}", <&str>::from(name));
-                    })
-                    .ok();
-                if let AttrValue::Integer(i) = default {
-                    tuning.group.insert(name, *i);
-                    info!(
-                        "Set default tuning config for {} = {:?}",
-                        <&str>::from(name),
-                        i
+                if attr.set_current_value(default).is_ok() {
+                    if let AttrValue::Integer(i) = default {
+                        tuning.group.insert(name, *i);
+                        info!(
+                            "Set default tuning config for {} = {:?}",
+                            <&str>::from(name),
+                            i
+                        );
+                        changed = true;
+                    }
+                } else {
+                    warn!(
+                        "Skipping {} from tuning config (firmware rejected default)",
+                        <&str>::from(name)
                     );
-                    changed = true;
                 }
             }
         } else {

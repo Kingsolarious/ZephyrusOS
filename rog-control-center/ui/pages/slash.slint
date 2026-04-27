@@ -89,6 +89,17 @@ export component PageSlash inherits Rectangle {
                         checked <=> SlashPageData.show_battery_warning;
                         toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
                     }
+                    SystemToggle {
+                        text: @tr("When Lid Closed");
+                        checked <=> SlashPageData.show_on_lid_closed;
+                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
+                    }
+                }
+            }
+            RogItem {
+                Button {
+                    text: @tr("Load Custom .slashlighting Animation");
+                    clicked => { SlashPageData.cb_custom_animation(); }
                 }
             }
         }

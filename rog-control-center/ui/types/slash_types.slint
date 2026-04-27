@@ -23,6 +23,7 @@ export struct SlashShowOptions {
     sleep: bool,
     battery: bool,
     battery_warning: bool,
+    lid_closed: bool,
 }
 
 export global SlashPageData {
@@ -68,6 +69,7 @@ export global SlashPageData {
     in-out property <bool> show_on_sleep;
     in-out property <bool> show_on_battery;
     in-out property <bool> show_battery_warning;
+    in-out property <bool> show_on_lid_closed;
     
     in-out property <SlashShowOptions> show_options: {
         boot: true,
@@ -75,6 +77,8 @@ export global SlashPageData {
         sleep: true,
         battery: true,
         battery_warning: true,
+        lid_closed: false,
     };
     callback cb_show_options(SlashShowOptions);
+    callback cb_custom_animation();
 }

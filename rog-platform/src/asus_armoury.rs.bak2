@@ -330,7 +330,7 @@ define_attribute_getters!(
         ppt_fppt: Ppt,
         nv_dynamic_boost: Ppt,
         nv_temp_target: Ppt,
-        dgpu_base_tgp: Immediate,
+        dgpu_base_tgp: Ppt,
         dgpu_tgp: Ppt,
 
         gpu_mux_mode: Gpu,

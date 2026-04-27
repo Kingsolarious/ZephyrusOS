@@ -6,6 +6,7 @@ import { AuraPageData, AuraDevType, PowerZones, LaptopAuraPower, AuraEffect } fr
 import { AuraPowerGroup, AuraPowerGroupOld } from "../widgets/aura_power.slint";
 
 export component PageAura inherits Rectangle {
+    clip: true;
     property <bool> show_fade_cover: false;
     property <bool> show_aura_power: false;
     callback external_colour_change();
@@ -19,6 +20,8 @@ export component PageAura inherits Rectangle {
     }
 
     ScrollView {
+        width: 100%;
+        height: 100%;
         VerticalLayout {
             padding: 10px;
             spacing: 10px;
@@ -176,6 +179,21 @@ export component PageAura inherits Rectangle {
                                 });
                             }
                         }
+                    }
+                }
+            }
+
+            GroupBox {
+                title: @tr("Advanced Effects");
+                VerticalLayout {
+                    padding: 5px;
+                    spacing: 5px;
+                    HorizontalLayout {
+                        spacing: 5px;
+                        Button { text: @tr("Reactive"); clicked => { AuraPageData.cb_custom_effect("reactive"); } }
+                        Button { text: @tr("Music"); clicked => { AuraPageData.cb_custom_effect("music"); } }
+                        Button { text: @tr("Temperature"); clicked => { AuraPageData.cb_custom_effect("temp"); } }
+                        Button { text: @tr("Stop Custom"); clicked => { AuraPageData.cb_custom_effect("stop"); } }
                     }
                 }
             }

@@ -1,13 +1,13 @@
 use std::sync::{Arc, Mutex};
 
-use log::{debug, error, info};
+use log::{debug, info};
 use rog_dbus::zbus_slash::SlashProxy;
 use rog_slash::SlashMode;
 use slint::ComponentHandle;
 
 use crate::config::Config;
 use crate::ui::show_toast;
-use crate::{set_ui_callbacks, set_ui_props_async, MainWindow, SlashPageData};
+use crate::{set_ui_props_async, MainWindow, SlashPageData};
 
 async fn find_slash_iface() -> Result<SlashProxy<'static>, Box<dyn std::error::Error>> {
     let conn = zbus::Connection::system().await?;
@@ -113,24 +113,24 @@ pub fn setup_slash_page(ui: &MainWindow, _states: Arc<Mutex<Config>>) {
             let proxy_copy = proxy.clone();
             let weak_copy = weak.clone();
             h.global::<SlashPageData>().on_cb_mode(move |mode_idx| {
-                let mode = match mode_idx {
-                    0 => SlashMode::Static,
-                    1 => SlashMode::Bounce,
-                    2 => SlashMode::Slash,
-                    3 => SlashMode::Loading,
-                    4 => SlashMode::BitStream,
-                    5 => SlashMode::Transmission,
-                    6 => SlashMode::Flow,
-                    7 => SlashMode::Flux,
-                    8 => SlashMode::Phantom,
-                    9 => SlashMode::Spectrum,
-                    10 => SlashMode::Hazard,
-                    11 => SlashMode::Interfacing,
-                    12 => SlashMode::Ramp,
-                    13 => SlashMode::GameOver,
-                    14 => SlashMode::Start,
-                    15 => SlashMode::Buzzer,
-                    _ => SlashMode::Spectrum,
+                let mode_u8 = match mode_idx {
+                    0 => SlashMode::Static as u8,
+                    1 => SlashMode::Bounce as u8,
+                    2 => SlashMode::Slash as u8,
+                    3 => SlashMode::Loading as u8,
+                    4 => SlashMode::BitStream as u8,
+                    5 => SlashMode::Transmission as u8,
+                    6 => SlashMode::Flow as u8,
+                    7 => SlashMode::Flux as u8,
+                    8 => SlashMode::Phantom as u8,
+                    9 => SlashMode::Spectrum as u8,
+                    10 => SlashMode::Hazard as u8,
+                    11 => SlashMode::Interfacing as u8,
+                    12 => SlashMode::Ramp as u8,
+                    13 => SlashMode::GameOver as u8,
+                    14 => SlashMode::Start as u8,
+                    15 => SlashMode::Buzzer as u8,
+                    _ => SlashMode::Spectrum as u8,
                 };
                 let p = proxy_copy.clone();
                 let w = weak_copy.clone();
@@ -139,31 +139,32 @@ pub fn setup_slash_page(ui: &MainWindow, _states: Arc<Mutex<Config>>) {
                         "Slash mode updated".into(),
                         "Failed to set Slash mode".into(),
                         w,
-                        p.set_mode(mode).await,
+                        p.set_mode(mode_u8).await,
                     );
                 });
             });
         }).ok();
 
         // Load current mode
-        if let Ok(mode) = slash.mode().await {
-            let mode_idx = match mode {
-                SlashMode::Static => 0,
-                SlashMode::Bounce => 1,
-                SlashMode::Slash => 2,
-                SlashMode::Loading => 3,
-                SlashMode::BitStream => 4,
-                SlashMode::Transmission => 5,
-                SlashMode::Flow => 6,
-                SlashMode::Flux => 7,
-                SlashMode::Phantom => 8,
-                SlashMode::Spectrum => 9,
-                SlashMode::Hazard => 10,
-                SlashMode::Interfacing => 11,
-                SlashMode::Ramp => 12,
-                SlashMode::GameOver => 13,
-                SlashMode::Start => 14,
-                SlashMode::Buzzer => 15,
+        if let Ok(mode_u8) = slash.mode().await {
+            let mode_idx = match mode_u8 {
+                0x06 => 0,   // Static
+                0x10 => 1,   // Bounce
+                0x12 => 2,   // Slash
+                0x13 => 3,   // Loading
+                0x1d => 4,   // BitStream
+                0x1a => 5,   // Transmission
+                0x19 => 6,   // Flow
+                0x25 => 7,   // Flux
+                0x24 => 8,   // Phantom
+                0x26 => 9,   // Spectrum
+                0x32 => 10,  // Hazard
+                0x33 => 11,  // Interfacing
+                0x34 => 12,  // Ramp
+                0x42 => 13,  // GameOver
+                0x43 => 14,  // Start
+                0x44 => 15,  // Buzzer
+                _ => 9,      // Spectrum default
             };
             handle.upgrade_in_event_loop(move |h| {
                 h.global::<SlashPageData>().set_current_mode(mode_idx);
@@ -185,6 +186,7 @@ pub fn setup_slash_page(ui: &MainWindow, _states: Arc<Mutex<Config>>) {
                     let _ = p.set_show_on_sleep(options.sleep).await;
                     let _ = p.set_show_on_battery(options.battery).await;
                     let _ = p.set_show_battery_warning(options.battery_warning).await;
+                    let _ = p.set_show_on_lid_closed(options.lid_closed).await;
                     show_toast(
                         "Slash options updated".into(),
                         "Failed to update options".into(),
@@ -201,6 +203,7 @@ pub fn setup_slash_page(ui: &MainWindow, _states: Arc<Mutex<Config>>) {
         let show_sleep = slash.show_on_sleep().await.unwrap_or(true);
         let show_battery = slash.show_on_battery().await.unwrap_or(true);
         let show_battery_warn = slash.show_battery_warning().await.unwrap_or(true);
+        let show_lid_closed = slash.show_on_lid_closed().await.unwrap_or(false);
         
         handle.upgrade_in_event_loop(move |h| {
             h.global::<SlashPageData>().set_show_on_boot(show_boot);
@@ -208,33 +211,61 @@ pub fn setup_slash_page(ui: &MainWindow, _states: Arc<Mutex<Config>>) {
             h.global::<SlashPageData>().set_show_on_sleep(show_sleep);
             h.global::<SlashPageData>().set_show_on_battery(show_battery);
             h.global::<SlashPageData>().set_show_battery_warning(show_battery_warn);
+            h.global::<SlashPageData>().set_show_on_lid_closed(show_lid_closed);
         }).ok();
 
         // Mode change stream
+
+        // Custom animation callback (load .slashlighting file via kdialog)
+        let weak_custom = handle.clone();
+        handle.upgrade_in_event_loop(move |h| {
+            h.global::<SlashPageData>().on_cb_custom_animation(move || {
+                let w = weak_custom.clone();
+                tokio::spawn(async move {
+                    let output = std::process::Command::new("kdialog")
+                        .args(["--getopenfilename", "/usr/share/zephyrus-os/slash-animations", "*.slashlighting"])
+                        .output();
+                    if let Ok(out) = output {
+                        let path = String::from_utf8_lossy(&out.stdout).trim().to_string();
+                        if !path.is_empty() {
+                            let _ = std::process::Command::new("/usr/local/bin/gu605my-slash-player")
+                                .args(["--loop", &path])
+                                .spawn();
+                            let name = std::path::Path::new(&path)
+                                .file_name()
+                                .map(|n| n.to_string_lossy().to_string())
+                                .unwrap_or_else(|| "animation".into());
+                            show_toast(format!("Playing {}", name).into(), "Failed to play animation".into(), w, Ok(()));
+                        }
+                    }
+                });
+            });
+        }).ok();
         let stream_handle = handle.clone();
         let slash_stream = slash.clone();
         tokio::spawn(async move {
             use futures_util::StreamExt;
             let mut stream = slash_stream.receive_mode_changed().await;
             while let Some(e) = stream.next().await {
-                if let Ok(mode) = e.get().await {
-                    let mode_idx = match mode {
-                        SlashMode::Static => 0,
-                        SlashMode::Bounce => 1,
-                        SlashMode::Slash => 2,
-                        SlashMode::Loading => 3,
-                        SlashMode::BitStream => 4,
-                        SlashMode::Transmission => 5,
-                        SlashMode::Flow => 6,
-                        SlashMode::Flux => 7,
-                        SlashMode::Phantom => 8,
-                        SlashMode::Spectrum => 9,
-                        SlashMode::Hazard => 10,
-                        SlashMode::Interfacing => 11,
-                        SlashMode::Ramp => 12,
-                        SlashMode::GameOver => 13,
-                        SlashMode::Start => 14,
-                        SlashMode::Buzzer => 15,
+                if let Ok(mode_u8) = e.get().await {
+                    let mode_idx = match mode_u8 {
+                        0x06 => 0,   // Static
+                        0x10 => 1,   // Bounce
+                        0x12 => 2,   // Slash
+                        0x13 => 3,   // Loading
+                        0x1d => 4,   // BitStream
+                        0x1a => 5,   // Transmission
+                        0x19 => 6,   // Flow
+                        0x25 => 7,   // Flux
+                        0x24 => 8,   // Phantom
+                        0x26 => 9,   // Spectrum
+                        0x32 => 10,  // Hazard
+                        0x33 => 11,  // Interfacing
+                        0x34 => 12,  // Ramp
+                        0x42 => 13,  // GameOver
+                        0x43 => 14,  // Start
+                        0x44 => 15,  // Buzzer
+                        _ => 9,      // Spectrum default
                     };
                     stream_handle.upgrade_in_event_loop(move |h| {
                         h.global::<SlashPageData>().set_current_mode(mode_idx);

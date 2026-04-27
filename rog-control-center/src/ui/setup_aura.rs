@@ -208,6 +208,54 @@ pub fn setup_aura_page(
             .map_err(|e| error!("{e}"))
             .ok();
 
+
+        // Custom effect callback (reactive, music, temp via gu605my-keyboard-effects)
+        let weak_custom = handle.clone();
+        handle.upgrade_in_event_loop(move |h| {
+            h.global::<AuraPageData>().on_cb_custom_effect(move |effect| {
+                let w = weak_custom.clone();
+                tokio::spawn(async move {
+                    let _ = std::process::Command::new("/usr/bin/pkill")
+                        .args(["-f", "gu605my-keyboard-effects"])
+                        .status();
+                    let _ = std::process::Command::new("/usr/bin/systemctl")
+                        .args(["--user", "stop", "gu605my-keyboard.service"])
+                        .status();
+                    if effect.as_str() == "stop" {
+                        // Actually stop everything — kill custom effects, stop service, no rainbow restart
+                        let r = std::process::Command::new("/usr/bin/systemctl")
+                            .args(["--user", "stop", "gu605my-keyboard.service"])
+                            .status();
+                        if let Ok(status) = r {
+                            info!("Stopped gu605my-keyboard.service: {:?}", status);
+                        }
+                        show_toast("Custom effects stopped".into(), "Failed to stop effect".into(), w, Ok(()));
+                    } else {
+                        let arg = match effect.as_str() {
+                            "reactive" => "--reactive",
+                            "music" => "--music",
+                            "temp" => "--temp",
+                            _ => "--rainbow-anim",
+                        };
+                        let r = std::process::Command::new("/usr/local/bin/gu605my-keyboard-effects")
+                            .arg(arg)
+                            .spawn();
+                        match r {
+                            Ok(_) => show_toast(format!("Started {}", effect).into(), "Failed to start effect".into(), w, Ok(())),
+                            Err(e) => {
+                                error!("Failed to spawn gu605my-keyboard-effects: {}", e);
+                                show_toast(
+                                    format!("Advanced effect unavailable").into(),
+                                    format!("gu605my-keyboard-effects not found. Install the external effects binary to enable reactive/music/temp animations.").into(),
+                                    w,
+                                    Err(zbus::Error::InputOutput(std::io::Error::new(std::io::ErrorKind::Other, e.to_string()).into()))
+                                );
+                            }
+                        }
+                    }
+                });
+            });
+        }).ok();
         let stream_handle = handle.clone();
         let aura_stream = aura.clone();
         tokio::spawn(async move {

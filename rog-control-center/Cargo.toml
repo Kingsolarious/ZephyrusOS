@@ -27,6 +27,7 @@ config-traits = { path = "../config-traits" }
 rog_anime = { path = "../rog-anime" }
 rog_dbus = { path = "../rog-dbus" }
 rog_aura = { path = "../rog-aura" }
+rog_slash = { path = "../rog-slash" }
 rog_profiles = { path = "../rog-profiles" }
 rog_platform = { path = "../rog-platform" }
 supergfxctl = { git = "https://gitlab.com/asus-linux/supergfxctl.git", default-features = false }

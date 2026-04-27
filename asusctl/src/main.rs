@@ -560,7 +560,7 @@ fn handle_slash(cmd: &SlashCommand) -> Result<(), Box<dyn std::error::Error>> {
             proxy.set_interval(interval)?;
         }
         if let Some(slash_mode) = cmd.mode {
-            proxy.set_mode(slash_mode)?;
+            proxy.set_mode(slash_mode as u8)?;
         }
         if let Some(show) = cmd.show_on_boot {
             proxy.set_show_on_boot(show)?;
@@ -578,9 +578,9 @@ fn handle_slash(cmd: &SlashCommand) -> Result<(), Box<dyn std::error::Error>> {
         if let Some(show) = cmd.show_battery_warning {
             proxy.set_show_battery_warning(show)?;
         }
-        // if let Some(show) = cmd.show_on_lid_closed {
-        //     proxy.set_show_on_lid_closed(show)?;
-        // }
+        if let Some(show) = cmd.show_on_lid_closed {
+            proxy.set_show_on_lid_closed(show)?;
+        }
     }
     if cmd.list {
         let res = SlashMode::list();

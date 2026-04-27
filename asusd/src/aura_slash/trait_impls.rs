@@ -140,7 +140,7 @@ impl SlashZbus {
     #[zbus(property)]
     async fn mode(&self) -> zbus::fdo::Result<u8> {
         let config = self.0.lock_config().await;
-        Ok(config.display_interval)
+        Ok(config.display_mode as u8)
     }
 
     /// Set interval between slash animations (0-255)
@@ -311,6 +311,21 @@ impl Reloadable for SlashZbus {
             show_battery_warning,
             "show_battery_warning"
         );
+        write_bytes_with_warning!(
+            slash_pkt_lid_closed,
+            show_on_lid_closed,
+            "show_on_lid_closed"
+        );
+
+        let config = self.0.lock_config().await;
+        let mode_packets = slash_pkt_set_mode(config.slash_type, config.display_mode);
+        self.0
+            .write_bytes(&mode_packets[1])
+            .await
+            .map_err(|err| {
+                warn!("set_mode {}", err);
+            })
+            .ok();
 
         Ok(())
     }
