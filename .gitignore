@@ -46,10 +46,8 @@ node_modules/ package-lock.json yarn.lock
 # ── Development / Debug ──
 DEBUG .bashrc-container-check
 zephyrus-crimson.code-workspace
-build/scripts/custom-asusctl
 
 # ── Embedded repos ──
-build/scripts/custom-asusctl/
 
 # ── Research artifacts (never commit captures/binaries) ──
 *.pcap *.pcapng
@@ -58,7 +56,6 @@ build/scripts/custom-asusctl/
 __pycache__/
 
 # ── Embedded repos ──
-build/scripts/custom-asusctl/
 
 # ── Research artifacts (never commit captures/binaries) ──
 *.pcap
