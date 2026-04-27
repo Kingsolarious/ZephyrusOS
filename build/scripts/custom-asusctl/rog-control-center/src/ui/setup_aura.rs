@@ -212,9 +212,12 @@ pub fn setup_aura_page(
         // Custom effect callback (reactive, music, temp via gu605my-keyboard-effects)
         let weak_custom = handle.clone();
         handle.upgrade_in_event_loop(move |h| {
+            info!("Setting up on_cb_custom_effect callback");
             h.global::<AuraPageData>().on_cb_custom_effect(move |effect| {
+                info!("on_cb_custom_effect called with effect: {}", effect.as_str());
                 let w = weak_custom.clone();
                 tokio::spawn(async move {
+                    info!("Spawning custom effect handler for: {}", effect.as_str());
                     let _ = std::process::Command::new("/usr/bin/pkill")
                         .args(["-f", "gu605my-keyboard-effects"])
                         .status();
@@ -237,11 +240,15 @@ pub fn setup_aura_page(
                             "temp" => "--temp",
                             _ => "--rainbow-anim",
                         };
+                        info!("Spawning gu605my-keyboard-effects {}", arg);
                         let r = std::process::Command::new("/usr/local/bin/gu605my-keyboard-effects")
                             .arg(arg)
                             .spawn();
                         match r {
-                            Ok(_) => show_toast(format!("Started {}", effect).into(), "Failed to start effect".into(), w, Ok(())),
+                            Ok(child) => {
+                                info!("Successfully spawned gu605my-keyboard-effects, pid: {:?}", child.id());
+                                show_toast(format!("Started {}", effect).into(), "Failed to start effect".into(), w, Ok(()));
+                            }
                             Err(e) => {
                                 error!("Failed to spawn gu605my-keyboard-effects: {}", e);
                                 show_toast(

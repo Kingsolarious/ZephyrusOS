@@ -34,8 +34,10 @@ sudo make install
 
 # Install Zephyrus-branded desktop entry
 echo -e "${YELLOW}Installing Zephyrus Control Center desktop entry...${NC}"
+# /usr/share is read-only on rpm-ostree; use /usr/local/share instead
 sudo install -Dm644 "$PROJECT_ROOT/config/desktop-entries/zephyrus-control-center.desktop" \
-    /usr/share/applications/zephyrus-control-center.desktop
+    /usr/local/share/applications/zephyrus-control-center.desktop
+sudo update-desktop-database /usr/local/share/applications/ 2>/dev/null || true
 
 # Ensure asusd service is enabled
 if command -v systemctl &> /dev/null; then
