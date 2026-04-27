@@ -189,7 +189,7 @@ asusctl slash -e true
 
 ## Upstream Collaboration
 
-This project builds on top of the excellent work from the [asus-linux.org](https://asus-linux.org/) community. Our custom `asusctl` fork (`build/scripts/custom-asusctl/`) adds GU605MY-specific features and will be rebased onto upstream `devel` regularly.
+This project builds on top of the excellent work from the [asus-linux.org](https://asus-linux.org/) community. Our custom `asusctl` fork (`build/scripts/custom-asusctl/`) is rebased onto upstream `devel` (6.3.7) with GU605MY-specific fixes and features applied on top.
 
 ### Goals
 

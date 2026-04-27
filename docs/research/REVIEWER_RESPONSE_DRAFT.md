@@ -43,20 +43,28 @@ You're right, and I should have been clearer about this. The `performance` gover
 
 The `90-asus-fnkeys` udev hwdb rules in this repo were a stopgap. I'd absolutely like to get the actual scancodes into the kernel `hid-asus` driver where they belong. What's the best way to collaborate on this? Should I open an issue on the asus-linux tracker with the discovered values, or go straight to linux-input@vger.kernel.org?
 
-## 6. Slash LED Fork — 6.3.4 Base
+## 6. Slash LED Fork — Rebased onto 6.3.7
 
-Yes, the fork is based on **asusctl 6.3.4** (commit `d2006046`). At that time, I branched off to add:
-- Slash LED tab to rog-control-center (16 modes, brightness, interval, show-on-lid-closed)
-- Custom `.slashlighting` animation playback via external player
-- Keyboard brightness and display brightness controls
-- GU605MY-specific branding and error handling
+The fork has been **rebased onto upstream `devel` (6.3.7)**. The rebase is complete and building:
 
-I haven't rebased onto current devel because I wasn't sure how much the Slash management had diverged after supergfxctl was removed. **Commit 5ff4d120** fixed a deadlock in `reload()` where `lock_config()` was held while re-acquiring, plus a D-Bus type mismatch where `set_mode` accepted `SlashMode` but the proxy sent `u8`. I found these independently on 6.3.4 — did you fix the same bugs in devel?
+```
+git remote add upstream https://gitlab.com/asus-linux/asusctl
+git fetch upstream devel
+git rebase upstream/devel  # ~96 commits
+```
 
-What's the best way to bring the GU605MY Slash features forward? Should I:
-- Rebase the entire fork onto current devel?
-- Open individual PRs for each feature?
-- Or is Slash support for GU605MY already in progress upstream?
+Fixes verified/ported:
+- `mode()` getter returning `display_mode` (not `display_interval`) — still needed in 6.3.7
+- `reload()` restoring `display_mode` and `show_on_lid_closed` on daemon start — still needed
+- `reload()` deadlock fix (`drop(config)` before re-acquiring) — still needed
+- D-Bus type consistency: changed `mode()` to return `SlashMode` (matching proxy) rather than `u8`
+
+Features ported:
+- Custom animation dropdown on Slash page (scans `/usr/share/zephyrus-os/slash-animations`, spawns `gu605my-slash-player`)
+- Keyboard effect buttons on Aura page (reactive/music/temp/stop via `gu605my-keyboard-effects`)
+- `asusd.service` `[Install] WantedBy=multi-user.target` for auto-start
+
+If any of these fixes overlap with work you already have in a branch, I'm happy to drop our versions and use yours.
 
 ## 7. Sound Work / Microphone Calibration
 
