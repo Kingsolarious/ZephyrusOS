@@ -4,6 +4,47 @@
 
 ### Changes
 
+- Added slash control: thanks jijiking
+- Disable GPU switching when unsupported
+
+## [6.3.7]
+
+### Changes
+
+- Fix flicker of anime matrix when in powersave: thanks @barsikus007
+- Add LEDs support for G733QS: thanks @ricoded-o00
+- Fix hang at shutdown: thanks @evert
+- Load fan profiles at start: thanks @rforced
+- Start asusd when dmi is ZenBook: thanks @jason01-95
+- Fix G713RS Lightbar support: thanks @Gokhan-Zengin
+- Harden systemd profile: thanks @sashok724
+- Fix keyboard lagging on newer kernels
+- Fix GPU switching via GUI: thanks @evert
+- Fix power governor not being set correctly: thanks @sashok724
+- Improve make uninstall: thanks @htrex
+- Make asusd start on ProArt PX13
+
+## [6.3.6]
+
+### Changes
+
+- Switch GPU works better
+- Reworked asus-shutdown to increase compatibility
+- Fix a race condition in changing TDP values: thanks @Ghoul4500
+- Fix an issue with aura config file: thanks @Ghoul4500
+- Add slash support for GA403GM: thanks @dimeskigj
+- Add support for G615JHR: thanks @absolutewisp and @Tomo-q3l
+- Add aura support for GZ302: thanks @dm_zharov
+- Fix README.md spelling: thanks @Bl4ckspell
+
+## [6.3.5]
+
+### Changes
+- Fix nv_base_tgp being referenced as dgpu_base_tgp
+- Add nv_tgp control slider
+- Fix switching to LowPower on unplug
+- add g615jm LEDs support: thanks @absolutewisp
+
 ## [6.3.4]
 
 ### Changes

@@ -5,8 +5,7 @@ import { SideBar } from "widgets/sidebar.slint";
 import { PageAbout } from "pages/about.slint";
 import { PageFans } from "pages/fans.slint";
 import { PageAnime, AnimePageData } from "pages/anime.slint";
-import { PageSlash } from "pages/slash.slint";
-import { SlashPageData } from "types/slash_types.slint";
+import { PageSlash, SlashPageData } from "pages/slash.slint";
 import { RogItem } from "widgets/common.slint";
 import { PageAura } from "pages/aura.slint";
 import { PageGPU, GPUPageData } from "pages/gpu.slint";
@@ -18,7 +17,7 @@ import { AuraPageData, AuraDevType, LaptopAuraPower, AuraPowerState, PowerZones,
 export { AuraPageData, AuraDevType, LaptopAuraPower, AuraPowerState, PowerZones, AuraEffect }
 import { PageAppSettings, AppSettingsPageData } from "pages/app_settings.slint";
 
-export { AppSize, AttrMinMax, SystemPageData, AnimePageData, AppSettingsPageData, GPUPageData, SlashPageData }
+export { AppSize, AttrMinMax, SystemPageData, AnimePageData, SlashPageData, AppSettingsPageData, GPUPageData }
 
 export component MainWindow inherits Window {
     title: "ROG Control";
@@ -32,7 +31,7 @@ export component MainWindow inherits Window {
         true,
         true,
         true,
-        true, // Slash LED
+        true,
         true, // GPU Configuration
         true, // App Settings
         true, // About
@@ -79,8 +78,8 @@ export component MainWindow inherits Window {
                     @tr("Menu1" => "System Control"),
                     @tr("Menu2" => "Keyboard Aura"),
                     @tr("Menu3" => "AniMe Matrix"),
-                    @tr("Menu4" => "Fan Curves"),
-                    @tr("Menu5" => "Slash LED"),
+                    @tr("Menu4" => "Slash Lighting"),
+                    @tr("Menu5" => "Fan Curves"),
                     @tr("Menu6" => "GPU Configuration"),
                     @tr("Menu7" => "App Settings"),
                     @tr("Menu8" => "About"),
@@ -118,13 +117,13 @@ export component MainWindow inherits Window {
                 visible: side-bar.current-item == 2;
             }
 
-            if(side-bar.current-item == 3): fans := PageFans {
+            if(side-bar.current-item == 3): PageSlash {
                 width: root.width - side-bar.width;
                 height: root.height + 12px;
                 visible: side-bar.current-item == 3;
             }
 
-            if(side-bar.current-item == 4): PageSlash {
+            if(side-bar.current-item == 4): fans := PageFans {
                 width: root.width - side-bar.width;
                 height: root.height + 12px;
                 visible: side-bar.current-item == 4;

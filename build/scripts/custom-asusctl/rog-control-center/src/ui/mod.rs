@@ -1,8 +1,8 @@
 pub mod setup_anime;
 pub mod setup_aura;
-pub mod setup_slash;
 pub mod setup_fans;
 pub mod setup_gpu;
+pub mod setup_slash;
 pub mod setup_system;
 
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -18,9 +18,9 @@ use slint::{ComponentHandle, SharedString, Weak};
 
 use crate::config::Config;
 use crate::ui::setup_anime::setup_anime_page;
-use crate::ui::setup_slash::setup_slash_page;
 use crate::ui::setup_aura::setup_aura_page;
 use crate::ui::setup_fans::setup_fan_curve_page;
+use crate::ui::setup_slash::setup_slash_page;
 use crate::ui::setup_system::{setup_system_page, setup_system_page_callbacks};
 use crate::{AppSettingsPageData, MainWindow};
 
@@ -144,8 +144,8 @@ pub fn setup_window(
             available.contains(&"xyz.ljones.Platform".to_string()),
             available.contains(&"xyz.ljones.Aura".to_string()),
             available.contains(&"xyz.ljones.Anime".to_string()),
+            available.contains(&"xyz.ljones.Slash".to_string()),
             available.contains(&"xyz.ljones.FanCurves".to_string()),
-            available.contains(&"xyz.ljones.Slash".to_string()), // Slash LED
             true, // GPU Configuration
             true, // App Settings
             true, // About

@@ -88,6 +88,8 @@ impl CtrlFanCurveZbus {
                 config = config.load();
             }
 
+            config.current = platform.get_platform_profile()?.into();
+
             return Ok(Self {
                 config: Arc::new(Mutex::new(config)),
                 platform,
@@ -199,26 +201,6 @@ impl CtrlFanCurveZbus {
         self.config.lock().await.write();
         Ok(())
     }
-
-    /// Reset the stored (self) and device curve to the defaults of the
-    /// platform.
-    ///
-    /// Each platform_profile has a different default and the defualt can be
-    /// read only for the currently active profile.
-    async fn reset_profile_curves(&self, profile: PlatformProfile) -> zbus::fdo::Result<()> {
-        let active = self.platform.get_platform_profile()?;
-
-        self.platform.set_platform_profile(profile.into())?;
-        self.config
-            .lock()
-            .await
-            .profiles
-            .set_active_curve_to_defaults(profile, &mut find_fan_curve_node()?)?;
-        self.platform.set_platform_profile(active.as_str())?;
-
-        self.config.lock().await.write();
-        Ok(())
-    }
 }
 
 impl crate::ZbusRun for CtrlFanCurveZbus {
@@ -283,6 +265,7 @@ impl crate::Reloadable for CtrlFanCurveZbus {
                 .profiles
                 .write_profile_curve_to_platform(active, &mut device)?;
         }
+        config.current = active;
 
         Ok(())
     }

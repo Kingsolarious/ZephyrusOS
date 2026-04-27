@@ -560,7 +560,7 @@ fn handle_slash(cmd: &SlashCommand) -> Result<(), Box<dyn std::error::Error>> {
             proxy.set_interval(interval)?;
         }
         if let Some(slash_mode) = cmd.mode {
-            proxy.set_mode(slash_mode as u8)?;
+            proxy.set_mode(slash_mode)?;
         }
         if let Some(show) = cmd.show_on_boot {
             proxy.set_show_on_boot(show)?;
@@ -578,9 +578,9 @@ fn handle_slash(cmd: &SlashCommand) -> Result<(), Box<dyn std::error::Error>> {
         if let Some(show) = cmd.show_battery_warning {
             proxy.set_show_battery_warning(show)?;
         }
-        if let Some(show) = cmd.show_on_lid_closed {
-            proxy.set_show_on_lid_closed(show)?;
-        }
+        // if let Some(show) = cmd.show_on_lid_closed {
+        //     proxy.set_show_on_lid_closed(show)?;
+        // }
     }
     if cmd.list {
         let res = SlashMode::list();
@@ -979,12 +979,14 @@ fn print_firmware_attr(attr: &AsusArmouryProxyBlocking) -> Result<(), Box<dyn st
     let has_possible = attrs.contains(&"possible_values".to_string());
     let has_default = attrs.contains(&"default_value".to_string());
 
-    if has_min && has_max && has_current {
+    if has_current && (has_min || has_max) {
         let c = attr.current_value().ok();
-        let min = attr.min_value().ok();
-        let max = attr.max_value().ok();
+        let min = if has_min { attr.min_value().ok() } else { None };
+        let max = if has_max { attr.max_value().ok() } else { None };
         match (min, c, max) {
             (Some(min), Some(c), Some(max)) => println!("  current: {min}..[{c}]..{max}"),
+            (Some(min), Some(c), None) => println!("  current: {min}..[{c}]"),
+            (None, Some(c), Some(max)) => println!("  current: [{c}]..{max}"),
             _ => println!("  current: unavailable"),
         }
 

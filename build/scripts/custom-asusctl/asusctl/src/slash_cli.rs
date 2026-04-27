@@ -31,10 +31,4 @@ pub struct SlashCommand {
         description = "show the low-battery warning animation"
     )]
     pub show_battery_warning: Option<bool>,
-    #[argh(
-        option,
-        short = 'L',
-        description = "show the animation when lid is closed"
-    )]
-    pub show_on_lid_closed: Option<bool>,
 }

@@ -260,6 +260,8 @@ pub enum FirmwareAttributeType {
     Ppt,
     Gpu,
     Bios,
+    /// Attribute is read-only and must never be written by asusd.
+    ReadOnly,
 }
 
 macro_rules! define_attribute_getters {
@@ -304,8 +306,8 @@ define_attribute_getters!(
     ppt_fppt,
     nv_dynamic_boost,
     nv_temp_target,
-    dgpu_base_tgp,
-    dgpu_tgp,
+    nv_base_tgp,
+    nv_tgp,
     charge_mode,
     boot_sound,
     kbd_leds_awake,
@@ -330,8 +332,8 @@ define_attribute_getters!(
         ppt_fppt: Ppt,
         nv_dynamic_boost: Ppt,
         nv_temp_target: Ppt,
-        dgpu_base_tgp: Immediate,
-        dgpu_tgp: Ppt,
+        nv_base_tgp: ReadOnly,
+        nv_tgp: Ppt,
 
         gpu_mux_mode: Gpu,
         egpu_connected: Gpu,
@@ -413,8 +415,8 @@ impl From<&str> for FirmwareAttribute {
             "ppt_platform_sppt" => Self::PptPlatformSppt,
             "nv_dynamic_boost" => Self::NvDynamicBoost,
             "nv_temp_target" => Self::NvTempTarget,
-            "dgpu_base_tgp" | "nv_base_tgp" => Self::DgpuBaseTgp,
-            "dgpu_tgp" | "nv_tgp" => Self::DgpuTgp,
+            "nv_base_tgp" => Self::DgpuBaseTgp,
+            "nv_tgp" => Self::DgpuTgp,
             "charge_mode" => Self::ChargeMode,
             "boot_sound" => Self::BootSound,
             "mcu_powersave" => Self::McuPowersave,
@@ -450,8 +452,8 @@ impl From<FirmwareAttribute> for &str {
             FirmwareAttribute::PptPlatformSppt => "ppt_platform_sppt",
             FirmwareAttribute::NvDynamicBoost => "nv_dynamic_boost",
             FirmwareAttribute::NvTempTarget => "nv_temp_target",
-            FirmwareAttribute::DgpuBaseTgp => "dgpu_base_tgp",
-            FirmwareAttribute::DgpuTgp => "dgpu_tgp",
+            FirmwareAttribute::DgpuBaseTgp => "nv_base_tgp",
+            FirmwareAttribute::DgpuTgp => "nv_tgp",
             FirmwareAttribute::ChargeMode => "charge_mode",
             FirmwareAttribute::BootSound => "boot_sound",
             FirmwareAttribute::McuPowersave => "mcu_powersave",

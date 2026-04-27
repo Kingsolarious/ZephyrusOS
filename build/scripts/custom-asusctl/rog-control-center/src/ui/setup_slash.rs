@@ -1,280 +1,223 @@
+use std::path::Path;
+use std::process::Command;
+use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 
-use log::{debug, info};
+use log::{error, info};
+use rog_dbus::find_iface_async;
 use rog_dbus::zbus_slash::SlashProxy;
 use rog_slash::SlashMode;
-use slint::ComponentHandle;
+use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
 use crate::config::Config;
 use crate::ui::show_toast;
-use crate::{set_ui_props_async, MainWindow, SlashPageData};
+use crate::{set_ui_callbacks, set_ui_props_async, MainWindow, SlashPageData};
 
-async fn find_slash_iface() -> Result<SlashProxy<'static>, Box<dyn std::error::Error>> {
-    let conn = zbus::Connection::system().await?;
-    SlashProxy::builder(&conn)
-        .destination("xyz.ljones.Asusd")?
-        .path("/xyz/ljones/aura/193b_4_8")?
-        .build()
-        .await
-        .map_err(Into::into)
+const CUSTOM_ANIMATION_DIR: &str = "/usr/share/zephyrus-os/slash-animations";
+
+fn slash_modes() -> Vec<SharedString> {
+    SlashMode::list()
+        .into_iter()
+        .map(SharedString::from)
+        .collect()
+}
+
+fn slash_mode_to_index(mode: SlashMode) -> i32 {
+    SlashMode::list()
+        .iter()
+        .position(|value| value == &mode.to_string())
+        .map(|index| index as i32)
+        .unwrap_or_default()
+}
+
+fn slash_mode_from_index(index: i32) -> SlashMode {
+    let modes = SlashMode::list();
+    let selected = modes
+        .get(index.max(0) as usize)
+        .cloned()
+        .unwrap_or_else(|| SlashMode::default().to_string());
+    SlashMode::from_str(&selected).unwrap_or_default()
+}
+
+fn custom_animations() -> Vec<SharedString> {
+    let mut names = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(CUSTOM_ANIMATION_DIR) {
+        let mut entries: Vec<_> = entries.filter_map(|e| e.ok()).collect();
+        entries.sort_by_key(|e| e.file_name());
+        for entry in entries {
+            let path = entry.path();
+            if path.extension().map(|e| e == "gif").unwrap_or(false) {
+                if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
+                    names.push(SharedString::from(stem));
+                }
+            }
+        }
+    }
+    names
+}
+
+fn spawn_custom_animation(index: i32) {
+    let names = custom_animations();
+    let name = names.get(index.max(0) as usize).cloned();
+    if let Some(name) = name {
+        let path = format!("{}/{}.gif", CUSTOM_ANIMATION_DIR, name);
+        if Path::new(&path).exists() {
+            let _ = Command::new("gu605my-slash-player")
+                .arg(&path)
+                .spawn();
+        }
+    }
 }
 
 pub fn setup_slash_page(ui: &MainWindow, _states: Arc<Mutex<Config>>) {
     let handle = ui.as_weak();
     tokio::spawn(async move {
-        let Ok(slash) = find_slash_iface().await else {
-            info!("No Slash interface found");
-            return Ok::<(), zbus::Error>(());
+        let Ok(slashes) = find_iface_async::<SlashProxy>("xyz.ljones.Slash").await else {
+            info!("This device appears to have no slash interface");
+            return;
         };
 
-        info!("Setting up Slash page");
+        for slash in slashes {
+            set_ui_props_async!(handle, slash, SlashPageData, enabled);
+            set_ui_props_async!(handle, slash, SlashPageData, brightness);
+            set_ui_props_async!(handle, slash, SlashPageData, interval);
+            set_ui_props_async!(handle, slash, SlashPageData, show_on_boot);
+            set_ui_props_async!(handle, slash, SlashPageData, show_on_shutdown);
+            set_ui_props_async!(handle, slash, SlashPageData, show_on_sleep);
+            set_ui_props_async!(handle, slash, SlashPageData, show_on_battery);
+            set_ui_props_async!(handle, slash, SlashPageData, show_battery_warning);
+            set_ui_props_async!(handle, slash, SlashPageData, show_on_lid_closed);
 
-        // Load initial values from D-Bus to UI
-        set_ui_props_async!(handle, slash, SlashPageData, enabled);
-        
-        // Load brightness
-        if let Ok(value) = slash.brightness().await {
-            handle.upgrade_in_event_loop(move |h| {
-                h.global::<SlashPageData>().set_brightness(value as i32);
-            }).ok();
-        }
-        
-        // Load interval
-        if let Ok(value) = slash.interval().await {
-            handle.upgrade_in_event_loop(move |h| {
-                h.global::<SlashPageData>().set_interval(value as i32);
-            }).ok();
-        }
-
-        // Set up callback for enabled
-        let proxy = slash.clone();
-        let weak = handle.clone();
-        handle.upgrade_in_event_loop(move |h| {
-            let proxy_copy = proxy.clone();
-            let weak_copy = weak.clone();
-            h.global::<SlashPageData>().on_cb_enabled(move |enabled| {
-                let p = proxy_copy.clone();
-                let w = weak_copy.clone();
-                tokio::spawn(async move {
-                    show_toast(
-                        "Slash LED updated".into(),
-                        "Failed to update Slash".into(),
-                        w,
-                        p.set_enabled(enabled).await,
-                    );
-                });
-            });
-        }).ok();
-
-        // Set up callback for brightness
-        let proxy = slash.clone();
-        let weak = handle.clone();
-        handle.upgrade_in_event_loop(move |h| {
-            let proxy_copy = proxy.clone();
-            let weak_copy = weak.clone();
-            h.global::<SlashPageData>().on_cb_brightness(move |brightness| {
-                let p = proxy_copy.clone();
-                let w = weak_copy.clone();
-                tokio::spawn(async move {
-                    show_toast(
-                        "Slash brightness updated".into(),
-                        "Failed to update brightness".into(),
-                        w,
-                        p.set_brightness(brightness as u8).await,
-                    );
-                });
-            });
-        }).ok();
-
-        // Set up callback for interval
-        let proxy = slash.clone();
-        let weak = handle.clone();
-        handle.upgrade_in_event_loop(move |h| {
-            let proxy_copy = proxy.clone();
-            let weak_copy = weak.clone();
-            h.global::<SlashPageData>().on_cb_interval(move |interval| {
-                let p = proxy_copy.clone();
-                let w = weak_copy.clone();
-                tokio::spawn(async move {
-                    show_toast(
-                        "Slash speed updated".into(),
-                        "Failed to update speed".into(),
-                        w,
-                        p.set_interval(interval as u8).await,
-                    );
-                });
-            });
-        }).ok();
-        
-        // Mode callback
-        let proxy = slash.clone();
-        let weak = handle.clone();
-        handle.upgrade_in_event_loop(move |h| {
-            let proxy_copy = proxy.clone();
-            let weak_copy = weak.clone();
-            h.global::<SlashPageData>().on_cb_mode(move |mode_idx| {
-                let mode_u8 = match mode_idx {
-                    0 => SlashMode::Static as u8,
-                    1 => SlashMode::Bounce as u8,
-                    2 => SlashMode::Slash as u8,
-                    3 => SlashMode::Loading as u8,
-                    4 => SlashMode::BitStream as u8,
-                    5 => SlashMode::Transmission as u8,
-                    6 => SlashMode::Flow as u8,
-                    7 => SlashMode::Flux as u8,
-                    8 => SlashMode::Phantom as u8,
-                    9 => SlashMode::Spectrum as u8,
-                    10 => SlashMode::Hazard as u8,
-                    11 => SlashMode::Interfacing as u8,
-                    12 => SlashMode::Ramp as u8,
-                    13 => SlashMode::GameOver as u8,
-                    14 => SlashMode::Start as u8,
-                    15 => SlashMode::Buzzer as u8,
-                    _ => SlashMode::Spectrum as u8,
-                };
-                let p = proxy_copy.clone();
-                let w = weak_copy.clone();
-                tokio::spawn(async move {
-                    show_toast(
-                        "Slash mode updated".into(),
-                        "Failed to set Slash mode".into(),
-                        w,
-                        p.set_mode(mode_u8).await,
-                    );
-                });
-            });
-        }).ok();
-
-        // Load current mode
-        if let Ok(mode_u8) = slash.mode().await {
-            let mode_idx = match mode_u8 {
-                0x06 => 0,   // Static
-                0x10 => 1,   // Bounce
-                0x12 => 2,   // Slash
-                0x13 => 3,   // Loading
-                0x1d => 4,   // BitStream
-                0x1a => 5,   // Transmission
-                0x19 => 6,   // Flow
-                0x25 => 7,   // Flux
-                0x24 => 8,   // Phantom
-                0x26 => 9,   // Spectrum
-                0x32 => 10,  // Hazard
-                0x33 => 11,  // Interfacing
-                0x34 => 12,  // Ramp
-                0x42 => 13,  // GameOver
-                0x43 => 14,  // Start
-                0x44 => 15,  // Buzzer
-                _ => 9,      // Spectrum default
-            };
-            handle.upgrade_in_event_loop(move |h| {
-                h.global::<SlashPageData>().set_current_mode(mode_idx);
-            }).ok();
-        }
-
-        // Show options callback
-        let proxy = slash.clone();
-        let weak = handle.clone();
-        handle.upgrade_in_event_loop(move |h| {
-            let proxy_copy = proxy.clone();
-            let weak_copy = weak.clone();
-            h.global::<SlashPageData>().on_cb_show_options(move |options| {
-                let p = proxy_copy.clone();
-                let w = weak_copy.clone();
-                tokio::spawn(async move {
-                    let _ = p.set_show_on_boot(options.boot).await;
-                    let _ = p.set_show_on_shutdown(options.shutdown).await;
-                    let _ = p.set_show_on_sleep(options.sleep).await;
-                    let _ = p.set_show_on_battery(options.battery).await;
-                    let _ = p.set_show_battery_warning(options.battery_warning).await;
-                    let _ = p.set_show_on_lid_closed(options.lid_closed).await;
-                    show_toast(
-                        "Slash options updated".into(),
-                        "Failed to update options".into(),
-                        w,
-                        Ok(()),
-                    );
-                });
-            });
-        }).ok();
-
-        // Load show options
-        let show_boot = slash.show_on_boot().await.unwrap_or(true);
-        let show_shutdown = slash.show_on_shutdown().await.unwrap_or(true);
-        let show_sleep = slash.show_on_sleep().await.unwrap_or(true);
-        let show_battery = slash.show_on_battery().await.unwrap_or(true);
-        let show_battery_warn = slash.show_battery_warning().await.unwrap_or(true);
-        let show_lid_closed = slash.show_on_lid_closed().await.unwrap_or(false);
-        
-        handle.upgrade_in_event_loop(move |h| {
-            h.global::<SlashPageData>().set_show_on_boot(show_boot);
-            h.global::<SlashPageData>().set_show_on_shutdown(show_shutdown);
-            h.global::<SlashPageData>().set_show_on_sleep(show_sleep);
-            h.global::<SlashPageData>().set_show_on_battery(show_battery);
-            h.global::<SlashPageData>().set_show_battery_warning(show_battery_warn);
-            h.global::<SlashPageData>().set_show_on_lid_closed(show_lid_closed);
-        }).ok();
-
-        // Mode change stream
-
-        // Custom animation callback (load .slashlighting file via kdialog)
-        let weak_custom = handle.clone();
-        handle.upgrade_in_event_loop(move |h| {
-            h.global::<SlashPageData>().on_cb_custom_animation(move || {
-                let w = weak_custom.clone();
-                tokio::spawn(async move {
-                    let output = std::process::Command::new("kdialog")
-                        .args(["--getopenfilename", "/usr/share/zephyrus-os/slash-animations", "*.slashlighting"])
-                        .output();
-                    if let Ok(out) = output {
-                        let path = String::from_utf8_lossy(&out.stdout).trim().to_string();
-                        if !path.is_empty() {
-                            let _ = std::process::Command::new("/usr/local/bin/gu605my-slash-player")
-                                .args(["--loop", &path])
-                                .spawn();
-                            let name = std::path::Path::new(&path)
-                                .file_name()
-                                .map(|n| n.to_string_lossy().to_string())
-                                .unwrap_or_else(|| "animation".into());
-                            show_toast(format!("Playing {}", name).into(), "Failed to play animation".into(), w, Ok(()));
-                        }
-                    }
-                });
-            });
-        }).ok();
-        let stream_handle = handle.clone();
-        let slash_stream = slash.clone();
-        tokio::spawn(async move {
-            use futures_util::StreamExt;
-            let mut stream = slash_stream.receive_mode_changed().await;
-            while let Some(e) = stream.next().await {
-                if let Ok(mode_u8) = e.get().await {
-                    let mode_idx = match mode_u8 {
-                        0x06 => 0,   // Static
-                        0x10 => 1,   // Bounce
-                        0x12 => 2,   // Slash
-                        0x13 => 3,   // Loading
-                        0x1d => 4,   // BitStream
-                        0x1a => 5,   // Transmission
-                        0x19 => 6,   // Flow
-                        0x25 => 7,   // Flux
-                        0x24 => 8,   // Phantom
-                        0x26 => 9,   // Spectrum
-                        0x32 => 10,  // Hazard
-                        0x33 => 11,  // Interfacing
-                        0x34 => 12,  // Ramp
-                        0x42 => 13,  // GameOver
-                        0x43 => 14,  // Start
-                        0x44 => 15,  // Buzzer
-                        _ => 9,      // Spectrum default
-                    };
-                    stream_handle.upgrade_in_event_loop(move |h| {
-                        h.global::<SlashPageData>().set_current_mode(mode_idx);
-                    }).ok();
-                }
+            if let Ok(mode) = slash.mode().await {
+                let idx = slash_mode_to_index(mode);
+                let choices = slash_modes();
+                let custom = custom_animations();
+                handle
+                    .upgrade_in_event_loop(move |handle| {
+                        let global = handle.global::<SlashPageData>();
+                        global.set_mode_choices(ModelRc::new(VecModel::from(choices)));
+                        global.set_custom_animations(ModelRc::new(VecModel::from(custom)));
+                        global.set_mode(idx);
+                    })
+                    .ok();
             }
-        });
 
-        debug!("Slash setup done");
-        Ok(())
+            handle
+                .upgrade_in_event_loop(move |handle| {
+                    let global = handle.global::<SlashPageData>();
+                    if global.get_mode_choices().row_count() == 0 {
+                        global.set_mode_choices(ModelRc::new(VecModel::from(slash_modes())));
+                    }
+                    if global.get_custom_animations().row_count() == 0 {
+                        global.set_custom_animations(ModelRc::new(VecModel::from(custom_animations())));
+                    }
+
+                    let handle_copy = handle.as_weak();
+                    let slash_copy = slash.clone();
+                    global.on_cb_mode(move |index| {
+                        let handle_copy = handle_copy.clone();
+                        let slash_copy = slash_copy.clone();
+                        tokio::spawn(async move {
+                            show_toast(
+                                format!(
+                                    "Slash animation successfully set to {}",
+                                    slash_mode_from_index(index)
+                                )
+                                .into(),
+                                "Setting Slash animation failed".into(),
+                                handle_copy,
+                                slash_copy.set_mode(slash_mode_from_index(index)).await,
+                            );
+                        });
+                    });
+
+                    global.on_cb_custom_animation(move |index| {
+                        spawn_custom_animation(index);
+                    });
+
+                    let handle_copy = handle.as_weak();
+                    let slash_copy = slash.clone();
+                    tokio::spawn(async move {
+                        let mut x = slash_copy.receive_mode_changed().await;
+                        use futures_util::StreamExt;
+                        while let Some(e) = x.next().await {
+                            if let Ok(out) = e.get().await {
+                                let idx = slash_mode_to_index(out);
+                                handle_copy
+                                    .upgrade_in_event_loop(move |handle| {
+                                        handle.global::<SlashPageData>().set_mode(idx);
+                                    })
+                                    .ok();
+                            }
+                        }
+                    });
+
+                    set_ui_callbacks!(
+                        handle,
+                        SlashPageData(),
+                        slash.enabled(),
+                        "Slash lighting successfully set to {}",
+                        "Setting Slash lighting failed"
+                    );
+                    set_ui_callbacks!(
+                        handle,
+                        SlashPageData(.into()),
+                        slash.brightness(.try_into().unwrap_or_default()),
+                        "Slash brightness successfully set to {}",
+                        "Setting Slash brightness failed"
+                    );
+                    set_ui_callbacks!(
+                        handle,
+                        SlashPageData(.into()),
+                        slash.interval(.try_into().unwrap_or_default()),
+                        "Slash interval successfully set to {}",
+                        "Setting Slash interval failed"
+                    );
+                    set_ui_callbacks!(
+                        handle,
+                        SlashPageData(),
+                        slash.show_on_boot(),
+                        "Slash boot animation visibility successfully set to {}",
+                        "Setting Slash boot animation visibility failed"
+                    );
+                    set_ui_callbacks!(
+                        handle,
+                        SlashPageData(),
+                        slash.show_on_shutdown(),
+                        "Slash shutdown animation visibility successfully set to {}",
+                        "Setting Slash shutdown animation visibility failed"
+                    );
+                    set_ui_callbacks!(
+                        handle,
+                        SlashPageData(),
+                        slash.show_on_sleep(),
+                        "Slash sleep animation visibility successfully set to {}",
+                        "Setting Slash sleep animation visibility failed"
+                    );
+                    set_ui_callbacks!(
+                        handle,
+                        SlashPageData(),
+                        slash.show_on_battery(),
+                        "Slash battery animation visibility successfully set to {}",
+                        "Setting Slash battery animation visibility failed"
+                    );
+                    set_ui_callbacks!(
+                        handle,
+                        SlashPageData(),
+                        slash.show_battery_warning(),
+                        "Slash battery warning successfully set to {}",
+                        "Setting Slash battery warning failed"
+                    );
+                    set_ui_callbacks!(
+                        handle,
+                        SlashPageData(),
+                        slash.show_on_lid_closed(),
+                        "Slash lid-closed animation visibility successfully set to {}",
+                        "Setting Slash lid-closed animation visibility failed"
+                    );
+                })
+                .map_err(|e| error!("setup_slash_page: upgrade_in_event_loop: {e:?}"))
+                .ok();
+        }
     });
 }

@@ -1,105 +1,188 @@
-import { RogItem, SystemToggle, SystemDropdown } from "../widgets/common.slint";
-import { Palette, Button, VerticalBox, GroupBox, HorizontalBox, ScrollView } from "std-widgets.slint";
-import { SlashPageData, SlashMode, SlashShowOptions } from "../types/slash_types.slint";
+import { Palette, VerticalBox, ScrollView } from "std-widgets.slint";
+import { SystemDropdown, SystemSlider, SystemToggle, RogItem } from "../widgets/common.slint";
+
+export global SlashPageData {
+    in-out property <bool> enabled: false;
+    callback cb_enabled(bool);
+
+    in-out property <int> brightness: 255;
+    callback cb_brightness(int);
+
+    in-out property <int> interval: 0;
+    callback cb_interval(int);
+
+    in-out property <[string]> mode_choices: [];
+    in-out property <int> mode: 0;
+    callback cb_mode(int);
+
+    in-out property <bool> show_on_boot: true;
+    callback cb_show_on_boot(bool);
+    in-out property <bool> show_on_shutdown: true;
+    callback cb_show_on_shutdown(bool);
+    in-out property <bool> show_on_sleep: true;
+    callback cb_show_on_sleep(bool);
+    in-out property <bool> show_on_battery: true;
+    callback cb_show_on_battery(bool);
+    in-out property <bool> show_battery_warning: true;
+    callback cb_show_battery_warning(bool);
+    in-out property <bool> show_on_lid_closed: true;
+    callback cb_show_on_lid_closed(bool);
+
+    in-out property <[string]> custom_animations: [];
+    in-out property <int> custom_animation: 0;
+    callback cb_custom_animation(int);
+}
 
 export component PageSlash inherits Rectangle {
+    clip: true;
+
     ScrollView {
         VerticalLayout {
-            padding: 10px;
-            spacing: 10px;
+            padding: 12px;
+            spacing: 8px;
             alignment: LayoutAlignment.start;
-            
-            RogItem {
-                SystemToggle {
-                    text: @tr("Enable Slash LED");
-                    checked <=> SlashPageData.enabled;
-                    toggled => {
-                        SlashPageData.cb_enabled(SlashPageData.enabled)
-                    }
+
+            Rectangle {
+                background: Palette.alternate-background;
+                border-color: Palette.border;
+                border-width: 1px;
+                border-radius: 2px;
+                height: 36px;
+                Text {
+                    font-size: 16px;
+                    color: Palette.control-foreground;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    text: @tr("Slash lighting");
                 }
             }
 
-            HorizontalLayout {
-                spacing: 10px;
-                RogItem {
-                    SystemDropdown {
-                        text: @tr("Brightness");
-                        current_value: SlashPageData.brightness;
-                        model: ["0", "64", "128", "192", "255"];
-                        current-index: SlashPageData.brightness / 51;
-                        selected => {
-                            SlashPageData.cb_brightness(self.current-index * 51)
-                        }
-                    }
+            SystemToggle {
+                text: @tr("Enable A-cover lighting");
+                checked <=> SlashPageData.enabled;
+                toggled => {
+                    SlashPageData.cb_enabled(SlashPageData.enabled);
                 }
-                
-                RogItem {
-                    SystemDropdown {
-                        text: @tr("Animation Speed");
-                        current-index <=> SlashPageData.interval;
-                        current_value: SlashPageData.interval_names[self.current-index];
-                        model <=> SlashPageData.interval_names;
-                        selected => {
-                            SlashPageData.cb_interval(SlashPageData.interval)
-                        }
-                    }
+            }
+
+            SystemSlider {
+                text: @tr("Brightness");
+                minimum: 0;
+                maximum: 255;
+                has_reset: false;
+                enabled <=> SlashPageData.enabled;
+                value: SlashPageData.brightness;
+                released => {
+                    SlashPageData.brightness = Math.round(self.value);
+                    SlashPageData.cb_brightness(SlashPageData.brightness);
+                }
+            }
+
+            SystemSlider {
+                text: @tr("Animation speed");
+                minimum: 0;
+                maximum: 5;
+                has_reset: false;
+                enabled <=> SlashPageData.enabled;
+                value: SlashPageData.interval;
+                released => {
+                    SlashPageData.interval = Math.round(self.value);
+                    SlashPageData.cb_interval(SlashPageData.interval);
+                }
+            }
+
+            if SlashPageData.mode_choices.length > 0: SystemDropdown {
+                text: @tr("Animation");
+                current_index <=> SlashPageData.mode;
+                current_value: SlashPageData.mode_choices[SlashPageData.mode];
+                model <=> SlashPageData.mode_choices;
+                enabled <=> SlashPageData.enabled;
+                selected => {
+                    SlashPageData.cb_mode(SlashPageData.mode);
+                }
+            }
+
+            if SlashPageData.custom_animations.length > 0: SystemDropdown {
+                text: @tr("Custom animation");
+                current_index <=> SlashPageData.custom_animation;
+                current_value: SlashPageData.custom_animations[SlashPageData.custom_animation];
+                model <=> SlashPageData.custom_animations;
+                enabled <=> SlashPageData.enabled;
+                selected => {
+                    SlashPageData.cb_custom_animation(SlashPageData.custom_animation);
+                }
+            }
+
+            Rectangle {
+                background: Palette.alternate-background;
+                border-color: Palette.border;
+                border-width: 1px;
+                border-radius: 2px;
+                height: 36px;
+                Text {
+                    font-size: 16px;
+                    color: Palette.control-foreground;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    text: @tr("Visibility triggers");
+                }
+            }
+
+            SystemToggle {
+                text: @tr("Show on boot");
+                checked <=> SlashPageData.show_on_boot;
+                toggled => {
+                    SlashPageData.cb_show_on_boot(SlashPageData.show_on_boot);
+                }
+            }
+
+            SystemToggle {
+                text: @tr("Show on shutdown");
+                checked <=> SlashPageData.show_on_shutdown;
+                toggled => {
+                    SlashPageData.cb_show_on_shutdown(SlashPageData.show_on_shutdown);
+                }
+            }
+
+            SystemToggle {
+                text: @tr("Show on sleep");
+                checked <=> SlashPageData.show_on_sleep;
+                toggled => {
+                    SlashPageData.cb_show_on_sleep(SlashPageData.show_on_sleep);
+                }
+            }
+
+            SystemToggle {
+                text: @tr("Show on battery");
+                checked <=> SlashPageData.show_on_battery;
+                toggled => {
+                    SlashPageData.cb_show_on_battery(SlashPageData.show_on_battery);
+                }
+            }
+
+            SystemToggle {
+                text: @tr("Show low-battery warning");
+                checked <=> SlashPageData.show_battery_warning;
+                toggled => {
+                    SlashPageData.cb_show_battery_warning(SlashPageData.show_battery_warning);
+                }
+            }
+
+            SystemToggle {
+                text: @tr("Show when lid is closed");
+                checked <=> SlashPageData.show_on_lid_closed;
+                toggled => {
+                    SlashPageData.cb_show_on_lid_closed(SlashPageData.show_on_lid_closed);
                 }
             }
 
             RogItem {
-                SystemDropdown {
-                    text: @tr("Animation Mode");
-                    current-index <=> SlashPageData.current_mode;
-                    current_value: SlashPageData.mode_names[self.current-index];
-                    model <=> SlashPageData.mode_names;
-                    selected => {
-                        SlashPageData.cb_mode(SlashPageData.current_mode)
-                    }
-                }
-            }
-
-            GroupBox {
-                title: @tr("Show When:");
-                VerticalLayout {
-                    padding: 10px;
-                    spacing: 5px;
-                    
-                    SystemToggle {
-                        text: @tr("On Boot");
-                        checked <=> SlashPageData.show_on_boot;
-                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
-                    }
-                    SystemToggle {
-                        text: @tr("On Shutdown");
-                        checked <=> SlashPageData.show_on_shutdown;
-                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
-                    }
-                    SystemToggle {
-                        text: @tr("On Sleep");
-                        checked <=> SlashPageData.show_on_sleep;
-                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
-                    }
-                    SystemToggle {
-                        text: @tr("On Battery");
-                        checked <=> SlashPageData.show_on_battery;
-                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
-                    }
-                    SystemToggle {
-                        text: @tr("Low Battery Warning");
-                        checked <=> SlashPageData.show_battery_warning;
-                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
-                    }
-                    SystemToggle {
-                        text: @tr("When Lid Closed");
-                        checked <=> SlashPageData.show_on_lid_closed;
-                        toggled => { SlashPageData.cb_show_options(SlashPageData.show_options); }
-                    }
-                }
-            }
-            RogItem {
-                Button {
-                    text: @tr("Load Custom .slashlighting Animation");
-                    clicked => { SlashPageData.cb_custom_animation(); }
+                min-height: 64px;
+                max-height: 64px;
+                Text {
+                    width: parent.width - 20px;
+                    x: 10px;
+                    wrap: TextWrap.word-wrap;
+                    color: Palette.control-foreground;
+                    text: @tr("Slash_tip" => "Slash Lighting controls the A-cover LED strip found on supported Zephyrus models.");
                 }
             }
         }

@@ -1,9 +1,10 @@
+use rog_slash::SlashMode;
 use zbus::proxy;
 
 #[proxy(
     interface = "xyz.ljones.Slash",
     default_service = "xyz.ljones.Asusd",
-    default_path = "/xyz/ljones/aura/193b_4_8"
+    default_path = "/xyz/ljones"
 )]
 pub trait Slash {
     /// EnableDisplay property
@@ -26,9 +27,9 @@ pub trait Slash {
 
     /// Slash modes property
     #[zbus(property)]
-    fn mode(&self) -> zbus::Result<u8>;
+    fn mode(&self) -> zbus::Result<SlashMode>;
     #[zbus(property)]
-    fn set_mode(&self, value: u8) -> zbus::Result<()>;
+    fn set_mode(&self, value: SlashMode) -> zbus::Result<()>;
 
     /// ShowBatteryWarning property
     #[zbus(property)]

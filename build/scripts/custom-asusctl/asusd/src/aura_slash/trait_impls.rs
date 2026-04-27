@@ -138,16 +138,15 @@ impl SlashZbus {
     }
 
     #[zbus(property)]
-    async fn mode(&self) -> zbus::fdo::Result<u8> {
+    async fn mode(&self) -> zbus::fdo::Result<SlashMode> {
         let config = self.0.lock_config().await;
-        Ok(config.display_mode as u8)
+        Ok(config.display_mode)
     }
 
     /// Set interval between slash animations (0-255)
     #[zbus(property)]
-    async fn set_mode(&self, mode: u8) -> zbus::Result<()> {
+    async fn set_mode(&self, mode: SlashMode) -> zbus::Result<()> {
         let mut config = self.0.lock_config().await;
-        let mode = SlashMode::from(mode);
 
         let command_packets = slash_pkt_set_mode(config.slash_type, mode);
         // self.node.write_bytes(&command_packets[0])?;
@@ -318,8 +317,6 @@ impl Reloadable for SlashZbus {
             "show_on_lid_closed"
         );
 
-        drop(config);
-        let config = self.0.lock_config().await;
         let mode_packets = slash_pkt_set_mode(config.slash_type, config.display_mode);
         self.0
             .write_bytes(&mode_packets[1])

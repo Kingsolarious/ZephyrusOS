@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use config_traits::StdConfig;
@@ -33,6 +34,7 @@ fn dbus_path_for_attr(attr_name: &str) -> OwnedObjectPath {
 pub struct AsusArmouryAttribute {
     attr: Attribute,
     config: Arc<Mutex<Config>>,
+    queued_gpu: Arc<Mutex<HashMap<FirmwareAttribute, i32>>>,
     /// platform control required here for access to PPD or Throttle profile
     platform: RogPlatform,
     power: AsusPower,
@@ -44,10 +46,12 @@ impl AsusArmouryAttribute {
         platform: RogPlatform,
         power: AsusPower,
         config: Arc<Mutex<Config>>,
+        queued_gpu: Arc<Mutex<HashMap<FirmwareAttribute, i32>>>,
     ) -> Self {
         Self {
             attr,
             config,
+            queued_gpu,
             platform,
             power,
         }
@@ -173,7 +177,7 @@ impl crate::Reloadable for AsusArmouryAttribute {
         let attribute: FirmwareAttribute = self.attr.name().into();
         let name = self.attr.name();
 
-        let config = self.config.lock().await;
+        let mut config = self.config.lock().await;
         let apply_value = match attribute.property_type() {
             FirmwareAttributeType::Ppt => {
                 let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
@@ -199,7 +203,19 @@ impl crate::Reloadable for AsusArmouryAttribute {
                 apply_value.map_or(AttrValue::None, AttrValue::Integer)
             }
             FirmwareAttributeType::Gpu => {
+                if config.armoury_settings.remove(&attribute).is_some() {
+                    info!("Removed persisted GPU attribute {name} from config");
+                    config.write();
+                }
                 info!("Reload called on GPU attribute {name}: doing nothing");
+                AttrValue::None
+            }
+            FirmwareAttributeType::ReadOnly => {
+                if config.armoury_settings.remove(&attribute).is_some() {
+                    info!("Removed stale persisted read-only attribute {name} from config");
+                    config.write();
+                }
+                info!("Reload called on read-only attribute {name}: doing nothing");
                 AttrValue::None
             }
             _ => {
@@ -368,6 +384,17 @@ impl AsusArmouryAttribute {
             ));
         }
 
+        /*
+        // This code would override the current_value with queued GPU value if present
+        // but I don't want to do that for now because it would cause confusion where
+        // current_value doesn't reflect actual firmware state until apply_queued_gpu_value is called. Instead, queued GPU values are only visible through the queued_gpu_value property and are applied on shutdown without affecting current_value.
+        if self.name().property_type() == FirmwareAttributeType::Gpu {
+            if let Some(saved_value) = self.queued_gpu.lock().await.get(&self.name()) {
+                return Ok(*saved_value);
+            }
+        }
+        */
+
         if let Ok(AttrValue::Integer(i)) = self.attr.current_value() {
             return Ok(i);
         }
@@ -379,6 +406,15 @@ impl AsusArmouryAttribute {
     #[zbus(property)]
     async fn set_current_value(&mut self, value: i32) -> fdo::Result<()> {
         let name = self.attr.name();
+
+        // if read-only, don't even attempt to set or persist value
+        if self.name().property_type() == FirmwareAttributeType::ReadOnly {
+            warn!("Attempted to set read-only attribute {name}: write discarded");
+            return Err(fdo::Error::NotSupported(format!(
+                "{name} is read-only and cannot be changed"
+            )));
+        }
+
         let apply_value = match self.name().property_type() {
             FirmwareAttributeType::Ppt => {
                 let profile: PlatformProfile = self.platform.get_platform_profile()?.into();
@@ -412,6 +448,11 @@ impl AsusArmouryAttribute {
                     }
                 }
             }
+            FirmwareAttributeType::Gpu => {
+                debug!("Queueing GPU attribute {name} = {value} for delayed apply");
+                self.queued_gpu.lock().await.insert(self.name(), value);
+                return Ok(());
+            }
             _ => {
                 let mut settings = self.config.lock().await;
                 settings
@@ -430,14 +471,73 @@ impl AsusArmouryAttribute {
             }
         };
 
-        self.attr.set_current_value(&apply_value).map_err(|e| {
-            error!("Could not set value {value} to attribute {name}: {e:?}");
-            e
-        })?;
+        // Only write to sysfs if we have a real value to apply.
+        // When tuning is disabled, the value is stored in config but not
+        // written to hardware — it will be applied when tuning is enabled.
+        if !matches!(apply_value, AttrValue::None) {
+            self.attr.set_current_value(&apply_value).map_err(|e| {
+                error!("Could not set value {value} to attribute {name}: {e:?}");
+                e
+            })?;
+        }
 
         // write config after setting value
         self.config.lock().await.write();
+
         Ok(())
+    }
+
+    /// Returns queued GPU value when present, otherwise `-1`.
+    #[zbus(property)]
+    async fn queued_gpu_value(&self) -> fdo::Result<i32> {
+        if self.name().property_type() != FirmwareAttributeType::Gpu {
+            return Ok(-1);
+        }
+
+        Ok(self
+            .queued_gpu
+            .lock()
+            .await
+            .get(&self.name())
+            .copied()
+            .unwrap_or(-1))
+    }
+
+    /// Applies queued GPU value if present and returns whether anything was applied.
+    async fn apply_queued_gpu_value(&mut self) -> fdo::Result<bool> {
+        if self.name().property_type() != FirmwareAttributeType::Gpu {
+            return Ok(false);
+        }
+
+        let name = self.name();
+        let value = {
+            let queue = self.queued_gpu.lock().await;
+            let Some(value) = queue.get(&name).copied() else {
+                return Ok(false);
+            };
+            value
+        };
+
+        self.attr
+            .set_current_value(&AttrValue::Integer(value))
+            .map_err(|e| {
+                error!(
+                    "Could not apply queued GPU attribute {} = {value}: {e:?}",
+                    <&str>::from(name)
+                );
+                e
+            })?;
+
+        info!(
+            "Applied queued GPU attribute {} = {value}",
+            <&str>::from(name)
+        );
+
+        // Remove only after successful firmware write so transient failures do
+        // not lose deferred shutdown values.
+        self.queued_gpu.lock().await.remove(&name);
+
+        Ok(true)
     }
 }
 
@@ -449,12 +549,14 @@ pub async fn start_attributes_zbus(
     config: Arc<Mutex<Config>>,
 ) -> Result<ArmouryAttributeRegistry, RogError> {
     let mut registry = ArmouryAttributeRegistry::default();
+    let queued_gpu = Arc::new(Mutex::new(HashMap::new()));
     for attr in attributes.attributes() {
         let mut attr = AsusArmouryAttribute::new(
             attr.clone(),
             platform.clone(),
             power.clone(),
             config.clone(),
+            queued_gpu.clone(),
         );
 
         let registry_attr = attr.clone();
@@ -503,22 +605,27 @@ pub async fn set_config_or_default(
     let mut changed = false;
     for attr in attrs.attributes().iter() {
         let name: FirmwareAttribute = attr.name().into();
-        if name.property_type() == FirmwareAttributeType::Ppt {
-            let tuning = config.select_tunings(power_plugged, profile);
-            if !tuning.enabled {
-                debug!("Tuning group is not enabled, skipping");
-                continue;
-            }
+        match name.property_type() {
+            FirmwareAttributeType::Ppt => {
+                let tuning = config.select_tunings(power_plugged, profile);
+                if !tuning.enabled {
+                    debug!("Tuning group is not enabled, skipping");
+                    continue;
+                }
 
-            if let Some(tune) = tuning.group.get(&name) {
-                attr.set_current_value(&AttrValue::Integer(*tune))
-                    .map_err(|e| {
-                        error!("Failed to set {}: {e}", <&str>::from(name));
-                    })
-                    .ok();
-            } else {
-                let default = attr.default_value();
-                if attr.set_current_value(default).is_ok() {
+                if let Some(tune) = tuning.group.get(&name) {
+                    attr.set_current_value(&AttrValue::Integer(*tune))
+                        .map_err(|e| {
+                            error!("Failed to set {}: {e}", <&str>::from(name));
+                        })
+                        .ok();
+                } else {
+                    let default = attr.default_value();
+                    attr.set_current_value(default)
+                        .map_err(|e| {
+                            error!("Failed to set {}: {e}", <&str>::from(name));
+                        })
+                        .ok();
                     if let AttrValue::Integer(i) = default {
                         tuning.group.insert(name, *i);
                         info!(
@@ -528,26 +635,42 @@ pub async fn set_config_or_default(
                         );
                         changed = true;
                     }
-                } else {
-                    warn!(
-                        "Skipping {} from tuning config (firmware rejected default)",
-                        <&str>::from(name)
-                    );
                 }
             }
-        } else {
-            // Handle non-PPT attributes (boolean and other settings)
-            if let Some(saved_value) = config.armoury_settings.get(&name) {
-                attr.set_current_value(&AttrValue::Integer(*saved_value))
-                    .map_err(|e| {
-                        error!("Failed to set {}: {e}", <&str>::from(name));
-                    })
-                    .ok();
-                info!(
-                    "Restored armoury setting for {} = {:?}",
-                    <&str>::from(name),
-                    saved_value
-                );
+            FirmwareAttributeType::Gpu => {
+                // Clean stale persisted queue from older versions. GPU deferred
+                // writes are now in-memory and are applied only on shutdown.
+                if config.armoury_settings.remove(&name).is_some() {
+                    info!(
+                        "Removed stale persisted GPU attribute {} from config",
+                        <&str>::from(name)
+                    );
+                    changed = true;
+                }
+            }
+            FirmwareAttributeType::ReadOnly => {
+                if config.armoury_settings.remove(&name).is_some() {
+                    info!(
+                        "Removed stale persisted read-only attribute {} from config",
+                        <&str>::from(name)
+                    );
+                    changed = true;
+                }
+                // Never restore or apply read-only attributes
+            }
+            _ => {
+                if let Some(saved_value) = config.armoury_settings.get(&name) {
+                    attr.set_current_value(&AttrValue::Integer(*saved_value))
+                        .map_err(|e| {
+                            error!("Failed to set {}: {e}", <&str>::from(name));
+                        })
+                        .ok();
+                    info!(
+                        "Restored armoury setting for {} = {:?}",
+                        <&str>::from(name),
+                        saved_value
+                    );
+                }
             }
         }
     }
