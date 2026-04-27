@@ -5,9 +5,23 @@
 set -e
 
 echo "=== Installing ASUS Linux stack & performance tools ==="
-sudo pacman -S --needed asusctl supergfxctl rog-control-center \
+# Install dependencies (excluding asusctl/rog-control-center - we build those from source)
+sudo pacman -S --needed supergfxctl \
     gamemode lib32-gamemode mangohud lib32-mangohud ananicy-cpp \
     scx-scheds s-tui nvtop intel-gpu-tools lm_sensors
+
+# Build and install custom asusctl/rog-control-center from Zephyrus OS repo
+ZEPHYRUS_DIR="$HOME/Desktop/Zephyrus OS"
+ASUSCTL_DIR="$ZEPHYRUS_DIR/build/scripts/custom-asusctl"
+if [ -d "$ASUSCTL_DIR" ]; then
+    echo "=== Building custom-asusctl from Zephyrus OS repo ==="
+    cd "$ASUSCTL_DIR"
+    make clean 2>/dev/null
+    make build 2>/dev/null && sudo make install 2>/dev/null && echo "✓ Custom rog-control-center installed from repo"
+else
+    echo "⚠ Zephyrus OS repo not found at $ZEPHYRUS_DIR, falling back to pacman..."
+    sudo pacman -S --needed asusctl rog-control-center
+fi
 
 echo "=== Enabling services ==="
 sudo systemctl enable --now asusd
@@ -15,43 +29,30 @@ sudo systemctl enable --now supergfxd
 sudo systemctl enable --now ananicy-cpp
 sudo systemctl enable --now scx.service
 
-echo "=== Setting ASUS platform profile to Performance ==="
-sudo asusctl profile -P performance
+echo "=== Setting ASUS platform profile to Balanced ==="
+sudo asusctl profile -P balanced
 
-echo "=== Setting max fan curves ==="
-sudo asusctl fan-curve -m performance -D 30c:100,40c:100,50c:100,60c:100,70c:100,80c:100,90c:100,100c:100
+echo "=== Installing Zephyrus-specific services ==="
+ZEPHYRUS_DIR="$HOME/Desktop/Zephyrus OS"
+if [ -d "$ZEPHYRUS_DIR/config/layered-fixes/configs/etc/systemd/system" ]; then
+    sudo cp "$ZEPHYRUS_DIR/config/layered-fixes/configs/etc/systemd/system/zephyrus-gu605my-tune.service" /etc/systemd/system/
+    sudo cp "$ZEPHYRUS_DIR/config/layered-fixes/configs/etc/systemd/system/zephyrus-profile-watch.service" /etc/systemd/system/
+    sudo cp "$ZEPHYRUS_DIR/config/layered-fixes/configs/etc/systemd/system/zephyrus-ac-governor.service" /etc/systemd/system/
+    sudo cp "$ZEPHYRUS_DIR/config/layered-fixes/configs/etc/systemd/system/zephyrus-gaming-qos.service" /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now zephyrus-gu605my-tune.service
+    sudo systemctl enable --now zephyrus-profile-watch.service
+    sudo systemctl enable --now zephyrus-ac-governor.service
+    sudo systemctl enable --now zephyrus-gaming-qos.service
+    echo "✓ Zephyrus services installed"
+else
+    echo "⚠ Zephyrus OS repo not found, skipping custom services"
+fi
 
-echo "=== Creating NVIDIA power limit service (115W default) ==="
-sudo tee /etc/systemd/system/nvidia-power-limit.service << 'EOF'
-[Unit]
-Description=NVIDIA GPU Power Limit
-After=multi-user.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/nvidia-smi -pl 115
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-EOF
-sudo systemctl enable --now nvidia-power-limit.service
-
-echo "=== Creating RAPL tuning service (CPU 75W/115W) ==="
-sudo tee /etc/systemd/system/rapl-tune.service << 'EOF'
-[Unit]
-Description=Intel RAPL Tuning for Gaming
-After=multi-user.target
-
-[Service]
-Type=oneshot
-ExecStart=/bin/bash -c 'echo 75000000 > /sys/class/powercap/intel-rapl/intel-rapl:0/constraint_0_power_limit_uw && echo 115000000 > /sys/class/powercap/intel-rapl/intel-rapl:0/constraint_1_power_limit_uw && echo 28000000 > /sys/class/powercap/intel-rapl/intel-rapl:0/constraint_0_time_window_us'
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-EOF
-sudo systemctl enable --now rapl-tune.service
+echo "=== Disabling conflicting services ==="
+sudo systemctl disable nvidia-power-limit.service 2>/dev/null || true
+sudo systemctl disable rapl-tune.service 2>/dev/null || true
+sudo systemctl disable tuned.service 2>/dev/null || true
 
 echo "=== Creating per-game GPU power wrappers ==="
 sudo tee /usr/local/bin/cpu-heavy-game.sh << 'EOF'

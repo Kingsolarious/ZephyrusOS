@@ -37,35 +37,13 @@ EOF
 chmod +x ~/.local/bin/asus-profile-cycle
 echo -e "${GREEN}✓ Updated: ~/.local/bin/asus-profile-cycle${NC}"
 
-# Also update zephyrus-control-center
-cat > ~/.local/bin/zephyrus-control-center << 'EOF'
-#!/bin/bash
-# Zephyrus Control Center - Enhanced with Power Limits
-
-case "$1" in
-    cycle|--cycle|-c)
-        exec ~/.local/bin/zephyrus-profile-enhanced cycle
-        ;;
-    silent|quiet|--silent|-s)
-        exec ~/.local/bin/zephyrus-profile-enhanced quiet
-        ;;
-    balanced|--balanced|-b)
-        exec ~/.local/bin/zephyrus-profile-enhanced balanced
-        ;;
-    performance|--performance|-p)
-        exec ~/.local/bin/zephyrus-profile-enhanced performance
-        ;;
-    status|--status)
-        exec ~/.local/bin/zephyrus-profile-enhanced status
-        ;;
-    *)
-        # Launch ROG Control Center GUI
-        exec /home/solarious/.local/bin/rog-control-center "$@"
-        ;;
-esac
-EOF
-chmod +x ~/.local/bin/zephyrus-control-center
-echo -e "${GREEN}✓ Updated: ~/.local/bin/zephyrus-control-center${NC}"
+# Ensure rog-control-center is available
+if command -v rog-control-center &> /dev/null; then
+    echo -e "${GREEN}✓ rog-control-center found${NC}"
+else
+    echo -e "${YELLOW}⚠ rog-control-center not found in PATH.${NC}"
+    echo -e "${YELLOW}  Run: ~/Desktop/Zephyrus\ OS/bin/install/build-and-install-asusctl.sh${NC}"
+fi
 
 echo ""
 echo -e "${YELLOW}Creating keyboard shortcuts...${NC}"

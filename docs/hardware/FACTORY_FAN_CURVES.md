@@ -78,7 +78,7 @@ asusctl fan-curve --default
 Or via control center:
 
 ```bash
-zephyrus-control-center fan-reset
+asusctl fan-curve --set-default
 ```
 
 ---

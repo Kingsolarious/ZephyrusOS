@@ -1,10 +1,11 @@
 [Unit]
-Description=Zephyrus Profile - Boot to Silent Mode
-After=graphical-session.target
+Description=Zephyrus Profile - Boot to Balanced Mode
+After=asusd.service
+Wants=asusd.service
 
 [Service]
 Type=oneshot
-ExecStart=/home/solarious/.local/bin/zephyrus-profile quiet
+ExecStart=/usr/local/bin/zephyrus-profile-sync sync
 RemainAfterExit=yes
 
 [Install]

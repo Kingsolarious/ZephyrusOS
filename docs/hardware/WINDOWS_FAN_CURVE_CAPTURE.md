@@ -99,7 +99,7 @@ asusctl fan-curve --mod-profile balanced --fan gpu --enable-fan-curve true
 Or use the control center reset to go back to firmware defaults:
 
 ```bash
-zephyrus-control-center fan-reset
+asusctl fan-curve --set-default
 ```
 
 ---

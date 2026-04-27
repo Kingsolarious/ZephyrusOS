@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Zephyrus Control Center
+Comment=Control center for ASUS ROG Zephyrus laptops
+Categories=Settings;System;
+Icon=rog-control-center
+Exec=rog-control-center
+Terminal=false
+StartupNotify=true

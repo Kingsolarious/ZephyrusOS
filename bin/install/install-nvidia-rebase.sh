@@ -60,8 +60,17 @@ fi
 echo ""
 echo "Installing customizations..."
 
-# Re-add your custom rog-control-center
-cd ~/Desktop/asusctl-gu605my-fork-20260303-173948 2>/dev/null && ./INSTALL.sh 2>/dev/null && echo "✓ Custom rog-control-center installed"
+# Rebuild and install custom rog-control-center from in-repo source
+ZEPHYRUS_DIR="$HOME/Desktop/Zephyrus OS"
+ASUSCTL_DIR="$ZEPHYRUS_DIR/build/scripts/custom-asusctl"
+if [ -d "$ASUSCTL_DIR" ]; then
+    echo "Building custom-asusctl from Zephyrus OS repo..."
+    cd "$ASUSCTL_DIR"
+    make clean 2>/dev/null
+    make build 2>/dev/null && sudo make install 2>/dev/null && echo "✓ Custom rog-control-center installed from repo"
+else
+    echo "⚠ Zephyrus OS repo not found at $ZEPHYRUS_DIR"
+fi
 
 # Check supergfxctl
 if command -v supergfxctl &> /dev/null; then
