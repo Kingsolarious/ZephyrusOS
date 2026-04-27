@@ -41,15 +41,16 @@ asusctl fan-curve --profile-set performance 2>/dev/null && echo -e "${GREEN}✓ 
 echo ""
 echo -e "${YELLOW}2. Optimizing RTX 4090 GPU...${NC}"
 
-# Check if supergfxctl is available
+# Check if supergfxctl is available (deprecated)
 if command -v supergfxctl &> /dev/null; then
+    echo -e "${YELLOW}⚠ supergfxctl is deprecated. NVIDIA driver native power management is preferred.${NC}"
     # Set to dedicated GPU mode for maximum performance
     supergfxctl --mode dedicated 2>/dev/null && echo -e "${GREEN}✓ GPU Mode: Dedicated (RTX 4090)${NC}" || echo -e "${YELLOW}⚠ GPU mode switch requires reboot${NC}"
     
     # Enable GPU overclocking (if supported)
     asusctl --gfx-powerboost true 2>/dev/null && echo -e "${GREEN}✓ GPU Power Boost: Enabled${NC}" || echo -e "${RED}✗ Power boost not available${NC}"
 else
-    echo -e "${RED}✗ supergfxctl not available${NC}"
+    echo -e "${YELLOW}⚠ supergfxctl not available (deprecated — NVIDIA driver manages GPU power states)${NC}"
 fi
 
 # ============================================================================
@@ -58,12 +59,13 @@ fi
 echo ""
 echo -e "${YELLOW}3. Optimizing Intel Core Ultra 9...${NC}"
 
-# Set CPU governor to performance
+# Set CPU governor to performance (model-specific: GU605MY with Intel P-State)
 if [ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]; then
     for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
         echo performance > "$cpu" 2>/dev/null
     done
     echo -e "${GREEN}✓ CPU Governor: Performance${NC}"
+    echo -e "${YELLOW}  Note: performance governor is correct for GU605MY. Other models may need powersave + EPP.${NC}"
 fi
 
 # Disable CPU power saving

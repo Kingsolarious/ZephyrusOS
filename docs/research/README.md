@@ -17,7 +17,7 @@ Zephyrus OS transforms your ASUS ROG laptop into a sleek, macOS-inspired powerho
 - ⚡ **Full hardware control** - Fan curves, GPU switching, LED effects
 - 🖥️ **Global Menu** support for native macOS-like app menus
 - 🎮 **Custom macOS Dock** with magnification and animations
-- 🔧 **ASUS Linux integration** - asusctl, supergfxctl, anime matrix
+- 🔧 **ASUS Linux integration** - asusctl, anime matrix (supergfxctl deprecated)
 
 ## 🚀 Quick Start
 

@@ -13,7 +13,7 @@ NC='\033[0m'
 
 echo -e "${BLUE}This will:${NC}"
 echo "  1. Rebase to ghcr.io/ublue-os/bazzite-nvidia:stable"
-echo "  2. Keep your current customizations (asusctl, supergfxctl)"
+echo "  2. Keep your current customizations (asusctl, etc.)"
 echo "  3. Your macOS theme and dock setup will remain"
 echo ""
 
@@ -72,15 +72,12 @@ else
     echo "⚠ Zephyrus OS repo not found at $ZEPHYRUS_DIR"
 fi
 
-# Check supergfxctl
+# Check supergfxctl (deprecated — NVIDIA driver manages GPU power states)
 if command -v supergfxctl &> /dev/null; then
-    echo "✓ supergfxctl available"
-    sudo systemctl enable --now supergfxd 2>/dev/null
-    supergfxctl --mode hybrid 2>/dev/null
-    echo "✓ GPU mode set to hybrid"
+    echo "⚠ supergfxctl is deprecated. NVIDIA driver native power management is preferred."
+    echo "  Skipping supergfxd enable."
 else
-    echo "Installing supergfxctl..."
-    sudo rpm-ostree install supergfxctl
+    echo "ℹ supergfxctl not installed (deprecated — not installing)"
 fi
 
 echo ""

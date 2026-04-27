@@ -1,8 +1,8 @@
 # ⚡ Zephyrus OS
 
 <p align="center">
-  <b>The ultimate Linux tuning layer for ASUS ROG Zephyrus G16 (GU605MY)</b><br>
-  <i>Extracted from Windows. Perfected on Bazzite.</i>
+  <b>Model-specific tuning layer for ASUS ROG Zephyrus G16 (GU605MY) on Bazzite</b><br>
+  <i>Hardware-extracted. Kernel-ready. Community-driven.</i>
 </p>
 
 <p align="center">
@@ -14,23 +14,36 @@
 
 ---
 
+## What This Is (and Isn't)
+
+**Zephyrus OS is NOT an attempt to install asusctl on Bazzite.**
+
+[Bazzite](https://bazzite.gg/) already ships ASUS support through [Terra repositories](https://terra.fyralabs.com/) — you can install `asusctl`, `rog-control-center`, and related tools directly via `rpm-ostree` or `dnf`. The upstream [asus-linux.org](https://asus-linux.org/) project provides excellent base support for ASUS laptops on Linux.
+
+**What Zephyrus OS actually does:**
+
+This is a **model-specific tuning and research layer** for the **GU605MY** that goes beyond what generic ASUS tools provide:
+
+- 🔬 **Factory-extracted fan curves** — Decoded from Armoury Crate EC firmware via three independent verification methods
+- ⚡ **Hardware-validated power profiles** — PL1/PL2 limits, RAPL, and GPU TGP matched to Windows behaviour
+- 🎹 **Custom keyboard effects engine** — Reactive, music-reactive, and temperature-based RGB via direct HID protocol
+- 💡 **Slash LED support** — Full mode control and custom animation playback
+- 🔊 **Audio routing fixes** — ALC285 + CS35L56 smart amp configuration, Focusrite Scarlett integration
+- 🎨 **Desktop integration** — macOS-style theming, global menu, face auth, system status panels
+
+Every PWM value, power limit, and RGB protocol in this repository was **extracted from Windows 11 with Armoury Crate** through direct hardware analysis, USB/HID capture, and ACPI table decoding.
+
+---
+
 ## 📖 Table of Contents
 
-- [What is Zephyrus OS?](#what-is-zephyrus-os)
+- [What This Is (and Isn't)](#what-this-is-and-isnt)
 - [Hardware](#hardware)
 - [Project Structure](#project-structure)
 - [Quick Start](#quick-start)
 - [Documentation](#documentation)
-- [Research](#research)
+- [Upstream Collaboration](#upstream-collaboration)
 - [License](#license)
-
----
-
-## What is Zephyrus OS?
-
-**Zephyrus OS** is a comprehensive tuning and customization layer built on top of [Bazzite](https://bazzite.gg/) (Fedora Silverblue) specifically for the **ASUS ROG Zephyrus G16 GU605MY**.
-
-Every setting, fan curve, and RGB protocol in this repository was **extracted from Windows 11 with Armoury Crate** through direct hardware analysis, USB/HID capture, and ACPI table decoding.
 
 ---
 
@@ -100,6 +113,7 @@ Zephyrus-OS/
 │   ├── container/         # Containerfiles
 │   ├── rpm/               # RPM specs & patches
 │   └── scripts/           # Build scripts & overlays
+│       └── custom-asusctl/  # Fork of asusctl with GU605MY additions
 │
 └── research/              # Reverse engineering
     └── acpi/              # ACPI table analysis
@@ -111,6 +125,19 @@ Zephyrus-OS/
 
 > ⚠️ **Warning:** Tailored for GU605MY. Verify compatibility before installing on other models.
 
+### Prerequisites
+
+Bazzite already provides ASUS base tools via Terra:
+
+```bash
+# Install upstream ASUS tools (if not already present)
+rpm-ostree install asusctl rog-control-center
+# or on Bazzite with Terra enabled:
+sudo dnf install asusctl rog-control-center
+```
+
+### Install Zephyrus OS Tuning Layer
+
 ```bash
 # 1. Clone
 git clone https://github.com/Kingsolarious/ZephyrusOS.git
@@ -119,10 +146,13 @@ cd ZephyrusOS
 # 2. Install dependencies
 ./bin/install/install-deps.sh
 
-# 3. Apply layered fixes
+# 3. Apply model-specific fixes
 sudo ./config/layered-fixes/apply-fixes.sh
 
-# 4. Reboot
+# 4. Pin your deployment (prevents accidental OS updates)
+sudo ./bin/setup/pin-os-deployment.sh
+
+# 5. Reboot
 systemctl reboot
 ```
 
@@ -151,8 +181,27 @@ asusctl slash -e true
 | [docs/hardware/GU605MY-HARDWARE-TUNING.md](docs/hardware/GU605MY-HARDWARE-TUNING.md) | Complete hardware tuning guide |
 | [docs/hardware/GU605MY_EXACT_FACTORY_FAN_CURVES.md](docs/hardware/GU605MY_EXACT_FACTORY_FAN_CURVES.md) | Decoded factory fan curves |
 | [docs/hardware/FACTORY_FAN_CURVES.md](docs/hardware/FACTORY_FAN_CURVES.md) | Fan curve reference |
+| [docs/hardware/GU605MY_FACTORY_FEATURES_STATUS.md](docs/hardware/GU605MY_FACTORY_FEATURES_STATUS.md) | Feature implementation status |
 | [docs/install/KDE_SETUP_GUIDE.md](docs/install/KDE_SETUP_GUIDE.md) | KDE Plasma setup |
 | [docs/install/MACOS_APPLE_LOOK_GUIDE.md](docs/install/MACOS_APPLE_LOOK_GUIDE.md) | macOS-style theming |
+
+---
+
+## Upstream Collaboration
+
+This project builds on top of the excellent work from the [asus-linux.org](https://asus-linux.org/) community. Our custom `asusctl` fork (`build/scripts/custom-asusctl/`) adds GU605MY-specific features and will be rebased onto upstream `devel` regularly.
+
+### Goals
+
+- 🐛 **Kernel bug reports** — Audio routing workarounds are documented with the intent to upstream proper fixes to the Linux kernel
+- ⌨️ **HID scancodes** — Missing Fn-key mappings discovered here are contributed back to the kernel `hid-asus` driver
+- 🔊 **ALC285 support** — Smart amp configurations are tracked for upstreaming to `snd-hda-intel`
+- 💻 **Model-specific data** — Fan curves, power limits, and thermal data are shared with upstream for broader laptop support
+
+### Deprecation Notes
+
+- **supergfxctl** is deprecated in favour of letting the NVIDIA driver manage GPU power states. Disabling the dGPU via supergfxctl often leaves it powered-on but inaccessible, consuming power without benefit. A replacement tool that works *with* the NVIDIA driver is being developed by the community.
+- **CPU governor settings** in this repository are model-specific. The GU605MY reaches maximum clocks under the `performance` governor with Intel P-State; other models may require `powersave` + EPP for the same result.
 
 ---
 

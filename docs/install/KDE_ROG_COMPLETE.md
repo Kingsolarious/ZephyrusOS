@@ -48,8 +48,8 @@ sudo asusctl profile performance
 sudo asusctl profile balanced
 sudo asusctl profile quiet
 
-# Check GPU status
-supergfxctl --status
+# Check GPU status (deprecated — NVIDIA driver manages power states)
+# supergfxctl --status
 
 # Restart Plasma (if needed)
 kquitapp6 plasmashell && plasmashell &
@@ -62,20 +62,12 @@ kquitapp6 plasmashell && plasmashell &
 - **Balanced**: Automatic power management
 - **Quiet**: Silent operation, reduced performance
 
-### GPU Switching
-```bash
-# Check current GPU mode
-supergfxctl --status
-
-# Switch to integrated (battery saving)
-supergfxctl --mode integrated
-
-# Switch to dedicated (gaming)
-supergfxctl --mode dedicated
-
-# Hybrid mode
-supergfxctl --mode hybrid
-```
+### GPU Power Management
+> **Note:** `supergfxctl` is deprecated. Disabling the dGPU via supergfxctl often leaves it powered-on but inaccessible, wasting battery. The NVIDIA driver's native power management (`nvidia.NVreg_DynamicPowerManagement=0x02`) is preferred.
+>
+> For MUX switch control, use `asusctl gfx` if available, or let the NVIDIA driver handle power states automatically.
+>
+> A community replacement tool that works *with* the NVIDIA driver is in development.
 
 ## 🔧 Customization
 

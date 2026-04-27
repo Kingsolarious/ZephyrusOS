@@ -8,7 +8,7 @@ echo ""
 
 echo "This will install your custom Zephyrus OS image with:"
 echo "  ✅ NVIDIA proprietary driver"
-echo "  ✅ asusctl + supergfxctl (GPU switching)"
+echo "  ✅ asusctl + custom rog-control-center"
 echo "  ✅ Working ROG Control Center GUI"
 echo "  ✅ Your ROG logo"
 echo "  ✅ zephyrus-os-tool"

@@ -6,7 +6,8 @@ set -e
 
 echo "=== Installing ASUS Linux stack & performance tools ==="
 # Install dependencies (excluding asusctl/rog-control-center - we build those from source)
-sudo pacman -S --needed supergfxctl \
+# Note: supergfxctl is deprecated. NVIDIA driver native power management is preferred.
+sudo pacman -S --needed \
     gamemode lib32-gamemode mangohud lib32-mangohud ananicy-cpp \
     scx-scheds s-tui nvtop intel-gpu-tools lm_sensors
 
@@ -25,7 +26,8 @@ fi
 
 echo "=== Enabling services ==="
 sudo systemctl enable --now asusd
-sudo systemctl enable --now supergfxd
+# supergfxd is deprecated — NVIDIA driver manages GPU power states
+# sudo systemctl enable --now supergfxd
 sudo systemctl enable --now ananicy-cpp
 sudo systemctl enable --now scx.service
 

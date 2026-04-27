@@ -89,8 +89,8 @@ asusctl --help
 # Set performance mode
 sudo asusctl profile performance
 
-# Check GPU status
-supergfxctl --status
+# Check GPU status (deprecated — NVIDIA driver manages power states)
+# supergfxctl --status
 ```
 
 ### Keyboard Shortcuts

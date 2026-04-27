@@ -1,6 +1,8 @@
 #!/bin/bash
 # Fix External Monitor on ASUS ROG Zephyrus with NVIDIA GPU
 # This script helps diagnose and fix external display issues
+# DEPRECATION NOTICE: supergfxctl is deprecated. NVIDIA driver native power
+# management is preferred.
 
 echo "╔═══════════════════════════════════════════════════════════╗"
 echo "║  External Monitor Fix for Zephyrus NVIDIA Laptops        ║"

@@ -110,6 +110,19 @@ Tau  = 28s
 
 ---
 
+## ⚠️ supergfxctl Deprecation
+
+**`supergfxctl` is deprecated for GPU power management.**
+
+Disabling the dGPU via `supergfxctl --mode integrated` does **not** power off the GPU on many models — the dGPU remains on, consuming ~10-20W, while being completely inaccessible to the user. This creates the illusion of power saving while actively wasting battery.
+
+**Recommended approach:**
+- Leave the NVIDIA driver to manage GPU power states via `nvidia.NVreg_DynamicPowerManagement=0x02`
+- Use `asusctl` performance profiles for thermal/power tuning
+- A community replacement tool that properly blocks the dGPU via the NVIDIA driver (rather than fighting it) is in development
+
+---
+
 ## 🌙 Sleep Configuration
 
 ### Kernel Parameters
@@ -127,6 +140,8 @@ i915.enable_dpcd_backlight=1
 nvidia.NVreg_EnableBacklightHandler=0
 acpi_osi=! acpi_osi="Windows 2022"
 ```
+
+> **Model-specific note:** The `performance` governor is correct for the GU605MY with Intel P-State. On some AMD hardware, `powersave` + amd-epp is required to reach maximum clocks. Governor choice is model-specific — do not blindly copy this to other laptops.
 
 ### Why Each Parameter Matters
 
@@ -227,7 +242,7 @@ kwriteconfig6 --file kwinrc --group Compositing --key AllowTearing false
 | Service | Purpose |
 |---------|---------|
 | `asusd` | ASUS WMI daemon |
-| `supergfxd` | MUX switch control |
+| `supergfxd` | **Deprecated.** MUX switch control — see deprecation notes above |
 | `nvidia-power-limit` | GPU 115W baseline |
 | `rapl-tune` | CPU PL1 75W / PL2 115W |
 | `zephyrus-gu605my-tune` | Set performance profile |

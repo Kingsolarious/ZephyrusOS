@@ -1,5 +1,7 @@
 #!/bin/bash
 # Post-reboot setup after NVIDIA rebase
+# DEPRECATION NOTICE: supergfxctl references in this script are deprecated.
+# NVIDIA driver native power management is preferred.
 
 echo "╔═══════════════════════════════════════════════════════════╗"
 echo "║  Post-Reboot NVIDIA Setup                                ║"

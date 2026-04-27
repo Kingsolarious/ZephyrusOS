@@ -42,7 +42,7 @@
 
 | Feature | Status | Details |
 |---------|--------|---------|
-| **MUX Switch** | ✅ | `supergfxctl` — supports Integrated/Hybrid/AsusMuxDgpu |
+| **MUX Switch** | 🟡 | `supergfxctl` — **deprecated**. NVIDIA driver power management preferred. See notes below. |
 | **Dynamic MUX** | 🔴 | **Impossible.** ASUS firmware requires reboot for MUX state change. No Linux NVAPI support for Advanced Optimus |
 | **OLED Backlight** | ✅ | `i915.enable_dpcd_backlight=1` |
 | **NVIDIA DRM Modeset** | ✅ | `nvidia-drm.modeset=1` |
@@ -119,6 +119,14 @@
 | **Performance Levels** | ✅ | 6 P-states visible via `nvidia-settings --query GPUPerfModes`. Dynamic clock switching works |
 
 > **Note:** The RTX 4090 Laptop VBIOS on the GU605MY explicitly disables overclocking. This is a **hardware/firmware lock**, not a driver limitation. On Windows, Armoury Crate's "Manual" mode allows only pre-configured profiles from the encrypted `AC_Config.VgaOc.GU605MY.enc` — the GPU is not actually user-overclockable even on Windows.
+
+---
+
+## Deprecated / Pending Replacement
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| **supergfxctl dGPU disable** | 🔴 | **Deprecated.** Disabling dGPU via supergfxctl leaves the GPU powered-on but inaccessible, consuming power without benefit. NVIDIA driver's native power management is preferred. Community replacement tool in development. |
 
 ---
 

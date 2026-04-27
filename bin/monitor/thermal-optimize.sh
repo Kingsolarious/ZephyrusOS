@@ -2,6 +2,8 @@
 # ASUS ROG Zephyrus G16 - Thermal Optimization Script
 # Reduces temperatures while maintaining gaming performance
 # Run with sudo for best results
+# DEPRECATION NOTICE: supergfxctl references in this script are deprecated.
+# NVIDIA driver native power management is preferred.
 
 echo "╔═══════════════════════════════════════════════════════════╗"
 echo "║  ASUS ROG Zephyrus G16 - Thermal Optimization            ║"

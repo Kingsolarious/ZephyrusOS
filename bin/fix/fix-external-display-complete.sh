@@ -1,6 +1,10 @@
 #!/bin/bash
 # Complete External Monitor Fix for ASUS ROG Zephyrus with NVIDIA
 
+# DEPRECATION NOTICE: supergfxctl is deprecated. NVIDIA driver native power
+# management is preferred. This script is retained for compatibility but
+# supergfxctl installation is no longer recommended.
+
 echo "╔═══════════════════════════════════════════════════════════╗"
 echo "║  External Monitor Fix - NVIDIA Driver Installation       ║"
 echo "╚═══════════════════════════════════════════════════════════╝"

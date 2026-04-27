@@ -27,8 +27,9 @@ fi
 echo ""
 echo "🔧 Enabling hybrid mode..."
 
-# Method 1: Try supergfxctl
+# Method 1: Try supergfxctl (deprecated)
 if command -v supergfxctl &> /dev/null; then
+    echo "WARNING: supergfxctl is deprecated. NVIDIA driver native power management is preferred."
     echo "Using supergfxctl..."
     supergfxctl --mode hybrid
     if [ $? -eq 0 ]; then

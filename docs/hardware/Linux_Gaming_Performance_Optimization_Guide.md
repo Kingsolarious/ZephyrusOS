@@ -42,7 +42,7 @@ You have a **desktop-class RTX 4090** crammed into a **16mm-thin chassis**. The 
 - Automatic NVIDIA driver installation (proprietary or open)
 - Pre-tuned compiler optimizations (`x86-64-v3`/`v4` packages)
 - Excellent Arch Wiki compatibility
-- Easy to install `asusctl`/`supergfxctl` from AUR
+- Easy to install `asusctl` from AUR (supergfxctl is deprecated — see below)
 
 ### Alternative: **Nobara 41** (Fedora-based)
 **Why:**
@@ -53,7 +53,7 @@ You have a **desktop-class RTX 4090** crammed into a **16mm-thin chassis**. The 
 ### Avoid:
 - **Ubuntu LTS** — kernel too old for Meteor Lake P-cores/E-cores scheduling and NVIDIA Dynamic Boost
 - **Vanilla Debian** — same kernel issue, missing `asusctl` packages
-- **Bazzite** — designed for HTPC/handheld use, poor laptop MUX/dGPU workflow
+- **Vanilla Ubuntu/Debian** — kernel often too old for latest hardware; ASUS support via backports only
 
 ---
 
@@ -79,11 +79,13 @@ Enter BIOS (spam `F2` during boot) and configure:
 
 ## 3. ASUS Linux Stack Installation
 
-These tools replace Armoury Crate on Linux and are **essential** for fan control, keyboard RGB, MUX switching, and GPU power profiles.
+These tools replace Armoury Crate on Linux and are **essential** for fan control, keyboard RGB, and GPU power profiles.
+
+> **Note on supergfxctl:** This tool is deprecated. Disabling the dGPU via supergfxctl often leaves it powered-on but inaccessible, wasting battery. The NVIDIA driver's native power management is preferred. A community replacement is in development.
 
 ```bash
 # On CachyOS (Arch-based):
-sudo pacman -S asusctl supergfxctl rog-control-center
+sudo pacman -S asusctl rog-control-center
 
 # Enable services:
 sudo systemctl enable --now asusd
@@ -164,22 +166,18 @@ asusctl profile -P performance
 
 Your GU605MY has a **MUX switch + NVIDIA Advanced Optimus**. On Linux, dynamic switching does **not work**. You must reboot to switch between `integrated` and `dedicated` GPU modes.
 
-```bash
-# Check current mode:
-supergfxctl -g
-
-# Switch to dedicated GPU mode (dGPU directly drives internal OLED panel):
-supergfxctl -m dedicated
-# Then reboot.
-
-# Switch back to hybrid (iGPU drives panel, dGPU renders):
-supergfxctl -m hybrid
-# Then reboot.
-```
+> **supergfxctl is deprecated.** Disabling the dGPU via supergfxctl often leaves it powered-on but inaccessible, wasting battery. The NVIDIA driver's native power management (`nvidia.NVreg_DynamicPowerManagement=0x02`) is preferred. A community replacement that works *with* the NVIDIA driver is in development.
+>
+> For MUX switching, use `asusctl gfx` if available in your asusctl version:
+> ```bash
+> asusctl gfx -m dedicated
+> asusctl gfx -m hybrid
+> asusctl gfx -m integrated
+> ```
 
 ### Recommendation:
 - **For competitive FPS / lowest latency:** Use `dedicated` mode
-- **For battery life / desktop use:** Use `hybrid` mode
+- **For battery life / desktop use:** Let the NVIDIA driver manage power states (hybrid mode without supergfxctl)
 - **For HDR+VRR gaming:** `dedicated` mode often has better NVIDIA G-Sync compatibility on Linux
 
 ### OLED Panel Note
@@ -729,11 +727,12 @@ Save this as `setup_gu605my.sh` and run it after installing CachyOS:
 set -e
 
 echo "=== Installing ASUS Linux stack ==="
-sudo pacman -S --needed asusctl supergfxctl rog-control-center gamemode lib32-gamemode mangohud lib32-mangohud ananicy-cpp scx-scheds s-tui nvtop intel-gpu-tools lm_sensors
+sudo pacman -S --needed asusctl rog-control-center gamemode lib32-gamemode mangohud lib32-mangohud ananicy-cpp scx-scheds s-tui nvtop intel-gpu-tools lm_sensors
 
 echo "=== Enabling services ==="
 sudo systemctl enable --now asusd
-sudo systemctl enable --now supergfxd
+# supergfxd is deprecated — NVIDIA driver manages GPU power states
+# sudo systemctl enable --now supergfxd
 sudo systemctl enable --now ananicy-cpp
 sudo systemctl enable --now scx.service
 
