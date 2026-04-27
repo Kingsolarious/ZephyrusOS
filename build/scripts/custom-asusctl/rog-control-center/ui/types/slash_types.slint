@@ -1,0 +1,84 @@
+export enum SlashMode {
+    Static,
+    Bounce,
+    Slash,
+    Loading,
+    BitStream,
+    Transmission,
+    Flow,
+    Flux,
+    Phantom,
+    Spectrum,
+    Hazard,
+    Interfacing,
+    Ramp,
+    GameOver,
+    Start,
+    Buzzer,
+}
+
+export struct SlashShowOptions {
+    boot: bool,
+    shutdown: bool,
+    sleep: bool,
+    battery: bool,
+    battery_warning: bool,
+    lid_closed: bool,
+}
+
+export global SlashPageData {
+    in-out property <bool> enabled;
+    callback cb_enabled(bool);
+    
+    in-out property <int> brightness: 255;
+    callback cb_brightness(int);
+    
+    in-out property <int> interval: 0;
+    in-out property <[string]> interval_names: [
+        @tr("Slash interval" => "Fast"),
+        @tr("Slash interval" => "Medium"),
+        @tr("Slash interval" => "Slow"),
+        @tr("Slash interval" => "Very Slow"),
+        @tr("Slash interval" => "Ultra Slow"),
+    ];
+    callback cb_interval(int);
+    
+    in-out property <int> current_mode: 0;
+    in-out property <[string]> mode_names: [
+        @tr("Slash mode" => "Static"),
+        @tr("Slash mode" => "Bounce"),
+        @tr("Slash mode" => "Slash"),
+        @tr("Slash mode" => "Loading"),
+        @tr("Slash mode" => "BitStream"),
+        @tr("Slash mode" => "Transmission"),
+        @tr("Slash mode" => "Flow"),
+        @tr("Slash mode" => "Flux"),
+        @tr("Slash mode" => "Phantom"),
+        @tr("Slash mode" => "Spectrum"),
+        @tr("Slash mode" => "Hazard"),
+        @tr("Slash mode" => "Interfacing"),
+        @tr("Slash mode" => "Ramp"),
+        @tr("Slash mode" => "GameOver"),
+        @tr("Slash mode" => "Start"),
+        @tr("Slash mode" => "Buzzer"),
+    ];
+    callback cb_mode(int);
+    
+    in-out property <bool> show_on_boot;
+    in-out property <bool> show_on_shutdown;
+    in-out property <bool> show_on_sleep;
+    in-out property <bool> show_on_battery;
+    in-out property <bool> show_battery_warning;
+    in-out property <bool> show_on_lid_closed;
+    
+    in-out property <SlashShowOptions> show_options: {
+        boot: true,
+        shutdown: true,
+        sleep: true,
+        battery: true,
+        battery_warning: true,
+        lid_closed: false,
+    };
+    callback cb_show_options(SlashShowOptions);
+    callback cb_custom_animation();
+}
