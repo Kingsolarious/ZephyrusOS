@@ -189,6 +189,30 @@ impl SlashMode {
     }
 }
 
+impl From<u8> for SlashMode {
+    fn from(mode: u8) -> Self {
+        match mode {
+            0x06 => SlashMode::Static,
+            0x10 => SlashMode::Bounce,
+            0x12 => SlashMode::Slash,
+            0x13 => SlashMode::Loading,
+            0x1d => SlashMode::BitStream,
+            0x1a => SlashMode::Transmission,
+            0x19 => SlashMode::Flow,
+            0x25 => SlashMode::Flux,
+            0x24 => SlashMode::Phantom,
+            0x26 => SlashMode::Spectrum,
+            0x32 => SlashMode::Hazard,
+            0x33 => SlashMode::Interfacing,
+            0x34 => SlashMode::Ramp,
+            0x42 => SlashMode::GameOver,
+            0x43 => SlashMode::Start,
+            0x44 => SlashMode::Buzzer,
+            _ => SlashMode::Spectrum,
+        }
+    }
+}
+
 #[cfg_attr(feature = "dbus", derive(Type))]
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Deserialize, Serialize)]
 pub struct DeviceState {
