@@ -1,18 +1,7 @@
-# ⚡ Zephyrus OS
+# Zephyrus OS
 
-<p align="center">
-  <b>Model-specific tuning layer for ASUS ROG Zephyrus G16 (GU605MY) on Bazzite</b><br>
-  <i>Hardware-extracted. Kernel-ready. Community-driven.</i>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/ASUS-GU605MY-FF0022?style=flat-square&logo=asus&logoColor=white">
-  <img src="https://img.shields.io/badge/CPU-Intel%20Core%20Ultra%209%20185H-0071C5?style=flat-square&logo=intel&logoColor=white">
-  <img src="https://img.shields.io/badge/GPU-RTX%204090%20Laptop-76B900?style=flat-square&logo=nvidia&logoColor=white">
-  <img src="https://img.shields.io/badge/OS-Bazzite%20(Fedora%20Silverblue)-294172?style=flat-square&logo=fedora&logoColor=white">
-</p>
-
----
+Model-specific tuning layer for ASUS ROG Zephyrus G16 (GU605MY) on Bazzite.
+Hardware-extracted. Kernel-ready. Community-driven.
 
 ## What This Is (and Isn't)
 
@@ -24,46 +13,28 @@
 
 This is a **model-specific tuning and research layer** for the **GU605MY** that goes beyond what generic ASUS tools provide:
 
-- 🔬 **Factory-extracted fan curves** — Decoded from Armoury Crate EC firmware via three independent verification methods
-- ⚡ **Hardware-validated power profiles** — PL1/PL2 limits, RAPL, and GPU TGP matched to Windows behaviour
-- 🎹 **Custom keyboard effects engine** — Reactive, music-reactive, and temperature-based RGB via direct HID protocol
-- 💡 **Slash LED support** — Full mode control and custom animation playback
-- 🔊 **Audio routing fixes** — ALC285 + CS35L56 smart amp configuration, Focusrite Scarlett integration
-- 🎨 **Desktop integration** — macOS-style theming, global menu, face auth, system status panels
+- Factory-extracted fan curves — Decoded from Armoury Crate EC firmware via three independent verification methods
+- Hardware-validated power profiles — PL1/PL2 limits, RAPL, and GPU TGP matched to Windows behaviour
+- Custom keyboard effects engine — Reactive, music-reactive, and temperature-based RGB via direct HID protocol
+- Slash LED support — Full mode control and custom animation playback
+- Audio routing fixes — ALC285 + CS35L56 smart amp configuration, Focusrite Scarlett integration
+- Desktop integration — macOS-style theming, global menu, face auth, system status panels
 
 Every PWM value, power limit, and RGB protocol in this repository was **extracted from Windows 11 with Armoury Crate** through direct hardware analysis, USB/HID capture, and ACPI table decoding.
 
----
-
-## 📖 Table of Contents
-
-- [What This Is (and Isn't)](#what-this-is-and-isnt)
-- [Hardware](#hardware)
-- [Project Structure](#project-structure)
-- [Quick Start](#quick-start)
-- [Documentation](#documentation)
-- [Upstream Collaboration](#upstream-collaboration)
-- [License](#license)
-
----
-
 ## Hardware
 
-| Component | Specification |
-|-----------|---------------|
-| **Model** | ASUS ROG Zephyrus G16 GU605MY |
-| **CPU** | Intel Core Ultra 9 185H (Meteor Lake) |
-| **dGPU** | NVIDIA GeForce RTX 4090 Laptop GPU (16 GB GDDR6) |
-| **iGPU** | Intel Arc Graphics (MTL) |
-| **Display** | Samsung SDC41A3, 2560×1600, 240 Hz OLED, 10-bit, HDR 616 nits |
-| **RAM** | 32 GB LPDDR5X-7467 |
-| **Audio** | Realtek ALC285 + Cirrus Logic CS35L56 Smart Amp |
-| **Keyboard** | ASUS ITE 8910 HID, 1-zone RGB |
-| **Slash LED** | ASUS AniMe Matrix-style LED array |
-| **WiFi** | Intel Wi-Fi 7 BE200 |
-| **Battery** | 90 Wh |
-
----
+ASUS ROG Zephyrus G16 GU605MY
+- CPU: Intel Core Ultra 9 185H (Meteor Lake)
+- dGPU: NVIDIA GeForce RTX 4090 Laptop GPU (16 GB GDDR6)
+- iGPU: Intel Arc Graphics (MTL)
+- Display: Samsung SDC41A3, 2560x1600, 240 Hz OLED, 10-bit, HDR 616 nits
+- RAM: 32 GB LPDDR5X-7467
+- Audio: Realtek ALC285 + Cirrus Logic CS35L56 Smart Amp
+- Keyboard: ASUS ITE 8910 HID, 1-zone RGB
+- Slash LED: ASUS AniMe Matrix-style LED array
+- WiFi: Intel Wi-Fi 7 BE200
+- Battery: 90 Wh
 
 ## Project Structure
 
@@ -119,11 +90,9 @@ Zephyrus-OS/
     └── acpi/              # ACPI table analysis
 ```
 
----
-
 ## Quick Start
 
-> ⚠️ **Warning:** Tailored for GU605MY. Verify compatibility before installing on other models.
+> **Warning:** Tailored for GU605MY. Verify compatibility before installing on other models.
 
 ### Prerequisites
 
@@ -172,20 +141,14 @@ asusctl led-mode rainbow
 asusctl slash -e true
 ```
 
----
-
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [docs/hardware/GU605MY-HARDWARE-TUNING.md](docs/hardware/GU605MY-HARDWARE-TUNING.md) | Complete hardware tuning guide |
-| [docs/hardware/GU605MY_EXACT_FACTORY_FAN_CURVES.md](docs/hardware/GU605MY_EXACT_FACTORY_FAN_CURVES.md) | Decoded factory fan curves |
-| [docs/hardware/FACTORY_FAN_CURVES.md](docs/hardware/FACTORY_FAN_CURVES.md) | Fan curve reference |
-| [docs/hardware/GU605MY_FACTORY_FEATURES_STATUS.md](docs/hardware/GU605MY_FACTORY_FEATURES_STATUS.md) | Feature implementation status |
-| [docs/install/KDE_SETUP_GUIDE.md](docs/install/KDE_SETUP_GUIDE.md) | KDE Plasma setup |
-| [docs/install/MACOS_APPLE_LOOK_GUIDE.md](docs/install/MACOS_APPLE_LOOK_GUIDE.md) | macOS-style theming |
-
----
+- [docs/hardware/GU605MY-HARDWARE-TUNING.md](docs/hardware/GU605MY-HARDWARE-TUNING.md) — Complete hardware tuning guide
+- [docs/hardware/GU605MY_EXACT_FACTORY_FAN_CURVES.md](docs/hardware/GU605MY_EXACT_FACTORY_FAN_CURVES.md) — Decoded factory fan curves
+- [docs/hardware/FACTORY_FAN_CURVES.md](docs/hardware/FACTORY_FAN_CURVES.md) — Fan curve reference
+- [docs/hardware/GU605MY_FACTORY_FEATURES_STATUS.md](docs/hardware/GU605MY_FACTORY_FEATURES_STATUS.md) — Feature implementation status
+- [docs/install/KDE_SETUP_GUIDE.md](docs/install/KDE_SETUP_GUIDE.md) — KDE Plasma setup
+- [docs/install/MACOS_APPLE_LOOK_GUIDE.md](docs/install/MACOS_APPLE_LOOK_GUIDE.md) — macOS-style theming
 
 ## Upstream Collaboration
 
@@ -193,17 +156,15 @@ This project builds on top of the excellent work from the [asus-linux.org](https
 
 ### Goals
 
-- 🐛 **Kernel bug reports** — Audio routing workarounds are documented with the intent to upstream proper fixes to the Linux kernel
-- ⌨️ **HID scancodes** — Missing Fn-key mappings discovered here are contributed back to the kernel `hid-asus` driver
-- 🔊 **ALC285 support** — Smart amp configurations are tracked for upstreaming to `snd-hda-intel`
-- 💻 **Model-specific data** — Fan curves, power limits, and thermal data are shared with upstream for broader laptop support
+- Kernel bug reports — Audio routing workarounds are documented with the intent to upstream proper fixes to the Linux kernel
+- HID scancodes — Missing Fn-key mappings discovered here are contributed back to the kernel `hid-asus` driver
+- ALC285 support — Smart amp configurations are tracked for upstreaming to `snd-hda-intel`
+- Model-specific data — Fan curves, power limits, and thermal data are shared with upstream for broader laptop support
 
 ### Deprecation Notes
 
 - **supergfxctl** is deprecated in favour of letting the NVIDIA driver manage GPU power states. Disabling the dGPU via supergfxctl often leaves it powered-on but inaccessible, consuming power without benefit. A replacement tool that works *with* the NVIDIA driver is being developed by the community.
 - **CPU governor settings** in this repository are model-specific. The GU605MY reaches maximum clocks under the `performance` governor with Intel P-State; other models may require `powersave` + EPP for the same result.
-
----
 
 ## Research
 
@@ -227,17 +188,13 @@ Decoded from Armoury Crate EC firmware via three independent methods:
 ### Display
 
 - **Panel:** Samsung SDC ATNA60DL01-0 (SDC41A3)
-- **Native:** 2560×1600 @ 240 Hz
+- **Native:** 2560x1600 @ 240 Hz
 - **Color:** 10-bit, DCI-P3 + BT.2020, HDR (616 nits peak)
-- **VRR:** Adaptive Sync 48–240 Hz
+- **VRR:** Adaptive Sync 48-240 Hz
 - **Interface:** DisplayPort (eDP)
-
----
 
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
 
----
-
-*Built with reverse engineering, hardware analysis, and too much coffee.*
+Built with reverse engineering, hardware analysis, and too much coffee.

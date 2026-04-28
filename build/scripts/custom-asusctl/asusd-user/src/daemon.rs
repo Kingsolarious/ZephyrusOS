@@ -97,18 +97,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             })
             .unwrap_or_else(|_| KeyLayout::default_layout());
 
-        let aura_proxy_blocking = AuraProxyBlocking::new(&conn).unwrap();
-        executor
-            .spawn(async move {
-                loop {
-                    aura_config.aura.next_state(&layout);
-                    let packets = aura_config.aura.create_packets();
+        match AuraProxyBlocking::new(&conn) {
+            Ok(aura_proxy_blocking) => {
+                executor
+                    .spawn(async move {
+                        loop {
+                            aura_config.aura.next_state(&layout);
+                            let packets = aura_config.aura.create_packets();
 
-                    aura_proxy_blocking.direct_addressing_raw(packets).unwrap();
-                    std::thread::sleep(std::time::Duration::from_millis(33));
-                }
-            })
-            .detach();
+                            if let Err(e) = aura_proxy_blocking.direct_addressing_raw(packets) {
+                                eprintln!("Aura update failed: {e}");
+                            }
+                            std::thread::sleep(std::time::Duration::from_millis(33));
+                        }
+                    })
+                    .detach();
+            }
+            Err(e) => {
+                eprintln!("Warning: Aura interface not available: {e}");
+                eprintln!("This is normal for laptops without per-key Aura RGB.");
+            }
+        }
     }
     // }
 
